@@ -1,0 +1,1 @@
+import{Z as e}from"./index-Ct_8WfsF.js";var t=e({type:`function`});export{t};
