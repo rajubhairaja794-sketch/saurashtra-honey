@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { listAdminReviews, moderateReview, deleteReview } from "@/lib/admin-catalog.functions";
 import { BtnGhost, Card, PageHeader } from "@/components/admin/ui";
-import { Check, RefreshCcw, Trash2, X } from "lucide-react";
+import { Check, RefreshCcw, Trash2, X, Star } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/reviews")({ component: ReviewsPage });
 
-type Review = { id: string; product_slug: string; author_name: string | null; rating: number; title: string | null; body: string | null; media_urls: string[] | null; status: string; created_at: string };
+type Review = { id: string; product_slug: string; author_name: string | null; rating: number; title: string | null; body: string | null; media_urls: string[] | null; status: string; created_at: string; featured_on_homepage?: boolean };
 const STATUSES = ["all","pending","approved","rejected"] as const;
 
 function ReviewsPage() {
@@ -17,6 +18,19 @@ function ReviewsPage() {
   const [status, setStatus] = useState<(typeof STATUSES)[number]>("pending");
   async function load() { setLoading(true); try { const r = await list({ data: { status } }); setRows(r.rows as unknown as Review[]); } catch (e) { toast.error((e as Error).message); } finally { setLoading(false); } }
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, [status]);
+
+  const toggleFeatured = async (id: string, current: boolean) => {
+    try {
+      const { error } = await (supabase.from("reviews") as any)
+        .update({ featured_on_homepage: !current })
+        .eq("id", id);
+      if (error) throw error;
+      setRows((prev) => prev.map((r) => r.id === id ? { ...r, featured_on_homepage: !current } : r));
+      toast.success(current ? "Removed from homepage testimonials" : "Featured on homepage testimonials");
+    } catch (e) {
+      toast.error("Failed to update featured status");
+    }
+  };
   return (
     <div>
       <PageHeader title="Reviews" subtitle="Moderate customer feedback" actions={<BtnGhost onClick={load}><RefreshCcw className="size-3.5" /> REFRESH</BtnGhost>} />
@@ -49,6 +63,20 @@ function ReviewsPage() {
               <div className="flex flex-col gap-2 shrink-0">
                 {r.status !== "approved" && <button onClick={async () => { try { await moderate({ data: { id: r.id, status: "approved" } }); toast.success("Approved"); void load(); } catch (e) { toast.error((e as Error).message); } }} className="inline-flex items-center gap-1 bg-forest text-cream rounded-lg px-3 py-1.5 text-[11px] font-bold tracking-widest hover:bg-forest-dark"><Check className="size-3.5" /> APPROVE</button>}
                 {r.status !== "rejected" && <button onClick={async () => { try { await moderate({ data: { id: r.id, status: "rejected" } }); toast.success("Rejected"); void load(); } catch (e) { toast.error((e as Error).message); } }} className="inline-flex items-center gap-1 border border-border rounded-lg px-3 py-1.5 text-[11px] font-bold tracking-widest hover:border-destructive hover:text-destructive"><X className="size-3.5" /> REJECT</button>}
+                {r.status === "approved" && (
+                  <button
+                    onClick={() => toggleFeatured(r.id, !!r.featured_on_homepage)}
+                    className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-[11px] font-bold tracking-widest transition-colors ${
+                      r.featured_on_homepage
+                        ? "bg-gold/20 text-gold-deep border border-gold-deep hover:bg-gold/30"
+                        : "border border-border hover:border-gold-deep hover:text-gold-deep"
+                    }`}
+                    title={r.featured_on_homepage ? "Remove from homepage testimonials" : "Feature on homepage testimonials"}
+                  >
+                    <Star className={`size-3.5 ${r.featured_on_homepage ? "fill-gold-deep" : ""}`} />
+                    {r.featured_on_homepage ? "FEATURED" : "FEATURE"}
+                  </button>
+                )}
                 <button onClick={async () => { if (!confirm("Delete?")) return; try { await del({ data: { id: r.id } }); toast.success("Deleted"); void load(); } catch (e) { toast.error((e as Error).message); } }} className="inline-flex items-center gap-1 text-destructive text-[11px] font-bold tracking-widest hover:underline"><Trash2 className="size-3.5" /> DELETE</button>
               </div>
             </div>

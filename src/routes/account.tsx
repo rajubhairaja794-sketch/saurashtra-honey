@@ -8,7 +8,7 @@ import { useWishlist } from "@/lib/wishlist";
 import { useCart } from "@/lib/cart";
 import { useRecentlyViewed } from "@/lib/recently-viewed";
 import { toast } from "sonner";
-import { products as staticProducts, type Product } from "@/lib/products";
+import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import {
   User, MapPin, Package, Heart, Mail, LogOut, Plus, Trash2, ShieldCheck, Bell, Star, Clock,
@@ -347,13 +347,10 @@ function OrdersTab({ orders }: { orders: Order[] }) {
 function WishlistTab() {
   const wl = useWishlist();
   const { add } = useCart();
-  const [all, setAll] = useState<Product[]>(staticProducts);
+  const [all, setAll] = useState<Product[]>([]);
   useEffect(() => { void fetchProducts().then((r) => { if (r.length) setAll(r); }); }, []);
   const items = useMemo(() => {
-    const fromAll = all.filter((p) => wl.has(p.slug));
-    const seen = new Set(fromAll.map((p) => p.slug));
-    const fromStatic = staticProducts.filter((p) => wl.has(p.slug) && !seen.has(p.slug));
-    return [...fromAll, ...fromStatic];
+    return all.filter((p) => wl.has(p.slug));
   }, [all, wl.slugs, wl]);
 
   return (
@@ -400,7 +397,7 @@ function WishlistTab() {
 /* -------- RECENTLY VIEWED -------- */
 function RecentlyViewedTab() {
   const { slugs, clear } = useRecentlyViewed();
-  const [all, setAll] = useState<Product[]>(staticProducts);
+  const [all, setAll] = useState<Product[]>([]);
   useEffect(() => { void fetchProducts().then((r) => { if (r.length) setAll(r); }); }, []);
   const items = slugs.map((s) => all.find((p) => p.slug === s)).filter(Boolean) as Product[];
   return (

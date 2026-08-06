@@ -1,14 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState, Fragment } from "react";
 import { SiteLayout } from "@/components/site/Layout";
 import { QuickView } from "@/components/site/QuickView";
 import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel";
-import { products, type Product } from "@/lib/products";
+import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
-import { fetchShopCategories, DEFAULT_SHOP_CATEGORIES, type ShopCategory } from "@/lib/category-catalog";
-import { blogPosts, type BlogPost } from "@/lib/blog";
+import { listPublicPosts } from "@/lib/blog-server.functions";
+import { resolvePostImage, formatPostDate } from "@/lib/blog-client-helpers";
 import { supabase } from "@/integrations/supabase/client";
 import { StructuredData, breadcrumbLd, organizationLd } from "@/components/site/StructuredData";
+import { fetchHomepageSections, type HomepageSection } from "@/lib/homepage-cms.functions";
 import {
   HomeHero,
   HomeTrustStrip,
@@ -35,67 +37,183 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+// ─── Canonical section order ──────────────────────────────────────────────────
+// This is the ORIGINAL homepage structure. It is ALWAYS the source of truth.
+// CMS records can override `enabled` and `sort_order` and `settings`,
+// but absence of a CMS record NEVER hides a section.
+const CANONICAL_SECTIONS = [
+  "hero",
+  "trust_strip",
+  "shop_by_category",
+  "featured_products",
+  "shoppable_videos",
+  "why_choose",
+  "farm_banner",
+  "stats_strip",
+  "testimonials",
+  "journal",
+] as const;
+
+type SectionKey = (typeof CANONICAL_SECTIONS)[number];
+
 function Home() {
   const [quick, setQuick] = useState<Product | null>(null);
-  const [list, setList] = useState<Product[]>(products);
-  const [categories, setCategories] = useState<ShopCategory[]>(DEFAULT_SHOP_CATEGORIES);
-  const [reviews, setReviews] = useState<{ id: string; author_name: string; content: string; rating: number; location?: string }[]>([]);
+  const [list, setList] = useState<Product[]>([]);
+  const [reviews, setReviews] = useState<
+    { id: string; author_name: string; content: string; rating: number; location?: string }[]
+  >([]);
+  // cmsMap: keyed by section_key — only present if DB returned that row
+  const [cmsMap, setCmsMap] = useState<Record<string, HomepageSection>>({});
+  const [cmsLoaded, setCmsLoaded] = useState(false);
+  const [homePosts, setHomePosts] = useState<any[]>([]);
+  const fetchPostsFn = useServerFn(listPublicPosts);
 
   useEffect(() => {
+    // Fetch live products
     void fetchProducts().then((r) => {
       if (r.length > 0) setList(r);
     });
-    void fetchShopCategories().then((r) => {
-      if (r.length > 0) setCategories(r);
+
+    // Fetch CMS sections — failure is safe, just means no CMS overrides
+    void fetchHomepageSections()
+      .then((data) => {
+        const map: Record<string, HomepageSection> = {};
+        for (const sec of data) {
+          map[sec.section_key] = sec;
+        }
+        setCmsMap(map);
+      })
+      .catch((err) => {
+        console.warn("[Homepage] CMS sections unavailable — rendering defaults:", err);
+      })
+      .finally(() => {
+        setCmsLoaded(true);
+      });
+
+    // Fetch latest blog posts for journal preview
+    void fetchPostsFn({ data: { page: 1, pageSize: 3 } }).then((res) => {
+      if (res.rows && res.rows.length > 0) {
+        setHomePosts(
+          res.rows.map((p) => ({
+            slug: p.slug,
+            title: p.title,
+            excerpt: p.excerpt || "",
+            category: p.category_name || "Journal",
+            displayDate: formatPostDate(p.published_at || p.created_at),
+            readTime: p.reading_time || "5 min read",
+            image: resolvePostImage(p.cover_image_url, p.category_name || p.slug),
+          }))
+        );
+      }
     });
 
-    // Fetch live product reviews for testimonials if available
-    void supabase
+    // Fetch featured reviews for testimonials
+    void (supabase
       .from("reviews")
-      .select("id, author_name, content, rating, location")
+      .select("id, author_name, content, rating, location") as any)
+      .eq("featured_on_homepage", true)
       .order("created_at", { ascending: false })
       .limit(6)
-      .then(({ data }) => {
-        if (data && data.length >= 3) {
+      .then(({ data, error }: { data: any[] | null; error: any }) => {
+        if (!error && data && data.length >= 3) {
           setReviews(data as any);
+        } else {
+          // Fallback: most recent approved reviews
+          void supabase
+            .from("reviews")
+            .select("id, author_name, content, rating, location")
+            .eq("status", "approved")
+            .order("created_at", { ascending: false })
+            .limit(6)
+            .then((res) => {
+              if (res.data && res.data.length >= 3) setReviews(res.data as any);
+            });
         }
       });
   }, []);
+
+  // ─── Build ordered + filtered section list ──────────────────────────────────
+  // Rules:
+  //   1. Start from CANONICAL_SECTIONS (always all visible by default)
+  //   2. If a CMS record exists for a key AND enabled===false → hide it
+  //   3. Apply CMS sort_order when all CMS records are present, otherwise keep canonical order
+  const orderedSections: SectionKey[] = (() => {
+    // Check if we have CMS records for ALL canonical sections
+    const allKeysInCms = CANONICAL_SECTIONS.every((k) => cmsMap[k] !== undefined);
+
+    let keys: SectionKey[];
+
+    if (allKeysInCms) {
+      // Sort by CMS sort_order
+      keys = [...CANONICAL_SECTIONS].sort((a, b) => {
+        const orderA = cmsMap[a]?.sort_order ?? 999;
+        const orderB = cmsMap[b]?.sort_order ?? 999;
+        return orderA - orderB;
+      });
+    } else {
+      // Partial or no CMS — use canonical order, supplement missing keys
+      keys = [...CANONICAL_SECTIONS];
+    }
+
+    // Filter: only hide if CMS record explicitly says enabled===false
+    return keys.filter((k) => {
+      const rec = cmsMap[k];
+      // No record → show (default visible)
+      if (!rec) return true;
+      // Record exists → respect enabled flag
+      return rec.enabled !== false;
+    });
+  })();
+
+  // ─── Render a single section by key ────────────────────────────────────────
+  const renderSection = (key: SectionKey) => {
+    const sec = cmsMap[key];
+    const settings = sec?.settings ?? {};
+
+    switch (key) {
+      case "hero":
+        return <HomeHero key="hero" />;
+      case "trust_strip":
+        return <HomeTrustStrip key="trust_strip" settings={settings} />;
+      case "shop_by_category":
+        return <HomeShopByCategory key="shop_by_category" settings={settings} />;
+      case "featured_products":
+        return (
+          <HomeBestSellers
+            key="featured_products"
+            products={list}
+            onQuickView={setQuick}
+            settings={settings}
+          />
+        );
+      case "shoppable_videos":
+        return <ShoppableVideoCarousel key="shoppable_videos" placementContext="homepage" />;
+      case "why_choose":
+        return <HomeWhyChoose key="why_choose" settings={settings} />;
+      case "farm_banner":
+        return <HomeFarmBanner key="farm_banner" settings={settings} />;
+      case "stats_strip":
+        return <HomeStatsStrip key="stats_strip" settings={settings} />;
+      case "testimonials":
+        return <HomeTestimonials key="testimonials" reviews={reviews} settings={settings} />;
+      case "journal":
+        return <HomeJournalPreview key="journal" posts={homePosts} settings={settings} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <SiteLayout>
       <StructuredData data={organizationLd()} />
       <StructuredData data={breadcrumbLd([{ name: "Home", url: "/" }])} />
 
-      {/* 1. HERO SECTION */}
-      <HomeHero />
-
-      {/* 2. MAIN TRUST STRIP */}
-      <HomeTrustStrip />
-
-      {/* 3. SHOP BY CATEGORY */}
-      <HomeShopByCategory />
-
-      {/* 4. BEST SELLERS */}
-      <HomeBestSellers products={list} onQuickView={setQuick} />
-
-      {/* 5. OUR SIGNATURE COLLECTION (Video Story Cards) */}
-      <ShoppableVideoCarousel placementContext="homepage" />
-
-      {/* 6. WHY CHOOSE SAURASHTRA HONEY */}
-      <HomeWhyChoose />
-
-      {/* 7. FARM / BEEKEEPING BANNER */}
-      <HomeFarmBanner />
-
-      {/* 8. STATISTICS STRIP */}
-      <HomeStatsStrip />
-
-      {/* 9. TESTIMONIALS */}
-      <HomeTestimonials reviews={reviews} />
-
-      {/* 10. JOURNAL PREVIEW */}
-      <HomeJournalPreview posts={blogPosts} />
+      {/*
+        Always render all canonical sections immediately.
+        CMS settings are applied progressively once loaded.
+        No loading spinner — the page never waits on the CMS.
+      */}
+      {orderedSections.map(renderSection)}
 
       {/* QUICK VIEW MODAL */}
       <QuickView product={quick} onClose={() => setQuick(null)} />

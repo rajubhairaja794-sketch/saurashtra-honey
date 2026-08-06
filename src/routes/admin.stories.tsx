@@ -6,7 +6,7 @@ import { listHomepageVideos, upsertHomepageVideo, deleteHomepageVideo, reorderHo
 import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
 import { ArrowLeft, ArrowUp, ArrowDown, ImageOff, Pencil, Plus, RefreshCcw, Trash2, Upload, Video, Play, Pause } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { products as staticProducts, type Product } from "@/lib/products";
+import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 
 export const Route = createFileRoute("/admin/stories")({ component: StoriesPage });
@@ -49,7 +49,7 @@ function StoriesPage() {
   const [rows, setRows] = useState<StoryRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [edit, setEdit] = useState<Partial<StoryRow> | null>(null);
-  const [allProducts, setAllProducts] = useState<Product[]>(staticProducts);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
 
   async function load() {
     setLoading(true);

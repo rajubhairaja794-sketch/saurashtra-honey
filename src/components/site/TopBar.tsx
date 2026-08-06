@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchAnnouncements, type AnnouncementItem } from "@/lib/homepage-cms.functions";
 
-const announcementMessages = [
+const fallbackMessages = [
   <span key="1" className="inline-flex items-center gap-2">
     <span className="shrink-0">🚚</span>
     <span className="text-white font-bold">Free Delivery on orders above ₹400</span>
@@ -11,31 +14,46 @@ const announcementMessages = [
       Up to 24% OFF All Honey + Up to 10% Off on Prepaid
     </span>
   </span>,
-  <span key="3" className="inline-flex items-center gap-2">
-    <span className="shrink-0">🎁</span>
-    <span className="text-white font-bold">First order? Get Flat 10% OFF</span>
-  </span>,
-  <span key="4" className="inline-flex items-center gap-2">
-    <span className="shrink-0">🐝</span>
-    <span className="text-white font-bold">100% Pure &amp; Natural Honey</span>
-  </span>,
-  <span key="5" className="inline-flex items-center gap-2">
-    <span className="shrink-0">🛡️</span>
-    <span className="text-white font-bold">
-      Independently Lab-Tested for Purity in Every Batch
-    </span>
-  </span>,
-  <span key="6" className="inline-flex items-center gap-2">
-    <span className="shrink-0">🌿</span>
-    <span className="text-white font-bold">Raw, Natural &amp; Unprocessed</span>
-  </span>,
 ];
 
 export function TopBar() {
+  const [items, setItems] = useState<AnnouncementItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    void fetchAnnouncements().then((data) => {
+      setItems(data);
+      setLoading(false);
+    });
+  }, []);
+
+  const renderMessage = (item: AnnouncementItem, idx: number) => {
+    const content = (
+      <span key={`db-${item.id}-${idx}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+        {item.icon && <span className="shrink-0">{item.icon}</span>}
+        <span className="text-white font-bold">{item.text}</span>
+      </span>
+    );
+
+    if (item.link) {
+      if (item.link.startsWith("http")) {
+        return <a href={item.link} target={item.open_in_new_tab ? "_blank" : "_self"} rel="noreferrer" key={`db-link-${item.id}-${idx}`}>{content}</a>;
+      }
+      return <Link to={item.link as any} target={item.open_in_new_tab ? "_blank" : undefined} key={`db-link-${item.id}-${idx}`}>{content}</Link>;
+    }
+    return content;
+  };
+
+  const activeMessages = items.length > 0 
+    ? items.map((item, idx) => renderMessage(item, idx))
+    : loading ? [] : fallbackMessages;
+
   // We duplicate the message group twice per half (12 items per half, 24 items total)
   // to ensure there is never any empty/blank area even on ultra-wide monitors,
   // creating a mathematically seamless infinite loop.
-  const loopGroup = [...announcementMessages, ...announcementMessages];
+  const loopGroup = [...activeMessages, ...activeMessages];
+
+  if (activeMessages.length === 0) return null;
 
   return (
     <div

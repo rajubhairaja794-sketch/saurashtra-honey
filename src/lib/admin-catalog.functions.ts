@@ -21,7 +21,14 @@ export const listAdminProducts = createServerFn({ method: "POST" })
       .select("*")
       .order("sort_order", { ascending: true });
     if (error) throw new Error(error.message);
-    return { rows: data ?? [] };
+    const rows = (data ?? []).map((row: any) => {
+      const attrs = row.attributes || {};
+      return {
+        ...row,
+        additional_images: Array.isArray(attrs.additional_images) ? attrs.additional_images : [],
+      };
+    });
+    return { rows };
   });
 
 const productSchema = z.object({

@@ -573,6 +573,159 @@ export type Database = {
         }
         Relationships: []
       }
+      homepage_sections: {
+        Row: {
+          id: string
+          section_key: string
+          enabled: boolean
+          sort_order: number
+          settings: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          section_key: string
+          enabled?: boolean
+          sort_order?: number
+          settings?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          section_key?: string
+          enabled?: boolean
+          sort_order?: number
+          settings?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      announcement_items: {
+        Row: {
+          id: string
+          text: string
+          icon: string | null
+          link: string | null
+          open_in_new_tab: boolean
+          enabled: boolean
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          text: string
+          icon?: string | null
+          link?: string | null
+          open_in_new_tab?: boolean
+          enabled?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          text?: string
+          icon?: string | null
+          link?: string | null
+          open_in_new_tab?: boolean
+          enabled?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      homepage_category_selection: {
+        Row: {
+          id: string
+          category_slug: string
+          enabled: boolean
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          category_slug: string
+          enabled?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          category_slug?: string
+          enabled?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      homepage_featured_products: {
+        Row: {
+          id: string
+          product_slug: string
+          enabled: boolean
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          product_slug: string
+          enabled?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          product_slug?: string
+          enabled?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      homepage_trust_items: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          icon: string | null
+          enabled: boolean
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          icon?: string | null
+          enabled?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          icon?: string | null
+          enabled?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inventory_history: {
         Row: {
           actor_id: string | null

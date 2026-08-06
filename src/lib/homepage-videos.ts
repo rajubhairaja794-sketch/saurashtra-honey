@@ -1,6 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { products as staticProducts } from "@/lib/products";
-
 export type HomepageVideoItem = {
   id: string;
   title: string;
@@ -35,9 +33,7 @@ type Row = {
 };
 
 function getFallbackImage(slug: string | null): string {
-  if (!slug) return staticProducts[0]?.image ?? "";
-  const found = staticProducts.find((p) => p.slug === slug);
-  return found?.image ?? staticProducts[0]?.image ?? "";
+  return "";
 }
 
 export const DEFAULT_HOMEPAGE_VIDEOS: HomepageVideoItem[] = [

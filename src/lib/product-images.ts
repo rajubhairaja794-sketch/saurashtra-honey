@@ -12,6 +12,11 @@ import family from "@/assets/family-honey.jpg";
 import beeFlower from "@/assets/bee-flower.jpg";
 import liquid from "@/assets/prod-liquid.jpg";
 import team from "@/assets/team-beekeepers.jpg";
+import beeswaxPellets from "@/assets/prod-beeswax-pellets.png";
+import beePollen from "@/assets/prod-bee-pollen.png";
+import beeswaxCandles from "@/assets/prod-beeswax-candles.png";
+import beautyProducts from "@/assets/prod-beauty.png";
+import luxuryHamper from "@/assets/prod-luxury-hamper.png";
 
 export const imageMap: Record<string, string> = {
   "ajwain-honey": ajwain,
@@ -36,6 +41,12 @@ export const imageMap: Record<string, string> = {
   "bee-flower": beeFlower,
   "prod-liquid": liquid,
   "team-beekeepers": team,
+  // Add new product images mapped from products.json
+  "prod-beeswax-pellets": beeswaxPellets,
+  "prod-bee-pollen": beePollen,
+  "prod-beeswax-candles": beeswaxCandles,
+  "prod-beauty": beautyProducts,
+  "prod-luxury-hamper": luxuryHamper,
 };
 
 export const IMAGE_KEYS = Object.keys(imageMap);

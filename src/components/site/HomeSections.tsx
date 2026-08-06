@@ -19,8 +19,15 @@ import { ProductCard } from "@/components/site/ProductCard";
 import { HeroSlider, type HeroSlide } from "@/components/site/HeroSlider";
 import { fetchHeroSlides, getDefaultHeroSlides } from "@/lib/hero-catalog";
 import { type Product } from "@/lib/products";
-import { type ShopCategory } from "@/lib/category-catalog";
+import { type ShopCategory, fetchShopCategories } from "@/lib/category-catalog";
 import { type BlogPost } from "@/lib/blog";
+import * as Icons from "lucide-react";
+import {
+  fetchAllHomepageTrustItems,
+  fetchAllHomepageCategories,
+  fetchAllHomepageFeaturedProducts,
+  type HomepageTrustItem,
+} from "@/lib/homepage-cms.functions";
 
 // Assets
 import heroHoneyImg from "@/assets/hero-honey.jpg";
@@ -65,15 +72,34 @@ export function HomeHero() {
 /* =========================================================================
    2. MAIN TRUST STRIP (Horizontal 6-card row with thin orange icons)
    ========================================================================= */
-export function HomeTrustStrip() {
-  const items = [
-    { label: "100% Pure No Additives", Icon: ShieldCheck },
-    { label: "Raw & Unprocessed", Icon: FlaskConical },
-    { label: "Natural Floral Sources", Icon: Leaf },
-    { label: "Rich in Nutrients", Icon: Sparkles },
-    { label: "Lab Tested", Icon: Award },
-    { label: "Ethical Beekeeping", Icon: HeartHandshake },
+export function HomeTrustStrip({ settings }: { settings?: Record<string, any> }) {
+  const [dbItems, setDbItems] = React.useState<HomepageTrustItem[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    fetchAllHomepageTrustItems()
+      .then(data => setDbItems(data))
+      .catch(err => console.warn("Failed to fetch trust items, using fallback", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const fallbackItems = [
+    { label: "100% Pure No Additives", iconName: "ShieldCheck", Icon: ShieldCheck },
+    { label: "Raw & Unprocessed", iconName: "FlaskConical", Icon: FlaskConical },
+    { label: "Natural Floral Sources", iconName: "Leaf", Icon: Leaf },
+    { label: "Rich in Nutrients", iconName: "Sparkles", Icon: Sparkles },
+    { label: "Lab Tested", iconName: "Award", Icon: Award },
+    { label: "Ethical Beekeeping", iconName: "HeartHandshake", Icon: HeartHandshake },
   ];
+
+  const items = dbItems.length > 0
+    ? dbItems.map(item => ({
+        label: item.title,
+        Icon: item.icon && (Icons as any)[item.icon] ? (Icons as any)[item.icon] : Icons.Check,
+      }))
+    : fallbackItems;
+
+  if (loading) return null;
 
   return (
     <section className="bg-cream-deep/40 border-y border-border/80 py-8 sm:py-10">
@@ -101,7 +127,10 @@ export function HomeTrustStrip() {
 /* =========================================================================
    3. SHOP BY CATEGORY (6 circular cards with images)
    ========================================================================= */
-export function HomeShopByCategory() {
+export function HomeShopByCategory({ settings }: { settings?: Record<string, any> }) {
+  const [displayCats, setDisplayCats] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, dragFree: true, align: "start" },
     [Autoplay({ delay: 2500, stopOnInteraction: false, stopOnMouseEnter: true })]
@@ -125,95 +154,97 @@ export function HomeShopByCategory() {
     { name: "All Products", img: heroProductsImg, filter: "" },
   ];
 
-  const displayCats = [...HOME_CATEGORIES, ...HOME_CATEGORIES, ...HOME_CATEGORIES];
+  React.useEffect(() => {
+    Promise.all([fetchShopCategories(), fetchAllHomepageCategories()])
+      .then(([allCats, selections]) => {
+        if (selections.length > 0) {
+          const mappedCats = selections.map(sel => {
+            const cat = allCats.find(c => c.slug === sel.category_slug);
+            return {
+              name: cat?.name || sel.category_slug,
+              img: cat?.image || prodLiquidImg,
+              filter: sel.category_slug,
+            };
+          });
+          setDisplayCats([...mappedCats, ...mappedCats, ...mappedCats]);
+        } else {
+          setDisplayCats([...HOME_CATEGORIES, ...HOME_CATEGORIES, ...HOME_CATEGORIES]);
+        }
+      })
+      .catch(err => {
+        console.warn("Failed to fetch shop categories, using fallback", err);
+        setDisplayCats([...HOME_CATEGORIES, ...HOME_CATEGORIES, ...HOME_CATEGORIES]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return null;
+
+  const s_eyebrow = settings?.eyebrow ?? "DISCOVER";
+  const s_heading = settings?.heading ?? "Explore Our World";
+  const s_desc = settings?.description ?? "Discover every expression of pure honey—from everyday favourites to rare treasures, thoughtfully crafted by nature.";
+  const s_cta_text = settings?.cta_text ?? "VIEW ALL CATEGORIES";
+  const s_cta_url = settings?.cta_url ?? "/shop";
 
   return (
     <section className="pt-24 pb-20 bg-[#F8F5EF] overflow-hidden">
       <div className="container-page mb-14">
         <div className="flex flex-col items-center text-center">
           <div className="text-[12px] uppercase tracking-[6px] text-[#D97706] font-[600] mb-2 sm:mb-4">
-            DISCOVER
+            {s_eyebrow}
           </div>
           <h2 className="font-serif text-[34px] md:text-[44px] lg:text-[56px] font-[500] text-[#2B2118] leading-tight mb-[20px]">
-            Explore Our World
+            {s_heading}
           </h2>
           <p className="text-[17px] md:text-[21px] text-[#6B6257] max-w-[700px] leading-[1.7] mb-[36px]">
-            Discover every expression of pure honey—from everyday favourites to rare treasures, thoughtfully crafted by nature.
+            {s_desc}
           </p>
           <Link
-            to="/shop"
+            to={s_cta_url as any}
             className="inline-flex items-center gap-2 text-[14px] font-bold tracking-wider text-[#D97706] hover:text-[#B46204] uppercase group"
           >
-            <span>VIEW ALL CATEGORIES</span>
+            <span>{s_cta_text}</span>
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-[6px]" />
           </Link>
         </div>
       </div>
 
       <div className="w-full max-w-[1696px] mx-auto relative group px-4">
-        {/* Mobile View (Premium Carousel) */}
-        <div className="block md:hidden">
-          <PremiumMobileCarousel
-            items={displayCats}
-            slideClassName="flex-[0_0_86vw] min-w-0"
-            renderItem={(cat) => (
-              <Link
-                to="/shop"
-                search={cat.filter ? ({ category: cat.filter } as never) : ({ category: "All Products" } as never)}
-                className="group relative flex flex-col shrink-0 overflow-hidden bg-white rounded-[22px] shadow-[0_10px_25px_rgba(0,0,0,0.05)] hover:shadow-[0_15px_35px_rgba(217,119,6,0.15)] transition-all duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] w-full aspect-[16/21] hover:scale-[1.03]"
-              >
-                <div className="h-[82%] w-full overflow-hidden bg-[#F8F5EF]/50">
-                  <img 
-                    src={cat.img} 
-                    alt={cat.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover transform transition-transform duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05] pointer-events-none"
-                  />
-                </div>
-                <div className="h-[18%] w-full bg-white flex items-center justify-center p-2">
-                  <h3 className="font-serif text-[18px] text-[#2B2118] font-medium transition-colors duration-[400ms] ease-out group-hover:text-[#D97706] text-center">
-                    {cat.name}
-                  </h3>
-                </div>
-              </Link>
-            )}
-          />
-        </div>
+        {/* Unified Mobile and Desktop View */}
+        {/* Navigation Arrows (Visible on all sizes, optimized for mobile) */}
+        <button
+          type="button"
+          onClick={scrollPrev}
+          className="absolute left-0 sm:left-8 lg:left-12 top-[40%] -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white sm:bg-white/40 backdrop-blur-md border border-gray-200 sm:border-white/60 shadow-md sm:shadow-lg flex items-center justify-center text-[#3B2E24] opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-gray-50 sm:hover:bg-white/70"
+        >
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+        </button>
 
-        {/* Desktop View (Original Embla Carousel) */}
-        <div className="hidden md:block">
-          {/* Navigation Arrows */}
-          <button
-            type="button"
-            onClick={scrollPrev}
-            className="absolute left-8 lg:left-12 top-[40%] -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/40 backdrop-blur-md border border-white/60 shadow-lg flex items-center justify-center text-[#3B2E24] opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white/70"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-          </button>
+        <button
+          type="button"
+          onClick={scrollNext}
+          className="absolute right-0 sm:right-8 lg:right-12 top-[40%] -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white sm:bg-white/40 backdrop-blur-md border border-gray-200 sm:border-white/60 shadow-md sm:shadow-lg flex items-center justify-center text-[#3B2E24] opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-gray-50 sm:hover:bg-white/70"
+        >
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </button>
 
-          <button
-            type="button"
-            onClick={scrollNext}
-            className="absolute right-8 lg:right-12 top-[40%] -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/40 backdrop-blur-md border border-white/60 shadow-lg flex items-center justify-center text-[#3B2E24] opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white/70"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-          </button>
-
-          {/* Carousel Container */}
-          <div className="overflow-hidden w-full" ref={emblaRef}>
-            <div className="flex gap-[24px] py-6 touch-pan-y cursor-grab active:cursor-grabbing">
-              {displayCats.map((cat, idx) => (
+        {/* Carousel Container */}
+        <div className="overflow-hidden w-full" ref={emblaRef}>
+          <div className="flex gap-4 sm:gap-[24px] py-6 touch-pan-y cursor-grab active:cursor-grabbing">
+            {displayCats.map((cat, idx) => (
               <div 
                 key={idx} 
-                className="flex-[0_0_48%] md:flex-[0_0_31%] lg:flex-[0_0_23%] xl:flex-[0_0_18.5%] min-w-0"
+                className="w-[calc(50%_-_8px)] shrink-0 sm:shrink sm:w-auto sm:flex-[0_0_48%] md:flex-[0_0_31%] lg:flex-[0_0_23%] xl:flex-[0_0_18.5%] min-w-0"
               >
                 <Link
                   to="/shop"
                   search={cat.filter ? ({ category: cat.filter } as never) : ({ category: "All Products" } as never)}
-                  className="group relative flex flex-col shrink-0 overflow-hidden bg-white rounded-[22px] shadow-[0_10px_25px_rgba(0,0,0,0.05)] hover:shadow-[0_15px_35px_rgba(217,119,6,0.15)] transition-all duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] w-full aspect-[16/21] hover:scale-[1.03]"
+                  className="group relative flex flex-col shrink-0 overflow-hidden bg-white rounded-[16px] sm:rounded-[22px] shadow-[0_8px_20px_rgba(0,0,0,0.05)] sm:shadow-[0_10px_25px_rgba(0,0,0,0.05)] hover:shadow-[0_15px_35px_rgba(217,119,6,0.15)] transition-all duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] w-full aspect-square sm:aspect-[16/21] hover:scale-[1.03]"
                 >
-                  {/* Image Section (82%) */}
-                  <div className="h-[82%] w-full overflow-hidden bg-[#F8F5EF]/50">
+                  {/* Image Section */}
+                  <div className="flex-1 w-full overflow-hidden bg-[#F8F5EF]/50">
                     <img 
                       src={cat.img} 
                       alt={cat.name}
@@ -222,9 +253,9 @@ export function HomeShopByCategory() {
                     />
                   </div>
                   
-                  {/* Text Section (18%) */}
-                  <div className="h-[18%] w-full bg-white flex items-center justify-center p-2">
-                    <h3 className="font-serif text-[18px] text-[#2B2118] font-medium transition-colors duration-[400ms] ease-out group-hover:text-[#D97706] text-center">
+                  {/* Text Section */}
+                  <div className="h-[48px] sm:h-[18%] w-full bg-white flex items-center justify-center px-2 py-1 sm:p-2 shrink-0">
+                    <h3 className="font-serif text-[clamp(13px,1.5vw,18px)] sm:text-[18px] text-[#2B2118] font-medium transition-colors duration-[400ms] ease-out group-hover:text-[#D97706] text-center leading-tight">
                       {cat.name}
                     </h3>
                   </div>
@@ -233,7 +264,6 @@ export function HomeShopByCategory() {
             ))}
           </div>
         </div>
-      </div>
       </div>
     </section>
   );
@@ -245,35 +275,73 @@ export function HomeShopByCategory() {
 export function HomeBestSellers({
   products,
   onQuickView,
+  settings,
 }: {
   products: Product[];
   onQuickView?: (p: Product) => void;
+  settings?: Record<string, any>;
 }) {
-  const bestSellers = products
-    .filter((p) => p.badge === "BESTSELLER" || (p.reviews || 0) > 200)
-    .slice(0, 4);
+  const [displayList, setDisplayList] = React.useState<Product[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
-  const displayList =
-    bestSellers.length >= 4 ? bestSellers : products.slice(0, 4);
+  React.useEffect(() => {
+    const applyFallback = () => {
+      const bestSellers = products
+        .filter((p) => p.badge === "BESTSELLER" || (p.reviews || 0) > 200)
+        .slice(0, 4);
+      setDisplayList(bestSellers.length >= 4 ? bestSellers : products.slice(0, 4));
+    };
+
+    fetchAllHomepageFeaturedProducts()
+      .then(selections => {
+        if (selections.length > 0) {
+          const mappedProducts = selections
+            .map(sel => products.find(p => p.slug === sel.product_slug))
+            .filter((p): p is Product => p !== undefined);
+          if (mappedProducts.length > 0) {
+            setDisplayList(mappedProducts);
+          } else {
+            applyFallback();
+          }
+        } else {
+          applyFallback();
+        }
+      })
+      .catch(err => {
+        console.warn("Failed to fetch featured products, using fallback", err);
+        applyFallback();
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [products]);
+
+  if (loading) return null;
+
+  const bs_eyebrow = settings?.eyebrow ?? "CURATED FOR YOU";
+  const bs_heading = settings?.heading ?? "Our Finest Picks";
+  const bs_desc = settings?.description ?? "A handpicked selection of our most loved honey and bee-crafted essentials, chosen for their exceptional purity and quality.";
+  const bs_cta_text = settings?.cta_text ?? "VIEW ALL PRODUCTS";
+  const bs_cta_url = settings?.cta_url ?? "/shop";
 
   return (
     <section className="pt-[100px] pb-14 sm:pb-20 bg-cream-deep/30 border-y border-border/60">
       <div className="container-page">
         <div className="flex flex-col items-center text-center mb-[70px]">
           <div className="text-[12px] uppercase tracking-[6px] text-[#D97706] font-[600] mb-2 sm:mb-4">
-            CURATED FOR YOU
+            {bs_eyebrow}
           </div>
           <h2 className="font-serif text-[34px] md:text-[44px] lg:text-[56px] font-[500] text-[#2B2118] leading-tight mb-[20px]">
-            Our Finest Picks
+            {bs_heading}
           </h2>
           <p className="text-[17px] md:text-[21px] text-[#6B6257] max-w-[700px] leading-[1.7] mb-[36px]">
-            A handpicked selection of our most loved honey and bee-crafted essentials, chosen for their exceptional purity and quality.
+            {bs_desc}
           </p>
           <Link
-            to="/shop"
+            to={bs_cta_url as any}
             className="inline-flex items-center gap-2 text-[14px] font-bold tracking-wider text-[#D97706] hover:text-[#B46204] uppercase group"
           >
-            <span>VIEW ALL PRODUCTS</span>
+            <span>{bs_cta_text}</span>
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-[6px]" />
           </Link>
         </div>
@@ -308,7 +376,7 @@ export function HomeBestSellers({
 /* =========================================================================
    6. WHY CHOOSE SAURASHTRA HONEY (Asymmetrical editorial 3-column layout)
    ========================================================================= */
-export function HomeWhyChoose() {
+export function HomeWhyChoose({ settings }: { settings?: Record<string, any> }) {
   const benefits = [
     "Pure & Unadulterated Honey",
     "Ethically Sourced & Sustainably Harvested",
@@ -316,24 +384,30 @@ export function HomeWhyChoose() {
     "No Artificial Flavours or Preservatives",
   ];
 
+  const wc_eyebrow = settings?.eyebrow ?? "OUR HERITAGE";
+  const wc_heading = settings?.heading ?? "Where Purity Begins";
+  const wc_desc = settings?.description ?? "Every drop reflects generations of beekeeping, sustainable farming, and an unwavering commitment to quality.";
+  const wc_cta_text = settings?.cta_text ?? "KNOW MORE ABOUT US";
+  const wc_cta_url = settings?.cta_url ?? "/our-story";
+
   return (
     <section id="why-saurashtra-honey" className="py-16 sm:py-24 bg-cream">
       <div className="container-page">
         <div className="flex flex-col items-center text-center mb-[70px]">
           <div className="text-[12px] uppercase tracking-[6px] text-[#D97706] font-[600] mb-2 sm:mb-4">
-            OUR HERITAGE
+            {wc_eyebrow}
           </div>
           <h2 className="font-serif text-[34px] md:text-[44px] lg:text-[56px] font-[500] text-[#2B2118] leading-tight mb-[20px]">
-            Where Purity Begins
+            {wc_heading}
           </h2>
           <p className="text-[17px] md:text-[21px] text-[#6B6257] max-w-[700px] leading-[1.7] mb-[36px]">
-            Every drop reflects generations of beekeeping, sustainable farming, and an unwavering commitment to quality.
+            {wc_desc}
           </p>
           <Link
-            to="/our-story"
+            to={wc_cta_url as any}
             className="inline-flex items-center gap-2 text-[14px] font-bold tracking-wider text-[#D97706] hover:text-[#B46204] uppercase group"
           >
-            <span>KNOW MORE ABOUT US</span>
+            <span>{wc_cta_text}</span>
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-[6px]" />
           </Link>
         </div>
@@ -453,7 +527,13 @@ export function HomeWhyChoose() {
 /* =========================================================================
    7. FARM / BEEKEEPING BANNER (Wide dark-overlay banner)
    ========================================================================= */
-export function HomeFarmBanner() {
+export function HomeFarmBanner({ settings }: { settings?: Record<string, any> }) {
+  const fb_eyebrow = settings?.eyebrow ?? "BEEKEEPING";
+  const fb_heading = settings?.heading ?? "The Art of Beekeeping";
+  const fb_desc = settings?.description ?? "A closer look at the people, passion, and practices that make our honey naturally exceptional.";
+  const fb_cta_text = settings?.cta_text ?? "LEARN ABOUT OUR FARMS";
+  const fb_cta_url = settings?.cta_url ?? "/bee-farming";
+
   return (
     <section className="relative overflow-hidden my-6 sm:my-10 bg-espresso text-white">
       <div className="absolute inset-0 z-0">
@@ -469,19 +549,19 @@ export function HomeFarmBanner() {
       <div className="relative z-10 container-page py-16 sm:py-24">
         <div className="flex flex-col items-center text-center max-w-none mb-[70px]">
           <div className="text-[12px] uppercase tracking-[6px] text-[#D97706] font-[600] mb-2 sm:mb-4">
-            BEEKEEPING
+            {fb_eyebrow}
           </div>
           <h2 className="font-serif text-[34px] md:text-[44px] lg:text-[56px] font-[500] text-[#FFF9ED] leading-tight mb-[20px]">
-            The Art of Beekeeping
+            {fb_heading}
           </h2>
           <p className="text-[17px] md:text-[21px] text-[#FFF9ED]/80 max-w-[700px] leading-[1.7] mb-[36px]">
-            A closer look at the people, passion, and practices that make our honey naturally exceptional.
+            {fb_desc}
           </p>
           <Link
-            to="/bee-farming"
+            to={fb_cta_url as any}
             className="inline-flex items-center gap-2 text-[14px] font-bold tracking-wider text-[#D97706] hover:text-[#B46204] uppercase group"
           >
-            <span>LEARN ABOUT OUR FARMS</span>
+            <span>{fb_cta_text}</span>
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-[6px]" />
           </Link>
         </div>
@@ -493,14 +573,18 @@ export function HomeFarmBanner() {
 /* =========================================================================
    8. STATISTICS STRIP (5 items horizontal grid below farm banner)
    ========================================================================= */
-export function HomeStatsStrip() {
-  const stats = [
+export function HomeStatsStrip({ settings }: { settings?: Record<string, any> }) {
+  const defaultStats = [
     { value: "15+ Years", label: "Beekeeping Experience" },
     { value: "2000+", label: "Happy Customers Across India" },
     { value: "500+", label: "Bee Boxes Under Care" },
     { value: "100%", label: "Lab Tested For Purity" },
     { value: "0%", label: "Additives Always Pure" },
   ];
+  const stats: { value: string; label: string }[] =
+    Array.isArray(settings?.stats) && settings.stats.length > 0
+      ? settings.stats
+      : defaultStats;
 
   return (
     <section className="bg-cream-deep/50 border-b border-border/80 py-10 sm:py-12">
@@ -530,6 +614,7 @@ export function HomeStatsStrip() {
    ========================================================================= */
 export function HomeTestimonials({
   reviews,
+  settings,
 }: {
   reviews?: {
     id: string;
@@ -538,6 +623,7 @@ export function HomeTestimonials({
     rating: number;
     location?: string;
   }[];
+  settings?: Record<string, any>;
 }) {
   const fallbackTestimonials = [
     {
@@ -581,18 +667,22 @@ export function HomeTestimonials({
         }))
       : fallbackTestimonials;
 
+  const tm_eyebrow = settings?.eyebrow ?? "TRUSTED BY MANY";
+  const tm_heading = settings?.heading ?? "Loved Across India";
+  const tm_desc = settings?.description ?? "Real experiences shared by customers who choose purity every day.";
+
   return (
     <section className="py-16 sm:py-24 bg-cream">
       <div className="container-page">
         <div className="flex flex-col items-center text-center mb-[70px]">
           <div className="text-[12px] uppercase tracking-[6px] text-[#D97706] font-[600] mb-2 sm:mb-4">
-            TRUSTED BY MANY
+            {tm_eyebrow}
           </div>
           <h2 className="font-serif text-[34px] md:text-[44px] lg:text-[56px] font-[500] text-[#2B2118] leading-tight mb-[20px]">
-            Loved Across India
+            {tm_heading}
           </h2>
           <p className="text-[17px] md:text-[21px] text-[#6B6257] max-w-[700px] leading-[1.7]">
-            Real experiences shared by customers who choose purity every day.
+            {tm_desc}
           </p>
         </div>
 
@@ -698,27 +788,33 @@ export function HomeTestimonials({
 /* =========================================================================
    10. JOURNAL PREVIEW (3 article cards from blogPosts)
    ========================================================================= */
-export function HomeJournalPreview({ posts }: { posts: BlogPost[] }) {
+export function HomeJournalPreview({ posts, settings }: { posts: BlogPost[], settings?: Record<string, any> }) {
   const displayPosts = posts.slice(0, 3);
+
+  const jp_eyebrow = settings?.eyebrow ?? "JOIN OUR JOURNEY";
+  const jp_heading = settings?.heading ?? "Follow Our Hive";
+  const jp_desc = settings?.description ?? "Stay connected for new harvests, behind-the-scenes moments, and everyday inspiration from our farms.";
+  const jp_cta_text = settings?.cta_text ?? "READ OUR STORIES";
+  const jp_cta_url = settings?.cta_url ?? "/blog";
 
   return (
     <section className="py-16 sm:py-24 bg-cream-deep/25 border-t border-border/80">
       <div className="container-page">
         <div className="flex flex-col items-center text-center mb-[70px]">
           <div className="text-[12px] uppercase tracking-[6px] text-[#D97706] font-[600] mb-2 sm:mb-4">
-            JOIN OUR JOURNEY
+            {jp_eyebrow}
           </div>
           <h2 className="font-serif text-[34px] md:text-[44px] lg:text-[56px] font-[500] text-[#2B2118] leading-tight mb-[20px]">
-            Follow Our Hive
+            {jp_heading}
           </h2>
           <p className="text-[17px] md:text-[21px] text-[#6B6257] max-w-[700px] leading-[1.7] mb-[36px]">
-            Stay connected for new harvests, behind-the-scenes moments, and everyday inspiration from our farms.
+            {jp_desc}
           </p>
           <Link
-            to="/blog"
+            to={jp_cta_url as any}
             className="inline-flex items-center gap-2 text-[14px] font-bold tracking-wider text-[#D97706] hover:text-[#B46204] uppercase group"
           >
-            <span>READ OUR STORIES</span>
+            <span>{jp_cta_text}</span>
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-[6px]" />
           </Link>
         </div>

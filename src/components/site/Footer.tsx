@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { subscribeNewsletter } from "@/lib/newsletter.functions";
-import footerIllustration from "@/assets/footer-illustration.png";
+import { fetchPublicSiteSettings } from "@/lib/homepage-cms.functions";
 import { BrandMark } from "./BeeLogo";
 import {
   DEFAULT_SHOP_CATEGORIES,
@@ -43,6 +43,7 @@ export function Footer() {
   const [shopCategories, setShopCategories] = useState<ShopCategory[]>(
     DEFAULT_SHOP_CATEGORIES,
   );
+  const [settings, setSettings] = useState<Record<string, any>>({});
 
   useEffect(() => {
     void fetchShopCategories().then((res) => {
@@ -50,6 +51,8 @@ export function Footer() {
         setShopCategories(res);
       }
     });
+    
+    void fetchPublicSiteSettings().then(setSettings);
 
     const handleScroll = () => {
       setShowTopBtn(window.scrollY > 300);
@@ -105,18 +108,19 @@ export function Footer() {
   ] as const;
 
   const socialLinks = [
-    { I: Instagram, href: "https://instagram.com", label: "Instagram" },
-    { I: Facebook, href: "https://facebook.com", label: "Facebook" },
-    { I: Youtube, href: "https://youtube.com", label: "YouTube" },
+    { I: Instagram, href: settings?.social?.instagram || "https://instagram.com", label: "Instagram", show: !!settings?.social?.instagram },
+    { I: Facebook, href: settings?.social?.facebook || "https://facebook.com", label: "Facebook", show: !!settings?.social?.facebook },
+    { I: Youtube, href: settings?.social?.youtube || "https://youtube.com", label: "YouTube", show: !!settings?.social?.youtube },
     {
       I: MessageCircle,
-      href: "https://wa.me/919687328404",
+      href: settings?.contact?.whatsapp ? `https://wa.me/${settings.contact.whatsapp}` : "https://wa.me/919687328404",
       label: "WhatsApp",
+      show: !!settings?.contact?.whatsapp
     },
-    { I: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
-  ];
+    { I: Linkedin, href: settings?.social?.linkedin || "https://linkedin.com", label: "LinkedIn", show: !!settings?.social?.linkedin },
+  ].filter(link => link.show || Object.keys(settings).length === 0);
   return (
-    <footer className="relative bg-[#F9F4EC] text-[#2B1D14] pt-20 sm:pt-28 pb-[180px] sm:pb-[300px] overflow-hidden w-full max-w-full">
+    <footer className="relative bg-[#F9F4EC] text-[#2B1D14] pt-20 sm:pt-28 pb-4 overflow-hidden w-full max-w-full">
       {/* Background Parallax Honey Glow (Subtle) */}
       <div className="absolute top-0 left-1/4 w-1/2 h-full bg-gradient-to-b from-[#C57A1C]/5 to-transparent pointer-events-none opacity-50 blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
 
@@ -134,7 +138,7 @@ export function Footer() {
               <div className="space-y-6">
                 <BrandMark alwaysShowText={true} />
                 <p className="text-[14px] sm:text-[15px] text-[#2B1D14]/80 max-w-[280px] leading-relaxed font-serif italic">
-                  "Handcrafted honey from the heart of Saurashtra.<br/>Pure. Natural. Honest."
+                  "{settings?.company?.tagline || "Handcrafted honey from the heart of Saurashtra.\nPure. Natural. Honest."}"
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -205,25 +209,25 @@ export function Footer() {
                 <FooterSection title="Contact">
                   <ul className="space-y-4 text-[14px] lg:text-[13px] text-[#2B1D14]/80 font-medium">
                     <li>
-                      <a href="tel:+919687328404" className="flex items-start gap-3 hover:text-[#C57A1C] transition-colors duration-300">
+                      <a href={`tel:${settings?.contact?.phone || "+919687328404"}`} className="flex items-start gap-3 hover:text-[#C57A1C] transition-colors duration-300">
                         <Phone className="size-4 text-[#C57A1C] shrink-0 mt-0.5" />
-                        <span>+91 96873 28404</span>
+                        <span>{settings?.contact?.phone || "+91 96873 28404"}</span>
                       </a>
                     </li>
                     <li>
-                      <a href="mailto:hello@saurastrahoney.com" className="flex items-start gap-3 hover:text-[#C57A1C] transition-colors duration-300">
+                      <a href={`mailto:${settings?.contact?.email || "hello@saurastrahoney.com"}`} className="flex items-start gap-3 hover:text-[#C57A1C] transition-colors duration-300">
                         <Mail className="size-4 text-[#C57A1C] shrink-0 mt-0.5" />
-                        <span>hello@saurastrahoney.com</span>
+                        <span>{settings?.contact?.email || "hello@saurastrahoney.com"}</span>
                       </a>
                     </li>
                     <li>
                       <div className="flex items-start gap-3">
                         <MapPin className="size-4 text-[#C57A1C] shrink-0 mt-0.5" />
-                        <span className="leading-relaxed">At & Post: Dhrangadhra,<br/>Surendranagar, Gujarat – 363310</span>
+                        <span className="leading-relaxed whitespace-pre-wrap">{settings?.contact?.address || "At & Post: Dhrangadhra,\nSurendranagar, Gujarat – 363310"}</span>
                       </div>
                     </li>
                     <li className="pt-2">
-                      <a href="https://wa.me/919687328404" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-[#C57A1C] font-bold text-[12px] uppercase tracking-widest hover:text-[#2B1D14] transition-colors duration-300">
+                      <a href={settings?.contact?.whatsapp ? `https://wa.me/${settings.contact.whatsapp}` : "https://wa.me/919687328404"} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-[#C57A1C] font-bold text-[12px] uppercase tracking-widest hover:text-[#2B1D14] transition-colors duration-300">
                         <MessageCircle className="size-4" /> Chat with us
                       </a>
                     </li>
@@ -245,27 +249,10 @@ export function Footer() {
               Crafted with Nature • Harvested with Care
             </p>
             <p className="text-[12px] text-[#2B1D14]/50 font-medium">
-              © {currentYear} Saurashtra Honey Bee Farm
+              {settings?.footer?.copyright || `© ${currentYear} Saurashtra Honey Bee Farm`}
             </p>
           </div>
         </div>
-      </div>
-
-      {/* ==================================================
-          4. PREMIUM BOTANICAL ILLUSTRATION BACKGROUND
-          ================================================== */}
-      <div className="absolute bottom-0 left-0 w-full h-[200px] sm:h-[400px] z-0 pointer-events-none overflow-hidden">
-        {/* Very subtle breathing honey glow overlay */}
-        <div className="absolute inset-0 z-10 opacity-60 mix-blend-overlay animate-pulse" style={{ animationDuration: '6s' }}>
-           <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-[#C57A1C]/20 to-transparent" />
-        </div>
-        
-        {/* The botanical landscape illustration */}
-        <img 
-          src={footerIllustration} 
-          alt="Honey Farm Botanical Landscape"
-          className="w-full h-full object-cover object-bottom mix-blend-multiply opacity-90 transition-transform duration-[10000ms] ease-in-out hover:scale-105"
-        />
       </div>
 
       {/* Scroll to Top */}

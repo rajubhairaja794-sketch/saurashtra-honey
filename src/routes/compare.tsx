@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCompare } from "@/lib/compare";
 import { SiteLayout, SectionEyebrow } from "@/components/site/Layout";
-import { products as staticProducts, type Product } from "@/lib/products";
+import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import { useCart } from "@/lib/cart";
 import { useEffect, useMemo, useState } from "react";
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/compare")({
 function ComparePage() {
   const { slugs, remove, clear, count } = useCompare();
   const { add } = useCart();
-  const [all, setAll] = useState<Product[]>(staticProducts);
+  const [all, setAll] = useState<Product[]>([]);
   useEffect(() => { void fetchProducts().then((r) => { if (r.length) setAll(r); }); }, []);
 
   const selected = useMemo(() => slugs.map((s) => all.find((p) => p.slug === s)).filter(Boolean) as Product[], [slugs, all]);

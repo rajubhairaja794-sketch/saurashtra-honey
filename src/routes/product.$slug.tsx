@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
-import { findProduct, getVariantByLabel, getProductGallery, getProductAdditionalImages, products as staticProducts } from "@/lib/products";
+import { getVariantByLabel, getProductGallery, getProductAdditionalImages } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import { fetchProduct, fetchProducts } from "@/lib/product-catalog";
 import {
@@ -17,7 +17,6 @@ import { useWishlist } from "@/lib/wishlist";
 import { useCompare } from "@/lib/compare";
 import { pushRecent } from "@/lib/recently-viewed";
 import { toast } from "sonner";
-import beeFlower from "@/assets/bee-flower.jpg";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { StructuredData, breadcrumbLd, productLd } from "@/components/site/StructuredData";
@@ -27,7 +26,7 @@ import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel
 export const Route = createFileRoute("/product/$slug")({
   loader: async ({ params }) => {
     const dbP = await fetchProduct(params.slug);
-    const p = dbP ?? findProduct(params.slug);
+    const p = dbP;
     if (!p) throw notFound();
     return { product: p };
   },
@@ -47,16 +46,16 @@ export const Route = createFileRoute("/product/$slug")({
   }),
   notFoundComponent: () => (
     <SiteLayout>
-      <div className="container-page py-24 text-center">
-        <h1 className="font-serif text-4xl text-forest-dark">Product not found</h1>
+      <div className="container-product py-24 text-center">
+        <h1 className="font-serif text-4xl lg:text-5xl text-forest-dark">Product not found</h1>
         <Link to="/shop" className="mt-4 inline-block text-gold-deep border-b border-gold-deep">Back to shop</Link>
       </div>
     </SiteLayout>
   ),
   errorComponent: ({ reset }) => (
     <SiteLayout>
-      <div className="container-page py-24 text-center">
-        <h1 className="font-serif text-4xl text-forest-dark">Something went wrong</h1>
+      <div className="container-product py-24 text-center">
+        <h1 className="font-serif text-4xl lg:text-5xl text-forest-dark">Something went wrong</h1>
         <button onClick={reset} className="mt-4 text-gold-deep border-b border-gold-deep">Try again</button>
       </div>
     </SiteLayout>
@@ -79,7 +78,7 @@ function ProductPage() {
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<"Description"|"Benefits"|"How to Use"|"Ingredients"|"Lab Report">("Description");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [allProducts, setAllProducts] = useState<Product[]>(staticProducts);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [heroIdx, setHeroIdx] = useState(0);
   const [zoom, setZoom] = useState(false);
   const { add, setOpen } = useCart();
@@ -98,11 +97,9 @@ function ProductPage() {
   }, [p.slug]);
 
   const gallery = useMemo(() => {
-    return getProductGallery(p);
-  }, [p]);
-
-  const additionalImages = useMemo(() => {
-    return getProductAdditionalImages(p);
+    const base = getProductGallery(p) || [];
+    const add = getProductAdditionalImages(p) || [];
+    return [...base, ...add].filter((u) => u && u.trim().length > 0);
   }, [p]);
 
   const related = allProducts.filter((x) => x.slug !== p.slug && x.category === p.category).slice(0, 4);
@@ -157,7 +154,7 @@ function ProductPage() {
 
   return (
     <SiteLayout>
-      <div className="container-page py-4 md:py-6 text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
+      <div className="container-product py-4 md:py-6 text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
         <Link to="/" className="hover:text-gold-deep">Home</Link> <ChevronRight className="size-3" />
         <Link to="/shop" className="hover:text-gold-deep">Shop</Link> <ChevronRight className="size-3" />
         <Link to="/collections/$slug" params={{ slug: getCategorySlug(p.category) }} className="hover:text-gold-deep">{p.category}</Link> <ChevronRight className="size-3" />
@@ -165,9 +162,9 @@ function ProductPage() {
       </div>
 
       {/* MAIN */}
-      <section className="container-page grid lg:grid-cols-2 gap-6 lg:gap-10 pb-8">
+      <section className="container-product grid lg:grid-cols-[minmax(520px,680px)_minmax(450px,1fr)] gap-6 lg:gap-10 pb-8">
         {/* Desktop Gallery */}
-        <div className="hidden md:grid grid-cols-[88px_1fr] gap-3.5 items-start">
+        <div className="hidden md:grid grid-cols-[90px_1fr] gap-3.5 items-start">
           <div className="relative flex flex-col items-center">
             {gallery.length > 5 && (
               <button
@@ -183,7 +180,7 @@ function ProductPage() {
             )}
             <div
               id="desktop-thumbs-rail"
-              className="flex flex-col gap-2.5 overflow-y-auto max-h-[460px] w-full pr-1 scrollbar-thin scrollbar-thumb-border"
+              className="flex flex-col gap-2.5 overflow-y-auto max-h-[600px] w-full pr-1 scrollbar-thin scrollbar-thumb-border"
             >
               {gallery.map((src, i) => (
                 <button
@@ -199,7 +196,7 @@ function ProductPage() {
                     src={src}
                     alt={`${p.name} view ${i + 1}`}
                     loading="lazy"
-                    className="w-full h-full object-cover object-center aspect-square"
+                    className="w-full h-full object-contain bg-white object-center aspect-square"
                   />
                 </button>
               ))}
@@ -232,7 +229,7 @@ function ProductPage() {
             <img
               src={gallery[heroIdx] || gallery[0]}
               alt={p.name}
-              className="w-full h-full object-cover aspect-square cursor-zoom-in transition-transform duration-500"
+              className="w-full h-full object-contain aspect-square cursor-zoom-in transition-transform duration-500"
               onClick={() => setZoom(true)}
             />
           </div>
@@ -243,7 +240,7 @@ function ProductPage() {
 
         <div>
           {p.badge && <div className="text-xs font-bold tracking-widest text-burnt-orange uppercase mb-1.5">{p.badge}</div>}
-          <h1 className="font-serif text-3xl md:text-5xl font-bold text-espresso leading-tight">{p.name}</h1>
+          <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-espresso leading-tight">{p.name}</h1>
           <p className="mt-2 text-sm md:text-base text-muted-foreground font-normal leading-relaxed">{p.tagline}</p>
           <div className="mt-3.5 flex items-center gap-2 text-sm flex-wrap">
             <div className="flex text-burnt-orange">{[...Array(5)].map((_, i) => <Star key={i} className={`size-4 ${i < Math.round(p.rating) ? "fill-burnt-orange text-burnt-orange" : "text-border"}`} />)}</div>
@@ -251,7 +248,7 @@ function ProductPage() {
             <a href="#reviews" className="text-muted-foreground hover:text-burnt-orange underline underline-offset-2 font-medium">({p.reviews} verified reviews)</a>
           </div>
           <div className="mt-5 flex items-baseline gap-2.5 flex-wrap">
-            <span className="text-3xl md:text-4xl font-serif font-bold text-espresso">₹{activePrice}</span>
+            <span className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-espresso">₹{activePrice}</span>
             {activeMrp && activeMrp > activePrice && (
               <><span className="text-base text-muted-foreground line-through">₹{activeMrp}</span>
                 <span className="text-xs font-bold text-terracotta bg-cream-deep px-2 py-0.5 rounded-full shadow-xs">-{Math.round(((activeMrp - activePrice)/activeMrp)*100)}% OFF</span></>
@@ -320,7 +317,7 @@ function ProductPage() {
       </section>
 
       {/* D2C QUALITY & TRUST STRIP */}
-      <section className="container-page pb-10">
+      <section className="container-product pb-10">
         <div className="bg-cream-deep/70 border border-border/80 rounded-2xl p-6 grid grid-cols-2 md:grid-cols-4 gap-6 shadow-soft">
           {[
             [Leaf, "100% Pure & Raw", "Unheated and unfiltered floral honey."],
@@ -343,7 +340,7 @@ function ProductPage() {
       </section>
 
       {/* STRUCTURED EDUCATIONAL TABS */}
-      <section className="container-page pb-12">
+      <section className="container-product pb-12">
         <div className="bg-white border border-border/80 rounded-2xl p-6 md:p-8 shadow-soft">
           <div className="flex flex-wrap gap-6 md:gap-8 border-b border-border/80 overflow-x-auto">
             {(["Story / Description", "What Makes It Special", "Floral Source & Notes", "Storage & Usage", "Purity & Lab Test"] as const).map((t) => (
@@ -400,7 +397,7 @@ function ProductPage() {
 
       {/* Frequently bought together */}
       {fbt.length > 0 && (
-        <section className="container-page pb-12">
+        <section className="container-product pb-12">
           <h2 className="font-serif text-2xl font-bold text-espresso mb-4">Frequently Bought Together</h2>
           <div className="bg-cream-deep/50 border border-border/80 rounded-2xl p-5 md:p-7 grid md:grid-cols-[1fr_auto] gap-6 md:gap-8 items-center shadow-soft">
             <div className="flex items-center gap-3 md:gap-5 overflow-x-auto pb-2 md:pb-0">
@@ -426,7 +423,7 @@ function ProductPage() {
       )}
 
       {/* FAQ Accordion */}
-      <section className="container-page pb-14">
+      <section className="container-product pb-14">
         <h2 className="font-serif text-2xl font-bold text-espresso mb-5">Frequently Asked Questions</h2>
         <div className="bg-white border border-border/80 rounded-2xl divide-y divide-border/60 shadow-soft overflow-hidden">
           {FAQS.map((f, i) => (
@@ -446,7 +443,7 @@ function ProductPage() {
 
       {/* RELATED / YOU MAY ALSO LIKE */}
       {related.length > 0 && (
-        <section className="container-page pb-12">
+        <section className="container-product pb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-serif text-2xl font-bold text-espresso">You May Also Like</h2>
             <Link to="/shop" className="text-xs font-bold tracking-widest text-burnt-orange hover:underline uppercase">VIEW ALL HARVESTS →</Link>
@@ -464,9 +461,6 @@ function ProductPage() {
         </section>
       )}
 
-      {/* 3 ADDITIONAL PRODUCT IMAGES */}
-      <AdditionalProductImagesSection images={additionalImages} />
-
       {/* STORIES FROM THE HIVE */}
       <ShoppableVideoCarousel
         eyebrow="FROM THE APIARIES"
@@ -482,7 +476,7 @@ function ProductPage() {
       <StructuredData data={{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQS.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) }} />
 
       {/* PROMISE STRIP */}
-      <section className="container-page pb-24">
+      <section className="container-product pb-24">
         <div className="bg-espresso text-cream rounded-2xl p-6 md:p-8 grid grid-cols-2 md:grid-cols-4 gap-6 shadow-soft border border-white/10">
           {[[PackageCheck, "100% Secure Payments", "256-bit encrypted transactions"], [Truck, "Fast & Safe Delivery", "Insured doorstep delivery"], [PackageCheck, "Artisanal Packing", "Recyclable glass & eco cushioning"], [ShieldCheck, "Purity Assurance", "Guaranteed unheated floral raw honey"]].map(([I, t, s]) => {
             const Icon = I as typeof PackageCheck;
@@ -574,7 +568,7 @@ function MobileProductGallery({ images, name }: { images: string[]; name: string
         <div className="flex touch-pan-y cursor-grab active:cursor-grabbing">
           {images.map((src, idx) => (
             <div key={idx} className="flex-[0_0_100%] min-w-0 aspect-square">
-              <img src={src} alt={`${name} view ${idx + 1}`} loading="lazy" className="w-full h-full object-cover object-center pointer-events-none" />
+              <img src={src} alt={`${name} view ${idx + 1}`} loading="lazy" className="w-full h-full object-contain bg-white object-center pointer-events-none" />
             </div>
           ))}
         </div>
@@ -606,7 +600,7 @@ function MobileProductGallery({ images, name }: { images: string[]; name: string
                   : "border-border/80 opacity-75"
               }`}
             >
-              <img src={src} alt={`${name} thumb ${idx + 1}`} className="w-full h-full object-cover" />
+              <img src={src} alt={`${name} thumb ${idx + 1}`} className="w-full h-full object-contain bg-white" />
             </button>
           ))}
         </div>
@@ -618,38 +612,7 @@ function MobileProductGallery({ images, name }: { images: string[]; name: string
   );
 }
 
-function AdditionalProductImagesSection({ images }: { images?: string[] }) {
-  if (!images || images.length === 0) return null;
-  const valid = images.filter((u) => u && u.trim().length > 0).slice(0, 3);
-  if (valid.length === 0) return null;
 
-  const gridClass =
-    valid.length === 1
-      ? "max-w-lg mx-auto"
-      : valid.length === 2
-      ? "grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8"
-      : "grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8";
-
-  return (
-    <section className="container-page py-12 md:py-16">
-      <div className={gridClass}>
-        {valid.map((src, i) => (
-          <div
-            key={i}
-            className="w-full aspect-square rounded-[28px] overflow-hidden bg-cream-deep/30 border border-border/60 shadow-soft group"
-          >
-            <img
-              src={src}
-              alt={`Storytelling view ${i + 1}`}
-              loading="lazy"
-              className="w-full h-full object-cover object-center aspect-square transition-transform duration-500 group-hover:scale-[1.03]"
-            />
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 /* Prevent unused-var lint for Copy which was imported for future use */
 void Copy;

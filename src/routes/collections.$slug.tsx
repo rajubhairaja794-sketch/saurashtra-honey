@@ -9,7 +9,7 @@ import {
   getCategorySlug,
   DEDICATED_COLLECTION_SLUGS,
 } from "@/lib/collection-helpers";
-import { products as staticProducts, type Product } from "@/lib/products";
+import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import {
   fetchShopCategories,
@@ -59,7 +59,7 @@ function CategoryCollectionPage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
 
-  const [products, setProducts] = useState<Product[]>(staticProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ShopCategory[]>(DEFAULT_SHOP_CATEGORIES);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
@@ -72,13 +72,8 @@ function CategoryCollectionPage() {
   useEffect(() => {
     void fetchProducts().then((r) => {
       const mergedMap = new Map<string, Product>();
-      staticProducts.forEach((p) => mergedMap.set(p.slug, p));
       if (r && r.length > 0) {
         r.forEach((p) => {
-          if (!p.image || p.image === "") {
-            const stat = staticProducts.find((sp) => sp.slug === p.slug);
-            if (stat) p.image = stat.image;
-          }
           mergedMap.set(p.slug, p);
         });
       }

@@ -1,84 +1,23 @@
-import ajwain from "@/assets/prod-ajwain.jpg";
-import fennel from "@/assets/prod-fennel.jpg";
-import lychee from "@/assets/prod-lychee.jpg";
-import multiflora from "@/assets/prod-multiflora.jpg";
-import squeeze from "@/assets/prod-squeeze.jpg";
-import honeycomb from "@/assets/prod-honeycomb.jpg";
-import giftpack from "@/assets/prod-giftpack.jpg";
-import beeswaxPellets from "@/assets/prod-beeswax-pellets.png";
-import beePollen from "@/assets/prod-bee-pollen.png";
-import beeswaxCandles from "@/assets/prod-beeswax-candles.png";
-import beautyProducts from "@/assets/prod-beauty.png";
-import luxuryHamper from "@/assets/prod-luxury-hamper.png";
-import beeFarm from "@/assets/bee-farm.jpg";
-import beeFlower from "@/assets/bee-flower.jpg";
-import familyHoney from "@/assets/family-honey.jpg";
-import honeyDrizzle from "@/assets/honey-drizzle.jpg";
-import honeycombBees from "@/assets/honeycomb-bees.jpg";
-import prodLiquid from "@/assets/prod-liquid.jpg";
-import teamBeekeepers from "@/assets/team-beekeepers.jpg";
-
-export type ProductVariant = {
-  id?: string;
-  label: string;
-  price: number;
-  mrp?: number;
-  stock?: number;
-  inStock?: boolean;
-  isDefault?: boolean;
-  sku?: string;
-  weightG?: number;
-};
-
-export type Product = {
-  slug: string;
-  name: string;
-  tagline: string;
-  price: number;
-  priceMax?: number;
-  mrp?: number;
-  rating: number;
-  reviews: number;
-  badge?: "BESTSELLER" | "NEW" | "PREMIUM";
-  category:
-    | "Honey"
-    | "Beeswax"
-    | "Bee Pollen"
-    | "Beeswax Candle"
-    | "Beeswax Products"
-    | "Beauty Products"
-    | string;
-  sizes: string[];
-  variants?: ProductVariant[];
-  image: string;
-  images?: string[];
-  additionalImages?: string[];
-  benefits: string[];
-  description: string;
-  flora?: string;
-  attributes?: Record<string, string | string[]>;
-};
-
-export function getProductGallery(product: Product): string[] {
-  const list = Array.isArray(product.images)
-    ? Array.from(new Set(product.images.filter((u): u is string => typeof u === "string" && u.trim().length > 0)))
-    : [];
-  if (list.length > 0) {
-    return list.slice(0, 9);
-  }
-  return product.image ? [product.image] : [];
-}
-
-export function getProductAdditionalImages(product: Product): string[] {
-  const list = Array.isArray(product.additionalImages)
-    ? Array.from(new Set(product.additionalImages.filter((u): u is string => typeof u === "string" && u.trim().length > 0)))
-    : product.attributes && typeof product.attributes === "object" && Array.isArray((product.attributes as Record<string, unknown>).additional_images)
-    ? Array.from(new Set(((product.attributes as Record<string, unknown>).additional_images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0)))
-    : [];
-  return list.slice(0, 8);
-}
-
-export const products: Product[] = [
+const ajwain = "prod-ajwain.jpg";
+const fennel = "prod-fennel.jpg";
+const lychee = "prod-lychee.jpg";
+const multiflora = "prod-multiflora.jpg";
+const squeeze = "prod-squeeze.jpg";
+const honeycomb = "prod-honeycomb.jpg";
+const giftpack = "prod-giftpack.jpg";
+const beeswaxPellets = "prod-beeswax-pellets.png";
+const beePollen = "prod-bee-pollen.png";
+const beeswaxCandles = "prod-beeswax-candles.png";
+const beautyProducts = "prod-beauty.png";
+const luxuryHamper = "prod-luxury-hamper.png";
+const beeFarm = "bee-farm.jpg";
+const beeFlower = "bee-flower.jpg";
+const familyHoney = "family-honey.jpg";
+const honeyDrizzle = "honey-drizzle.jpg";
+const honeycombBees = "honeycomb-bees.jpg";
+const prodLiquid = "prod-liquid.jpg";
+const teamBeekeepers = "team-beekeepers.jpg";
+const products = [
   {
     slug: "ajwain-honey",
     name: "Ajwain Honey",
@@ -710,61 +649,5 @@ export const products: Product[] = [
   }
 ];
 
-export const findProduct = (slug: string) => products.find((p) => p.slug === slug);
 
-export function getProductVariants(product: Product): ProductVariant[] {
-  if (product.variants && product.variants.length > 0) {
-    return product.variants;
-  }
-  const sizes = product.sizes && product.sizes.length > 0 ? product.sizes : ["Standard"];
-  const multipliers: Record<string, { factor: number; mrpFactor: number; weight: number }> = {
-    "250g": { factor: 1, mrpFactor: 1.15, weight: 250 },
-    "500g": { factor: 1.716, mrpFactor: 1.15, weight: 500 }, // e.g. 349 -> 599
-    "1kg": { factor: 2.862, mrpFactor: 1.15, weight: 1000 }, // e.g. 349 -> 999
-    "250ml": { factor: 1, mrpFactor: 1.15, weight: 250 },
-    "500ml": { factor: 1.803, mrpFactor: 1.15, weight: 500 }, // e.g. 249 -> 449
-    "100g": { factor: 0.6, mrpFactor: 1.15, weight: 100 },
-  };
-
-  return sizes.map((s, idx) => {
-    const mult = multipliers[s] || { factor: idx === 0 ? 1 : idx === 1 ? 1.7 : 2.5, mrpFactor: 1.15, weight: 250 };
-    const price = Math.round(product.price * mult.factor);
-    const mrp = product.mrp ? Math.round(product.mrp * mult.factor) : Math.round(price * mult.mrpFactor);
-    return {
-      id: `${product.slug}-${s.toLowerCase()}`,
-      label: s,
-      price,
-      mrp,
-      stock: 50,
-      inStock: true,
-      isDefault: idx === 0,
-      sku: `SH-${product.slug.toUpperCase().slice(0, 4)}-${s.toUpperCase()}`,
-      weightG: mult.weight,
-    };
-  });
-}
-
-export function getDefaultVariant(product: Product): ProductVariant {
-  const vars = getProductVariants(product);
-  return (
-    vars.find((v) => v.isDefault && v.inStock !== false && (v.stock === undefined || v.stock > 0)) ||
-    vars.find((v) => v.inStock !== false && (v.stock === undefined || v.stock > 0)) ||
-    vars.find((v) => v.isDefault) ||
-    vars[0] || {
-      label: product.sizes?.[0] || "Standard",
-      price: product.price,
-      mrp: product.mrp,
-      inStock: true,
-    }
-  );
-}
-
-export function getVariantByLabel(product: Product, label?: string): ProductVariant {
-  const vars = getProductVariants(product);
-  if (label) {
-    const found = vars.find((v) => v.label.toLowerCase() === label.toLowerCase());
-    if (found) return found;
-  }
-  return getDefaultVariant(product);
-}
-
+console.log(JSON.stringify(products, null, 2));

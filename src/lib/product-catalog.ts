@@ -92,7 +92,7 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     : [];
   const additionalImages =
     rawAdditional.length > 0
-      ? Array.from(new Set(rawAdditional)).slice(0, 3)
+      ? Array.from(new Set(rawAdditional)).slice(0, 8)
       : staticMatch?.additionalImages;
 
   return {
@@ -148,26 +148,48 @@ export async function fetchProducts(): Promise<Product[]> {
       .select("id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,image_key,image_url,images,attributes")
       .eq("published", true)
       .order("sort_order", { ascending: true });
-    if (error || !data || data.length === 0) return staticProducts;
+    
+    if (error) {
+      console.error("[fetchProducts] Supabase error:", error);
+      throw error;
+    }
+    
+    if (!data || data.length === 0) {
+      console.warn("[fetchProducts] No products found in Supabase. Returning empty array.");
+      return [];
+    }
     const varMap = await fetchAllVariantsMap();
     return (data as unknown as Row[]).map((r) => toProduct(r, varMap));
-  } catch {
-    return staticProducts;
+  } catch (err) {
+    console.error("[fetchProducts] Exception:", err);
+    throw err;
   }
 }
 
-export async function fetchProduct(slug: string): Promise<Product | null> {
+export async function fetchProduct(rawSlug: string): Promise<Product | null> {
+  const slug = decodeURIComponent(rawSlug).trim().replace(/\/+$/, "");
   try {
     const { data, error } = await supabase
       .from("products")
       .select("id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,image_key,image_url,images,attributes")
       .eq("slug", slug)
       .maybeSingle();
-    if (error || !data) return staticProducts.find((p) => p.slug === slug) ?? null;
+
+    if (error) {
+      console.error("[fetchProduct] Supabase error:", error);
+      throw error; // Let the router catch it as a real error
+    }
+
+    if (!data) {
+      // No DB product found
+      return null;
+    }
+
     const varMap = await fetchAllVariantsMap();
     return toProduct(data as unknown as Row, varMap);
-  } catch {
-    return staticProducts.find((p) => p.slug === slug) ?? null;
+  } catch (err) {
+    console.error("[fetchProduct] Exception:", err);
+    throw err;
   }
 }
 

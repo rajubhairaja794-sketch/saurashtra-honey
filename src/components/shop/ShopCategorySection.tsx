@@ -1,31 +1,34 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
+import { fetchShopCategories, type ShopCategory } from "@/lib/category-catalog";
 
 import heroProductsImg from "@/assets/hero-products.jpg";
-import honeycombBeesImg from "@/assets/honeycomb-bees.jpg";
-import beeFlowerImg from "@/assets/bee-flower.jpg";
-import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
-import familyHoneyImg from "@/assets/family-honey.jpg";
-import prodGiftpackImg from "@/assets/prod-giftpack.jpg";
-import prodLiquidImg from "@/assets/prod-liquid.jpg";
-
-const SHOP_CATEGORIES_DATA = [
-  { name: "All Products", img: heroProductsImg, filter: "", slug: "all" },
-  { name: "Raw Honey", img: prodLiquidImg, filter: "raw honey", slug: "raw-honey" },
-  { name: "Beeswax", img: honeycombBeesImg, filter: "beeswax", slug: "beeswax" },
-  { name: "Bee Pollen", img: beeFlowerImg, filter: "bee pollen", slug: "bee-pollen" },
-  { name: "Beeswax Candles", img: honeyDrizzleImg, filter: "candles", slug: "beeswax-candles" },
-  { name: "Beauty & Personal Care", img: familyHoneyImg, filter: "beauty", slug: "beauty" },
-  { name: "Gift Hampers", img: prodGiftpackImg, filter: "gift packs", slug: "gift-hampers" },
-];
 
 export function ShopCategorySection({
   activeCategory,
 }: {
   activeCategory: string;
 }) {
+  const [categories, setCategories] = useState<{name: string, img: string, filter: string, slug: string}[]>([
+    { name: "All Products", img: heroProductsImg, filter: "", slug: "all" }
+  ]);
+
+  useEffect(() => {
+    void fetchShopCategories().then((cats) => {
+      const formatted = cats.map(c => ({
+        name: c.name,
+        img: c.image,
+        filter: c.name.toLowerCase(),
+        slug: c.slug
+      }));
+      setCategories([
+        { name: "All Products", img: heroProductsImg, filter: "", slug: "all" },
+        ...formatted
+      ]);
+    });
+  }, []);
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop: true,
@@ -50,9 +53,9 @@ export function ShopCategorySection({
   }, [emblaApi]);
 
   const displayCats = [
-    ...SHOP_CATEGORIES_DATA,
-    ...SHOP_CATEGORIES_DATA,
-    ...SHOP_CATEGORIES_DATA,
+    ...categories,
+    ...categories,
+    ...categories,
   ];
 
   return (

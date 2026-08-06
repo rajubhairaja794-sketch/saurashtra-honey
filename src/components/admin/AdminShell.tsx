@@ -29,13 +29,19 @@ import {
   Mail,
   Award,
   Store,
+  Home,
+  Film,
+  Layers,
 } from "lucide-react";
+import { AutoSeeder } from "./AutoSeeder";
 
 type NavItem = {
   label: string;
   to: string;
   icon: React.ComponentType<{ className?: string }>;
   perm?: string;
+  indent?: boolean;
+  dividerBefore?: string; // section header label
 };
 
 const NAV: NavItem[] = [
@@ -49,18 +55,17 @@ const NAV: NavItem[] = [
   { label: "Coupons", to: "/admin/coupons", icon: Ticket, perm: "coupons.manage" },
   { label: "Blog", to: "/admin/blog", icon: FileText, perm: "blog.manage" },
   { label: "Media", to: "/admin/media", icon: ImageIcon, perm: "media.manage" },
-  { label: "Banner / Hero Slider Management", to: "/admin/hero", icon: Sparkles, perm: "settings.manage" },
+  // ── Homepage group ──
+  { label: "Homepage Management", to: "/admin/homepage", icon: Home, perm: "settings.manage", dividerBefore: "HOMEPAGE" },
+  { label: "↳ Hero Slider", to: "/admin/hero", icon: Layers, perm: "settings.manage", indent: true },
+  { label: "↳ Videos & Stories", to: "/admin/stories", icon: Film, perm: "settings.manage", indent: true },
+  // ── Other ──
   {
-    label: "Homepage → Video / Story",
-    to: "/admin/stories",
-    icon: Sparkles,
-    perm: "settings.manage",
-  },
-  {
-    label: "Bulk Orders → Who We Supply",
+    label: "Who We Supply",
     to: "/admin/who-we-supply",
     icon: Store,
     perm: "settings.manage",
+    dividerBefore: "OTHER",
   },
   { label: "Submissions", to: "/admin/submissions", icon: MessageSquare },
   { label: "Newsletter", to: "/admin/newsletter", icon: Mail, perm: "settings.manage" },
@@ -173,15 +178,29 @@ export function AdminShell() {
           {visible.map((item) => {
             const active = item.to === "/admin" ? path === "/admin" : path.startsWith(item.to);
             return (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-5 py-2.5 text-sm transition ${active ? "bg-white/10 text-gold border-l-2 border-gold" : "text-cream/80 hover:bg-white/5 hover:text-cream"}`}
-              >
-                <item.icon className="size-4" />
-                <span>{item.label}</span>
-              </Link>
+              <div key={item.to}>
+                {item.dividerBefore && (
+                  <div className="px-5 pt-4 pb-1 text-[10px] font-bold tracking-[0.15em] text-cream/30 uppercase select-none">
+                    {item.dividerBefore}
+                  </div>
+                )}
+                <Link
+                  to={item.to}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-3 py-2 text-sm transition ${
+                    item.indent ? "pl-8 pr-5" : "px-5"
+                  } ${
+                    active
+                      ? "bg-white/10 text-gold border-l-2 border-gold"
+                      : item.indent
+                      ? "text-cream/60 hover:bg-white/5 hover:text-cream/90"
+                      : "text-cream/80 hover:bg-white/5 hover:text-cream"
+                  }`}
+                >
+                  <item.icon className={`shrink-0 ${item.indent ? "size-3.5" : "size-4"}`} />
+                  <span className={item.indent ? "text-[13px]" : ""}>{item.label}</span>
+                </Link>
+              </div>
             );
           })}
         </nav>
@@ -236,6 +255,7 @@ export function AdminShell() {
           </div>
         </header>
         <main className="p-4 lg:p-6">
+          <AutoSeeder />
           <Outlet />
         </main>
       </div>

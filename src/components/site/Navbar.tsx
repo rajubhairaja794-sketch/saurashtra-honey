@@ -9,7 +9,8 @@ import { BrandMark, BeeLogo } from "./BeeLogo";
 import { TopBar } from "./TopBar";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
-import { products } from "@/lib/products";
+import { type Product } from "@/lib/products";
+import { fetchProducts } from "@/lib/product-catalog";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchShopCategories, DEFAULT_SHOP_CATEGORIES, type ShopCategory } from "@/lib/category-catalog";
@@ -43,10 +44,8 @@ function pushHistory(q: string) {
   try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 6))); } catch {/* ignore */}
 }
 
-const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
-const bestSellers = products.filter((p) => p.badge === "BESTSELLER").slice(0, 3);
-const newArrivals = products.filter((p) => p.badge === "NEW").slice(0, 3);
-const featuredForMenu = (newArrivals.length ? newArrivals : products).slice(0, 3);
+// These will be loaded dynamically
+// const uniqueCategories = ...
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -56,9 +55,26 @@ export function Navbar() {
   const [unread, setUnread] = useState(0);
   const [history, setHistory] = useState<string[]>([]);
   const [dbCategories, setDbCategories] = useState<ShopCategory[]>(DEFAULT_SHOP_CATEGORIES);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [bestSellers, setBestSellers] = useState<Product[]>([]);
+  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
+  const [featuredForMenu, setFeaturedForMenu] = useState<Product[]>([]);
+  const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
+
   useEffect(() => {
     void fetchShopCategories().then((res) => {
       if (res.length > 0) setDbCategories(res);
+    });
+    void fetchProducts().then((res) => {
+      if (res.length > 0) {
+        setProducts(res);
+        setUniqueCategories(Array.from(new Set(res.map((p) => p.category))));
+        const bs = res.filter((p) => p.badge === "BESTSELLER").slice(0, 3);
+        const na = res.filter((p) => p.badge === "NEW").slice(0, 3);
+        setBestSellers(bs);
+        setNewArrivals(na);
+        setFeaturedForMenu((na.length ? na : res).slice(0, 3));
+      }
     });
   }, []);
   const navCategories = useMemo(() => {

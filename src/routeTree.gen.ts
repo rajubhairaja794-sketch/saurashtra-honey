@@ -39,10 +39,12 @@ import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminHeroRouteImport } from './routes/admin.hero'
+import { Route as AdminHomepageRouteImport } from './routes/admin.homepage'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminMediaRouteImport } from './routes/admin.media'
+import { Route as AdminMigrateCatalogRouteImport } from './routes/admin.migrate-catalog'
 import { Route as AdminNewsletterRouteImport } from './routes/admin.newsletter'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
@@ -59,6 +61,10 @@ import { Route as CollectionsIndexRouteImport } from './routes/collections.index
 import { Route as CollectionsSlugRouteImport } from './routes/collections.$slug'
 import { Route as OrderIdRouteImport } from './routes/order.$id'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
+import { Route as AdminHomepageAnnouncementsRouteImport } from './routes/admin.homepage_.announcements'
+import { Route as AdminHomepageCategoriesRouteImport } from './routes/admin.homepage_.categories'
+import { Route as AdminHomepageProductsRouteImport } from './routes/admin.homepage_.products'
+import { Route as AdminHomepageTrustRouteImport } from './routes/admin.homepage_.trust'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicSubmissionsRouteImport } from './routes/api/public/submissions'
 import { Route as NewsletterConfirmTokenRouteImport } from './routes/newsletter.confirm.$token'
@@ -214,6 +220,11 @@ const AdminHeroRoute = AdminHeroRouteImport.update({
   path: '/hero',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminHomepageRoute = AdminHomepageRouteImport.update({
+  id: '/homepage',
+  path: '/homepage',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInventoryRoute = AdminInventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
@@ -232,6 +243,11 @@ const AdminMarketingRoute = AdminMarketingRouteImport.update({
 const AdminMediaRoute = AdminMediaRouteImport.update({
   id: '/media',
   path: '/media',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMigrateCatalogRoute = AdminMigrateCatalogRouteImport.update({
+  id: '/migrate-catalog',
+  path: '/migrate-catalog',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminNewsletterRoute = AdminNewsletterRouteImport.update({
@@ -314,6 +330,27 @@ const ProductSlugRoute = ProductSlugRouteImport.update({
   path: '/product/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminHomepageAnnouncementsRoute =
+  AdminHomepageAnnouncementsRouteImport.update({
+    id: '/homepage_/announcements',
+    path: '/homepage/announcements',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminHomepageCategoriesRoute = AdminHomepageCategoriesRouteImport.update({
+  id: '/homepage_/categories',
+  path: '/homepage/categories',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHomepageProductsRoute = AdminHomepageProductsRouteImport.update({
+  id: '/homepage_/products',
+  path: '/homepage/products',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHomepageTrustRoute = AdminHomepageTrustRouteImport.update({
+  id: '/homepage_/trust',
+  path: '/homepage/trust',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   id: '/api/public/health',
   path: '/api/public/health',
@@ -366,10 +403,12 @@ export interface FileRoutesByFullPath {
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/hero': typeof AdminHeroRoute
+  '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
+  '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
@@ -387,6 +426,10 @@ export interface FileRoutesByFullPath {
   '/product/$slug': typeof ProductSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/collections/': typeof CollectionsIndexRoute
+  '/admin/homepage/announcements': typeof AdminHomepageAnnouncementsRoute
+  '/admin/homepage/categories': typeof AdminHomepageCategoriesRoute
+  '/admin/homepage/products': typeof AdminHomepageProductsRoute
+  '/admin/homepage/trust': typeof AdminHomepageTrustRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/submissions': typeof ApiPublicSubmissionsRoute
   '/newsletter/confirm/$token': typeof NewsletterConfirmTokenRoute
@@ -421,10 +464,12 @@ export interface FileRoutesByTo {
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/hero': typeof AdminHeroRoute
+  '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
+  '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
@@ -442,6 +487,10 @@ export interface FileRoutesByTo {
   '/product/$slug': typeof ProductSlugRoute
   '/admin': typeof AdminIndexRoute
   '/collections': typeof CollectionsIndexRoute
+  '/admin/homepage/announcements': typeof AdminHomepageAnnouncementsRoute
+  '/admin/homepage/categories': typeof AdminHomepageCategoriesRoute
+  '/admin/homepage/products': typeof AdminHomepageProductsRoute
+  '/admin/homepage/trust': typeof AdminHomepageTrustRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/submissions': typeof ApiPublicSubmissionsRoute
   '/newsletter/confirm/$token': typeof NewsletterConfirmTokenRoute
@@ -478,10 +527,12 @@ export interface FileRoutesById {
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/hero': typeof AdminHeroRoute
+  '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
+  '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
@@ -499,6 +550,10 @@ export interface FileRoutesById {
   '/product/$slug': typeof ProductSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/collections/': typeof CollectionsIndexRoute
+  '/admin/homepage_/announcements': typeof AdminHomepageAnnouncementsRoute
+  '/admin/homepage_/categories': typeof AdminHomepageCategoriesRoute
+  '/admin/homepage_/products': typeof AdminHomepageProductsRoute
+  '/admin/homepage_/trust': typeof AdminHomepageTrustRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/submissions': typeof ApiPublicSubmissionsRoute
   '/newsletter/confirm/$token': typeof NewsletterConfirmTokenRoute
@@ -536,10 +591,12 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/hero'
+    | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/loyalty'
     | '/admin/marketing'
     | '/admin/media'
+    | '/admin/migrate-catalog'
     | '/admin/newsletter'
     | '/admin/orders'
     | '/admin/products'
@@ -557,6 +614,10 @@ export interface FileRouteTypes {
     | '/product/$slug'
     | '/admin/'
     | '/collections/'
+    | '/admin/homepage/announcements'
+    | '/admin/homepage/categories'
+    | '/admin/homepage/products'
+    | '/admin/homepage/trust'
     | '/api/public/health'
     | '/api/public/submissions'
     | '/newsletter/confirm/$token'
@@ -591,10 +652,12 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/hero'
+    | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/loyalty'
     | '/admin/marketing'
     | '/admin/media'
+    | '/admin/migrate-catalog'
     | '/admin/newsletter'
     | '/admin/orders'
     | '/admin/products'
@@ -612,6 +675,10 @@ export interface FileRouteTypes {
     | '/product/$slug'
     | '/admin'
     | '/collections'
+    | '/admin/homepage/announcements'
+    | '/admin/homepage/categories'
+    | '/admin/homepage/products'
+    | '/admin/homepage/trust'
     | '/api/public/health'
     | '/api/public/submissions'
     | '/newsletter/confirm/$token'
@@ -647,10 +714,12 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/hero'
+    | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/loyalty'
     | '/admin/marketing'
     | '/admin/media'
+    | '/admin/migrate-catalog'
     | '/admin/newsletter'
     | '/admin/orders'
     | '/admin/products'
@@ -668,6 +737,10 @@ export interface FileRouteTypes {
     | '/product/$slug'
     | '/admin/'
     | '/collections/'
+    | '/admin/homepage_/announcements'
+    | '/admin/homepage_/categories'
+    | '/admin/homepage_/products'
+    | '/admin/homepage_/trust'
     | '/api/public/health'
     | '/api/public/submissions'
     | '/newsletter/confirm/$token'
@@ -921,6 +994,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminHeroRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/homepage': {
+      id: '/admin/homepage'
+      path: '/homepage'
+      fullPath: '/admin/homepage'
+      preLoaderRoute: typeof AdminHomepageRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/inventory': {
       id: '/admin/inventory'
       path: '/inventory'
@@ -947,6 +1027,13 @@ declare module '@tanstack/react-router' {
       path: '/media'
       fullPath: '/admin/media'
       preLoaderRoute: typeof AdminMediaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/migrate-catalog': {
+      id: '/admin/migrate-catalog'
+      path: '/migrate-catalog'
+      fullPath: '/admin/migrate-catalog'
+      preLoaderRoute: typeof AdminMigrateCatalogRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/newsletter': {
@@ -1061,6 +1148,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/homepage_/announcements': {
+      id: '/admin/homepage_/announcements'
+      path: '/homepage/announcements'
+      fullPath: '/admin/homepage/announcements'
+      preLoaderRoute: typeof AdminHomepageAnnouncementsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/homepage_/categories': {
+      id: '/admin/homepage_/categories'
+      path: '/homepage/categories'
+      fullPath: '/admin/homepage/categories'
+      preLoaderRoute: typeof AdminHomepageCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/homepage_/products': {
+      id: '/admin/homepage_/products'
+      path: '/homepage/products'
+      fullPath: '/admin/homepage/products'
+      preLoaderRoute: typeof AdminHomepageProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/homepage_/trust': {
+      id: '/admin/homepage_/trust'
+      path: '/homepage/trust'
+      fullPath: '/admin/homepage/trust'
+      preLoaderRoute: typeof AdminHomepageTrustRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/api/public/health': {
       id: '/api/public/health'
       path: '/api/public/health'
@@ -1099,10 +1214,12 @@ interface AdminRouteChildren {
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminHeroRoute: typeof AdminHeroRoute
+  AdminHomepageRoute: typeof AdminHomepageRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminLoyaltyRoute: typeof AdminLoyaltyRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminMediaRoute: typeof AdminMediaRoute
+  AdminMigrateCatalogRoute: typeof AdminMigrateCatalogRoute
   AdminNewsletterRoute: typeof AdminNewsletterRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminProductsRoute: typeof AdminProductsRoute
@@ -1114,6 +1231,10 @@ interface AdminRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   AdminWhoWeSupplyRoute: typeof AdminWhoWeSupplyRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminHomepageAnnouncementsRoute: typeof AdminHomepageAnnouncementsRoute
+  AdminHomepageCategoriesRoute: typeof AdminHomepageCategoriesRoute
+  AdminHomepageProductsRoute: typeof AdminHomepageProductsRoute
+  AdminHomepageTrustRoute: typeof AdminHomepageTrustRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -1123,10 +1244,12 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCouponsRoute: AdminCouponsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminHeroRoute: AdminHeroRoute,
+  AdminHomepageRoute: AdminHomepageRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminLoyaltyRoute: AdminLoyaltyRoute,
   AdminMarketingRoute: AdminMarketingRoute,
   AdminMediaRoute: AdminMediaRoute,
+  AdminMigrateCatalogRoute: AdminMigrateCatalogRoute,
   AdminNewsletterRoute: AdminNewsletterRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminProductsRoute: AdminProductsRoute,
@@ -1138,6 +1261,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   AdminWhoWeSupplyRoute: AdminWhoWeSupplyRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminHomepageAnnouncementsRoute: AdminHomepageAnnouncementsRoute,
+  AdminHomepageCategoriesRoute: AdminHomepageCategoriesRoute,
+  AdminHomepageProductsRoute: AdminHomepageProductsRoute,
+  AdminHomepageTrustRoute: AdminHomepageTrustRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

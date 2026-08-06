@@ -169,6 +169,7 @@ function ProductsPage() {
         image_key: p.image_key || null,
         image_url: p.image_url || null,
         images: p.images ?? [],
+        additional_images: p.additional_images ?? [],
         stock_quantity: Number(p.stock_quantity ?? 100),
         in_stock: !!p.in_stock,
         published: !!p.published,
@@ -466,7 +467,7 @@ function ProductForm({
   const addRef1 = useRef<HTMLInputElement>(null);
   const addRef2 = useRef<HTMLInputElement>(null);
 
-  async function handleMediaUpload(file: File, mode: "gallery" | 0 | 1 | 2, replaceIdx?: number) {
+  async function handleMediaUpload(file: File, mode: "gallery" | number, replaceIdx?: number) {
     setUploadingMedia(true);
     try {
       const b64 = await new Promise<string>((resolve, reject) => {
@@ -491,7 +492,7 @@ function ProductForm({
           }));
         } else {
           const cur = [...(f.additional_images ?? [])];
-          cur[mode] = res.url;
+          cur[mode as number] = res.url;
           setF((prev) => ({ ...prev, additional_images: cur }));
         }
         toast.success("Image uploaded");
@@ -974,14 +975,13 @@ function ProductForm({
               <div>
                 <h3 className="font-serif text-lg font-bold text-espresso">Additional Product Images</h3>
                 <p className="text-xs text-muted-foreground">
-                  Upload 3 images. Recommended size: 1080 × 1080 px.
+                  Upload up to 8 images. Recommended size: 1080 × 1080 px.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[0, 1, 2].map((idx) => {
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                {[0, 1, 2, 3, 4, 5, 6, 7].map((idx) => {
                   const url = (f.additional_images ?? [])[idx];
-                  const ref = idx === 0 ? addRef0 : idx === 1 ? addRef1 : addRef2;
                   return (
                     <div
                       key={idx}
@@ -1019,13 +1019,12 @@ function ProductForm({
 
                       <div>
                         <input
-                          ref={ref}
                           type="file"
                           accept="image/*"
                           className="hidden"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
-                            if (file) void handleMediaUpload(file, idx as 0 | 1 | 2);
+                            if (file) void handleMediaUpload(file, idx);
                             e.target.value = "";
                           }}
                         />
@@ -1033,11 +1032,14 @@ function ProductForm({
                           <BtnGhost
                             type="button"
                             disabled={uploadingMedia}
-                            onClick={() => ref.current?.click()}
-                            className="flex-1 border-border text-espresso font-semibold text-xs py-2"
+                            onClick={(e) => {
+                              const input = e.currentTarget.parentElement?.parentElement?.querySelector("input[type='file']") as HTMLInputElement;
+                              if (input) input.click();
+                            }}
+                            className="flex-1 border-border text-espresso font-semibold text-xs py-2 px-1"
                           >
                             <Upload className="size-3.5" />
-                            {url ? "REPLACE IMAGE" : "UPLOAD IMAGE"}
+                            {url ? "REPLACE" : "UPLOAD"}
                           </BtnGhost>
                         </div>
                         <input
@@ -1047,8 +1049,8 @@ function ProductForm({
                             cur[idx] = e.target.value;
                             setF({ ...f, additional_images: cur });
                           }}
-                          className={`${inp} mt-2 text-xs font-mono`}
-                          placeholder="Or paste image URL…"
+                          className={`${inp} mt-2 text-[10px] font-mono`}
+                          placeholder="Or paste URL…"
                         />
                       </div>
                     </div>

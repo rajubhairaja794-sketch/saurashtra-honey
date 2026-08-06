@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ArrowRight, Star } from "lucide-react";
-import { products as staticProducts, type Product } from "@/lib/products";
+import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import { fetchHomepageVideos, type HomepageVideoItem } from "@/lib/homepage-videos";
 import { SectionEyebrow } from "@/components/site/Layout";
@@ -100,8 +100,8 @@ function ShoppableVideoCard({
   return (
     <div
       ref={cardRef}
-      className={`group relative shrink-0 flex flex-col snap-start
-        w-[85vw] sm:w-[calc(50vw-24px)] md:w-[calc(33.33vw-24px)] lg:w-[calc(20vw-24px)] xl:w-[280px]
+      className={`group relative shrink-0 flex flex-col snap-center sm:snap-start
+        w-[70vw] sm:w-[calc(50vw-24px)] md:w-[calc(33.33vw-24px)] lg:w-[calc(20vw-24px)] xl:w-[280px]
         aspect-[9/16]
         rounded-[24px] overflow-hidden cursor-pointer
         shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.15)]
@@ -148,10 +148,10 @@ function ShoppableVideoCard({
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none z-10" />
 
       {/* BOTTOM OVERLAY INFO */}
-      <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 z-20 flex items-center gap-3">
+      <div className="absolute bottom-0 inset-x-0 p-3 sm:p-5 z-20 flex items-center gap-2 sm:gap-3">
         {/* Left: Product Thumbnail */}
         {product && (
-          <div className="shrink-0 size-12 sm:size-14 rounded-xl border border-white/20 bg-cream/10 backdrop-blur-md overflow-hidden shadow-sm">
+          <div className="shrink-0 size-10 sm:size-14 rounded-xl border border-white/20 bg-cream/10 backdrop-blur-md overflow-hidden shadow-sm">
             <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
           </div>
         )}
@@ -198,7 +198,7 @@ export function ShoppableVideoCarousel({
   className,
 }: ShoppableVideoCarouselProps) {
   const [videos, setVideos] = useState<HomepageVideoItem[]>([]);
-  const [allProducts, setAllProducts] = useState<Product[]>(staticProducts);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isSectionVisible, setIsSectionVisible] = useState(false);
 
   const sectionRef = useRef<HTMLElement>(null);
@@ -379,7 +379,7 @@ export function ShoppableVideoCarousel({
           onMouseLeave={onMouseLeave}
           onMouseUp={onMouseUp}
           onMouseMove={onMouseMove}
-          className="flex gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-10 pt-4 px-4 -mx-4 sm:mx-0 sm:px-0 cursor-grab active:cursor-grabbing"
+          className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-10 pt-4 px-[15vw] sm:px-0 -mx-4 sm:mx-0 cursor-grab active:cursor-grabbing"
           style={{ scrollBehavior: 'smooth' }}
         >
           {sortedVideos.map((item, idx) => (

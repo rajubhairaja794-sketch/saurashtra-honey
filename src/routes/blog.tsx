@@ -24,7 +24,6 @@ import {
 } from "@/lib/blog-client-helpers";
 import { subscribeNewsletter } from "@/lib/newsletter.functions";
 import { useServerFn } from "@tanstack/react-start";
-import { blogPosts, type BlogPost } from "@/lib/blog";
 
 // Custom hook for native drag-to-scroll
 function useDragScroll() {
@@ -222,8 +221,6 @@ function BlogPage() {
     }
   }
 
-  // Ensure we always have real editorial articles to display:
-  // If Supabase returns posts, use them; otherwise seamlessly fall back to our real local editorial blogPosts.
   const displayedPosts = useMemo(() => {
     if (posts.rows && posts.rows.length > 0) {
       return posts.rows.map((p) => ({
@@ -237,25 +234,7 @@ function BlogPage() {
       }));
     }
 
-    // Fallback to static editorial posts filtered by category if selected
-    let filtered = blogPosts;
-    if (activeCategory && activeCategory !== "All Posts") {
-      filtered = blogPosts.filter(
-        (p) => p.category.toLowerCase() === activeCategory.toLowerCase()
-      );
-      if (filtered.length === 0) {
-        filtered = blogPosts;
-      }
-    }
-    return filtered.map((p) => ({
-      slug: p.slug,
-      title: p.title,
-      excerpt: p.excerpt,
-      category: p.category,
-      date: p.displayDate || formatPostDate(p.date),
-      readTime: p.readTime || "5 min read",
-      image: p.image || resolvePostImage(undefined, p.category),
-    }));
+    return [];
   }, [posts.rows, activeCategory]);
 
   return (

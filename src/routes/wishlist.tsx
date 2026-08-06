@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useWishlist } from "@/lib/wishlist";
 import { SiteLayout, SectionEyebrow } from "@/components/site/Layout";
-import { products as staticProducts, type Product } from "@/lib/products";
+import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import { useCart } from "@/lib/cart";
 import { useEffect, useMemo, useState } from "react";
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/wishlist")({
 function WishlistPage() {
   const wl = useWishlist();
   const { add } = useCart();
-  const [all, setAll] = useState<Product[]>(staticProducts);
+  const [all, setAll] = useState<Product[]>([]);
 
   useEffect(() => {
     void fetchProducts().then((r) => {
@@ -35,10 +35,7 @@ function WishlistPage() {
   }, []);
 
   const items = useMemo(() => {
-    const fromAll = all.filter((p) => wl.has(p.slug));
-    const seen = new Set(fromAll.map((p) => p.slug));
-    const fromStatic = staticProducts.filter((p) => wl.has(p.slug) && !seen.has(p.slug));
-    return [...fromAll, ...fromStatic];
+    return all.filter((p) => wl.has(p.slug));
   }, [all, wl.slugs, wl]);
 
   const handleAddToCart = (p: Product) => {

@@ -16,7 +16,7 @@ import { SiteLayout } from "@/components/site/Layout";
 import { ProductCard } from "@/components/site/ProductCard";
 import { QuickView } from "@/components/site/QuickView";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
-import { products as staticProducts, type Product } from "@/lib/products";
+import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import {
   fetchShopCategories,
@@ -80,7 +80,7 @@ function Shop() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
-  const [products, setProducts] = useState<Product[]>(staticProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ShopCategory[]>(DEFAULT_SHOP_CATEGORIES);
   const [quick, setQuick] = useState<Product | null>(null);
 
@@ -103,18 +103,10 @@ function Shop() {
   useEffect(() => {
     void fetchProducts().then((r) => {
       const mergedMap = new Map<string, Product>();
-      // 1. Add static products first
-      staticProducts.forEach((p) => mergedMap.set(p.slug, p));
       
-      // 2. Add database products (overwrites static if same slug)
+      // Add database products
       if (r && r.length > 0) {
-        // If DB products are exactly the static ones, this just overwrites.
         r.forEach((p) => {
-          // Keep static fallback image if db image is missing
-          if (!p.image || p.image === "") {
-             const stat = staticProducts.find(sp => sp.slug === p.slug);
-             if (stat) p.image = stat.image;
-          }
           mergedMap.set(p.slug, p);
         });
       }
