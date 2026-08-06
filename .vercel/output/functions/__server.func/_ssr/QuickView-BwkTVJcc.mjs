@@ -1,12 +1,12 @@
 import { i as __toESM } from "../_runtime.mjs";
 import { i as getVariantByLabel } from "./products-BzIDWMnY.mjs";
+import { a as DialogOverlay$1, i as DialogDescription$1, n as DialogClose, o as DialogPortal$1, r as DialogContent$1, s as DialogTitle$1, t as Dialog$1 } from "../_libs/@radix-ui/react-dialog+[...].mjs";
 import { f as require_jsx_runtime, p as require_react } from "../_libs/@radix-ui/react-checkbox+[...].mjs";
 import { s as useCart } from "./collection-helpers-BfZPBpPQ.mjs";
 import { g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { n as toast } from "../_libs/sonner.mjs";
 import { S as ShoppingCart, i as X, it as Leaf, v as Star } from "../_libs/lucide-react.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
-import { a as DialogOverlay$1, i as DialogDescription$1, n as DialogClose, o as DialogPortal$1, r as DialogContent$1, s as DialogTitle$1, t as Dialog$1 } from "../_libs/@radix-ui/react-dialog+[...].mjs";
 //#region node_modules/.nitro/vite/services/ssr/assets/QuickView-BwkTVJcc.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
