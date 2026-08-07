@@ -88,6 +88,7 @@ type P = {
   meta_keywords: string | null;
   canonical_url: string | null;
   attributes?: Record<string, string | string[]>;
+  show_on_homepage: boolean;
 };
 
 const EMPTY: Partial<P> = {
@@ -189,6 +190,7 @@ function ProductsPage() {
         is_featured: !!p.is_featured,
         is_bestseller: !!p.is_bestseller,
         is_new_arrival: !!p.is_new_arrival,
+        show_on_homepage: !!p.show_on_homepage,
         video_url: p.video_url || null,
         meta_title: p.meta_title || null,
         meta_description: p.meta_description || null,
@@ -753,6 +755,14 @@ function ProductForm({
                 onChange={(e) => setF({ ...f, is_new_arrival: e.target.checked })}
               />{" "}
               New arrival
+            </label>
+            <label className="flex items-center gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={!!f.show_on_homepage}
+                onChange={(e) => setF({ ...f, show_on_homepage: e.target.checked })}
+              />{" "}
+              Show on Homepage (Our Finest Picks)
             </label>
           </div>
         )}

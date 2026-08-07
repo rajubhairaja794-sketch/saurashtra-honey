@@ -1099,6 +1099,7 @@ export type Database = {
           sku: string | null
           slug: string
           sort_order: number
+          show_on_homepage: boolean | null
           status: string
           stock_quantity: number
           tagline: string | null
@@ -1148,6 +1149,7 @@ export type Database = {
           sku?: string | null
           slug: string
           sort_order?: number
+          show_on_homepage?: boolean | null
           status?: string
           stock_quantity?: number
           tagline?: string | null
@@ -1197,6 +1199,7 @@ export type Database = {
           sku?: string | null
           slug?: string
           sort_order?: number
+          show_on_homepage?: boolean | null
           status?: string
           stock_quantity?: number
           tagline?: string | null

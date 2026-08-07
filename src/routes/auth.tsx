@@ -122,10 +122,15 @@ function AuthPage() {
   setBusy(true);
 
   try {
+    const searchParams = new URLSearchParams(window.location.search);
+    const intended = searchParams.get("redirect") || "/";
+    const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
+    callbackUrl.searchParams.set("redirect", intended);
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth`,
+        redirectTo: callbackUrl.toString(),
       },
     });
 

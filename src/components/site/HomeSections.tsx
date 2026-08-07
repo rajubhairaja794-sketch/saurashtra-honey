@@ -285,35 +285,10 @@ export function HomeBestSellers({
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const applyFallback = () => {
-      const bestSellers = products
-        .filter((p) => p.badge === "BESTSELLER" || (p.reviews || 0) > 200)
-        .slice(0, 4);
-      setDisplayList(bestSellers.length >= 4 ? bestSellers : products.slice(0, 4));
-    };
-
-    fetchAllHomepageFeaturedProducts()
-      .then(selections => {
-        if (selections.length > 0) {
-          const mappedProducts = selections
-            .map(sel => products.find(p => p.slug === sel.product_slug))
-            .filter((p): p is Product => p !== undefined);
-          if (mappedProducts.length > 0) {
-            setDisplayList(mappedProducts);
-          } else {
-            applyFallback();
-          }
-        } else {
-          applyFallback();
-        }
-      })
-      .catch(err => {
-        console.warn("Failed to fetch featured products, using fallback", err);
-        applyFallback();
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    // ONLY display products where show_on_homepage = true
+    const homepageProducts = products.filter(p => p.showOnHomepage === true);
+    setDisplayList(homepageProducts);
+    setLoading(false);
   }, [products]);
 
   if (loading) return null;

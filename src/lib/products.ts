@@ -57,6 +57,7 @@ export type Product = {
   description: string;
   flora?: string;
   attributes?: Record<string, string | string[]>;
+  showOnHomepage?: boolean;
 };
 
 export function getProductGallery(product: Product): string[] {

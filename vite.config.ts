@@ -6,7 +6,7 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-export default defineConfig({
+/*export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
@@ -17,4 +17,25 @@ export default defineConfig({
   preset: "vercel",
   noExternals: ["tslib"],
 },
+vite: {
+    server: {
+      allowedHosts: ["stale-worlds-cough.loca.lt"],
+    },
+  },*/
+  export default defineConfig({
+  vite: {
+    server: {
+      allowedHosts: true,
+    },
+  },
+
+  tanstackStart: {
+    server: { entry: "server" },
+  },
+
+  nitro: {
+    preset: "netlify",
+  },
+
+
 });
