@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { ShopCategorySection } from "@/components/shop/ShopCategorySection";
+import { CategoryThumbnailNav } from "@/components/shop/CategoryThumbnailNav";
 import { PremiumMobileCarousel } from "@/components/site/PremiumMobileCarousel";
 import { DesktopFilterSheet, MobileFilterDrawer, defaultFilters, type FilterState } from "@/components/shop/ShopFilters";
 import {
@@ -287,10 +287,7 @@ function Shop() {
          ========================================================================= */}
       <PageHeroSlider page="shop" />
 
-      {/* =========================================================================
-          2B. SHOP BY CATEGORY (Premium Horizontal Carousel)
-         ========================================================================= */}
-      <ShopCategorySection activeCategory={cat} />
+      {/* (Old ShopCategorySection removed in favor of the Premium Nav below) */}
 
       {/* =========================================================================
           3. SEARCH BAR
@@ -314,30 +311,13 @@ function Shop() {
       </section>
 
       {/* =========================================================================
-          4. CATEGORY FILTER CHIPS (Scrollable)
+          4. CATEGORY FILTER THUMBNAILS (Premium Horizontal Carousel)
          ========================================================================= */}
-      <section className="bg-cream border-b border-border/80 pt-2 pb-5 overflow-hidden">
-        <div className="container-page">
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar scroll-smooth snap-x pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            {["All Products", "Honey", "Beeswax", "Bee Pollen", "Beeswax Candles", "Beauty Products", "Gift Hampers"].map((chip) => {
-              const isSelected = cat === chip || (chip === "All Products" && (cat === "All" || cat === "all"));
-              return (
-                <button
-                  key={chip}
-                  onClick={() => handleSelectCategory(chip)}
-                  className={`shrink-0 snap-start px-6 py-3 rounded-full text-[13px] font-bold tracking-wide transition-all duration-[250ms] min-h-[48px] ${
-                    isSelected
-                      ? "bg-brand-orange text-white shadow-[0_4px_14px_rgba(217,119,6,0.2)]"
-                      : "bg-[#FDFBF7] text-espresso border border-border/80 hover:border-brand-orange/50 hover:bg-[#F8F5EF]"
-                  }`}
-                >
-                  {chip}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      <CategoryThumbnailNav
+        categories={categories}
+        activeCategory={cat}
+        onSelectCategory={handleSelectCategory}
+      />
 
       {/* =========================================================================
           5. FILTER + SORT TOOLBAR & PRODUCT GRID (#products-grid)

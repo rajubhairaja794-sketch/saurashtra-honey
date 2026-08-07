@@ -208,6 +208,28 @@
 }
 
 /* Saurashtra Honey Standard D2C Button System (Section 38) */
+@keyframes float-vintage-1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-10px, -15px); }
+}
+@keyframes float-vintage-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(12px, -8px) scale(1.02); }
+}
+@keyframes float-vintage-3 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-8px, 12px) rotate(2deg); }
+}
+@keyframes float-vintage-4 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(15px, 15px); }
+}
+
+.animate-float-1 { animation: float-vintage-1 14s ease-in-out infinite; }
+.animate-float-2 { animation: float-vintage-2 18s ease-in-out infinite; }
+.animate-float-3 { animation: float-vintage-3 20s ease-in-out infinite; }
+.animate-float-4 { animation: float-vintage-4 16s ease-in-out infinite; }
+
 @utility btn-primary {
   background-color: var(--color-botanical);
   color: var(--color-ivory);

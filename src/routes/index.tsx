@@ -21,6 +21,7 @@ import {
   HomeStatsStrip,
   HomeTestimonials,
   HomeJournalPreview,
+  HomeMarqueeStrip,
 } from "@/components/site/HomeSections";
 
 export const Route = createFileRoute("/")({
@@ -187,7 +188,12 @@ function Home() {
           />
         );
       case "shoppable_videos":
-        return <ShoppableVideoCarousel key="shoppable_videos" placementContext="homepage" />;
+        return (
+          <Fragment key="shoppable_videos_wrapper">
+            <HomeMarqueeStrip />
+            <ShoppableVideoCarousel placementContext="homepage" />
+          </Fragment>
+        );
       case "why_choose":
         return <HomeWhyChoose key="why_choose" settings={settings} />;
       case "farm_banner":

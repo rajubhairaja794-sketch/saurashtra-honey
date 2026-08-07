@@ -21,7 +21,6 @@ const primaryLinks: readonly PrimaryLink[] = [
   { to: "/", label: "Home" },
   { to: "/shop", label: "Shop" },
   { to: "/our-story", label: "Our Story" },
-  { to: "/bee-farming", label: "Bee Farming" },
   { to: "/blog", label: "Journal" },
   { to: "/bulk-gifting", label: "Bulk & Gifting" },
   { to: "/contact", label: "Contact" },
@@ -49,6 +48,7 @@ function pushHistory(q: string) {
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileShopExpanded, setMobileShopExpanded] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [q, setQ] = useState("");
   const [shopOpen, setShopOpen] = useState(false);
@@ -182,8 +182,8 @@ export function Navbar() {
       <div className="bg-cream/95 backdrop-blur-xl border-b border-border/80 shadow-soft transition-all">
         <div className="container-page">
         {/* Mobile row: MENU + LOGO | SEARCH + CART */}
-        <div className="flex items-center justify-between h-[60px] px-2 lg:hidden w-full">
-          {/* Left group: Hamburger + Logo */}
+        <div className="flex items-center justify-between h-[80px] px-2 lg:hidden w-full relative">
+          {/* Left group: Hamburger */}
           <div className="flex items-center gap-1.5 min-w-0">
             <button
               type="button"
@@ -193,14 +193,11 @@ export function Navbar() {
             >
               <Menu className="size-[26px] stroke-[1.5]" />
             </button>
-            <Link to="/" aria-label="Saurashtra Honey home" className="flex items-center gap-2.5 min-w-0 shrink-0 pr-2">
-              <BeeLogo className="h-[38px] w-auto object-contain shrink-0" />
-              <div className="min-w-0 flex flex-col justify-center pt-0.5">
-                <span className="font-serif text-[18px] font-medium leading-[1.1] text-[#2B2118] tracking-tight truncate">Saurashtra</span>
-                <span className="text-[9px] tracking-[0.2em] uppercase text-[#D97706] font-bold leading-none mt-[3px] truncate">Honey</span>
-              </div>
-            </Link>
           </div>
+
+          <Link to="/" aria-label="Saurashtra Honey home" className="absolute left-1/2 -translate-x-1/2 flex items-center min-w-0 shrink-0 top-1/2 -translate-y-1/2">
+            <BrandMark />
+          </Link>
 
           {/* Right group: Search + Cart */}
           <div className="flex items-center gap-1 shrink-0 text-[#2B2118]">
@@ -229,12 +226,8 @@ export function Navbar() {
         </div>
 
         {/* Desktop row */}
-        <div className="hidden lg:grid grid-cols-[auto_1fr_auto] items-center h-20 gap-8">
-          <Link to="/" aria-label="Saurashtra Honey home" className="shrink-0">
-            <BrandMark />
-          </Link>
-
-          <nav className="flex items-center justify-center gap-7 text-[13.5px]">
+        <div className="hidden lg:flex items-center justify-between h-[100px] relative">
+          <nav className="flex items-center gap-7 text-[13.5px]">
             {primaryLinks.map((l, idx) => {
               const isShop = l.to === "/shop";
               const isHome = l.label === "Home";
@@ -274,7 +267,11 @@ export function Navbar() {
             })}
           </nav>
 
-          <div className="flex items-center gap-4 text-foreground/80 justify-self-end">
+          <Link to="/" aria-label="Saurashtra Honey home" className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 shrink-0">
+            <BrandMark />
+          </Link>
+
+          <div className="flex items-center gap-4 text-foreground/80 justify-self-end shrink-0">
             <button aria-label="Search" className="hover:text-burnt-orange transition-colors" onClick={() => setSearchOpen((s) => !s)}>
               <Search className="size-5" />
             </button>
@@ -303,63 +300,30 @@ export function Navbar() {
       </div>
 
       {/* Mega Menu — Shop (desktop) */}
-      <div className={`hidden lg:block absolute left-0 right-0 top-full border-t border-border bg-cream shadow-lift origin-top transition-all duration-[220ms] ease-out ${shopOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}
+      <div className={`hidden lg:block absolute left-0 right-0 top-full border-t border-border/60 bg-[#FDFBF7] shadow-xl origin-top transition-all duration-[350ms] ease-out ${shopOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}
         onMouseEnter={handleMouseEnterShop} onMouseLeave={handleMouseLeaveShop}>
-        <div className="container-page grid grid-cols-12 gap-10 py-10">
-          <div className="col-span-3">
-            <p className="text-[11px] tracking-[0.28em] uppercase text-gold-deep font-bold mb-4">Shop by Category</p>
-            <ul className="space-y-3">
-              {navCategories.map((cat) => {
-                const Icon = categoryIcons[cat] ?? Leaf;
-                return (
-                  <li key={cat}>
-                    <Link to="/collections/$slug" params={{ slug: getCategorySlug(cat) }} className="group flex items-center gap-3 text-sm text-foreground/85 hover:text-gold-deep" onClick={() => setShopOpen(false)}>
-                      <span className="size-8 rounded-full bg-cream-deep group-hover:bg-gold/30 grid place-items-center transition-colors">
-                        <Icon className="size-4 text-forest-dark group-hover:text-gold-deep" />
-                      </span>
-                      {cat}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-          <div className="col-span-3">
-            <p className="text-[11px] tracking-[0.28em] uppercase text-gold-deep font-bold mb-4">Best Sellers</p>
-            <ul className="space-y-3">
-              {bestSellers.map((p) => (
-                <li key={p.slug}>
-                  <Link to="/product/$slug" params={{ slug: p.slug }} className="flex items-center gap-3 group" onClick={() => setShopOpen(false)}>
-                    <img src={p.image} alt="" className="size-12 rounded-md object-cover bg-cream-deep" loading="lazy" />
-                    <span className="text-sm text-foreground/85 group-hover:text-gold-deep">{p.name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="col-span-3">
-            <p className="text-[11px] tracking-[0.28em] uppercase text-gold-deep font-bold mb-4">Explore</p>
-            <ul className="space-y-3 text-sm">
-              <li><Link to="/shop" className="hover:text-gold-deep" onClick={() => setShopOpen(false)}>All products</Link></li>
-              <li><Link to="/compare" className="hover:text-gold-deep" onClick={() => setShopOpen(false)}>Compare products</Link></li>
-              <li><Link to="/track-order" className="hover:text-gold-deep" onClick={() => setShopOpen(false)}>Track an order</Link></li>
-              <li><Link to="/collections/$slug" params={{ slug: "gift-hampers" }} className="hover:text-gold-deep" onClick={() => setShopOpen(false)}>Gift packs & combos</Link></li>
-              <li><Link to="/bulk-orders" className="hover:text-gold-deep" onClick={() => setShopOpen(false)}>Bulk & corporate gifting</Link></li>
-              <li><Link to="/bee-farming" className="hover:text-gold-deep" onClick={() => setShopOpen(false)}>Trace your honey</Link></li>
-            </ul>
-          </div>
-          <div className="col-span-3">
-            {featuredForMenu[0] && (
-              <Link to="/product/$slug" params={{ slug: featuredForMenu[0].slug }} className="block group rounded-xl overflow-hidden bg-cream-deep relative" onClick={() => setShopOpen(false)}>
-                <img src={featuredForMenu[0].image} alt={featuredForMenu[0].name} className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                <div className="absolute inset-0 bg-linear-to-t from-forest-dark/80 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 text-cream">
-                  <p className="text-[10px] tracking-[0.28em] uppercase text-gold">Featured</p>
-                  <p className="font-serif text-lg leading-tight mt-1">{featuredForMenu[0].name}</p>
-                  <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-gold">Shop now <ChevronRight className="size-3.5" /></span>
-                </div>
-              </Link>
-            )}
+        <div className="w-full max-w-[1400px] mx-auto py-12 px-6 xl:px-12">
+          <div className="grid grid-cols-7 gap-4 xl:gap-8 w-full items-start">
+            {(() => {
+              // Reorder to match requested design if possible, fallback to DB order
+              const desiredOrder = ["Honey", "Beeswax", "Bee Pollen", "Beeswax Candle", "Beeswax Products", "Multiflora", "Beauty Products"];
+              let orderedCats = desiredOrder.map(name => dbCategories.find(c => c.name.toLowerCase() === name.toLowerCase() || c.name.toLowerCase() === name.toLowerCase() + "s")).filter(Boolean) as typeof dbCategories;
+              
+              // If we didn't find all requested categories, append the rest
+              const remaining = dbCategories.filter(c => !orderedCats.find(o => o.id === c.id));
+              const displayCats = [...orderedCats, ...remaining].slice(0, 7);
+
+              return displayCats.map((cat) => (
+                <Link key={cat.id} to="/shop" search={{ category: cat.name } as never} onClick={() => setShopOpen(false)} className="group flex flex-col items-center text-center gap-4 outline-none w-full">
+                  <div className="w-full max-w-[140px] aspect-square rounded-[20px] overflow-hidden bg-white shadow-sm border border-border/40 group-hover:shadow-md transition-all duration-300">
+                    <img src={cat.image} alt={cat.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                  </div>
+                  <span className="font-serif text-[14px] xl:text-[15px] text-espresso group-hover:text-brand-orange transition-colors leading-tight px-1">
+                    {cat.name}
+                  </span>
+                </Link>
+              ));
+            })()}
           </div>
         </div>
       </div>
@@ -454,9 +418,85 @@ export function Navbar() {
               {/* Drawer Navigation */}
               <nav className="flex-1 overflow-y-auto px-4 py-3">
                 <ul className="space-y-1">
-                  {primaryLinks.map((l, idx) => (
+                  {primaryLinks.map((l, idx) => {
+                    const isShop = l.to === "/shop";
+
+                    return (
                     <li key={idx}>
-                      {l.hash ? (
+                      {isShop ? (
+                        <div className="rounded-xl overflow-hidden mb-1">
+                          <button
+                            onClick={() => setMobileShopExpanded(!mobileShopExpanded)}
+                            className={`w-full flex items-center justify-between px-3 py-3 text-[15px] font-semibold text-espresso transition-colors ${mobileShopExpanded ? 'bg-[#F8F5EF] text-brand-orange' : 'hover:bg-[#F8F5EF]'}`}
+                          >
+                            {l.label}
+                            <ChevronRight className={`size-4 text-muted-foreground transition-transform duration-300 ${mobileShopExpanded ? 'rotate-90 text-brand-orange' : ''}`} />
+                          </button>
+                          
+                          {/* Shop Mobile Accordion Content */}
+                          <div className={`overflow-hidden transition-all duration-300 ${mobileShopExpanded ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                            <div className="px-3 pb-4 pt-1 bg-[#F8F5EF]/50 flex flex-col gap-6">
+                              
+                              {/* Categories */}
+                              <div>
+                                <p className="text-[10px] tracking-[0.25em] uppercase text-brand-orange font-bold mb-3">Shop by Category</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <Link to="/shop" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 p-2 rounded-lg bg-white border border-border/50 shadow-sm">
+                                    <span className="text-[13px] font-medium text-espresso">All Honey</span>
+                                  </Link>
+                                  {dbCategories.slice(0, 5).map((cat) => (
+                                    <Link key={cat.id} to="/shop" search={{ category: cat.name } as never} onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 p-2 rounded-lg bg-white border border-border/50 shadow-sm">
+                                      <img src={cat.image} alt="" className="size-7 rounded object-cover" />
+                                      <span className="text-[13px] font-medium text-espresso truncate">{cat.name}</span>
+                                    </Link>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Best Sellers */}
+                              <div>
+                                <p className="text-[10px] tracking-[0.25em] uppercase text-brand-orange font-bold mb-3">Best Sellers</p>
+                                <ul className="space-y-3">
+                                  {bestSellers.map(p => (
+                                    <li key={p.slug}>
+                                      <Link to="/product/$slug" params={{ slug: p.slug }} onClick={() => setMobileOpen(false)} className="flex items-center gap-3">
+                                        <img src={p.image} alt="" className="size-10 rounded-md object-cover border border-border/50" />
+                                        <div className="flex flex-col">
+                                          <span className="text-[13px] font-medium text-espresso truncate">{p.name}</span>
+                                          <span className="text-[11px] text-foreground/60 font-semibold">₹{p.price}</span>
+                                        </div>
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+
+                              {/* Explore */}
+                              <div>
+                                <p className="text-[10px] tracking-[0.25em] uppercase text-brand-orange font-bold mb-3">Explore</p>
+                                <ul className="space-y-2 text-[13px] font-medium text-espresso">
+                                  <li><Link to="/compare" onClick={() => setMobileOpen(false)}>Compare Products</Link></li>
+                                  <li><Link to="/track-order" onClick={() => setMobileOpen(false)}>Track an Order</Link></li>
+                                  <li><Link to="/bulk-gifting" onClick={() => setMobileOpen(false)}>Bulk & Corporate Gifting</Link></li>
+                                </ul>
+                              </div>
+
+                              {/* Featured */}
+                              {featuredForMenu[0] && (
+                                <Link to="/product/$slug" params={{ slug: featuredForMenu[0].slug }} onClick={() => setMobileOpen(false)} className="block relative rounded-xl overflow-hidden h-[120px] shadow-sm">
+                                  <img src={featuredForMenu[0].image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-[#1A120A]/90 to-transparent" />
+                                  <div className="absolute bottom-3 left-3 text-white">
+                                    <p className="text-[9px] tracking-[0.25em] text-brand-orange font-bold uppercase mb-0.5">Featured</p>
+                                    <p className="font-serif text-[15px]">{featuredForMenu[0].name}</p>
+                                  </div>
+                                </Link>
+                              )}
+
+                            </div>
+                          </div>
+                        </div>
+                      ) : l.hash ? (
                         <a
                           href={`/#${l.hash}`}
                           onClick={(e) => {
@@ -467,7 +507,7 @@ export function Navbar() {
                               el.scrollIntoView({ behavior: "smooth" });
                             }
                           }}
-                          className="flex items-center justify-between px-3 py-3 rounded-xl text-[15px] font-semibold text-espresso hover:bg-cream-deep transition-colors"
+                          className="flex items-center justify-between px-3 py-3 rounded-xl text-[15px] font-semibold text-espresso hover:bg-[#F8F5EF] transition-colors"
                         >
                           {l.label}
                           <ChevronRight className="size-4 text-muted-foreground" />
@@ -476,7 +516,7 @@ export function Navbar() {
                         <Link
                           to={l.to}
                           activeOptions={{ exact: l.label === "Home" }}
-                          className="flex items-center justify-between px-3 py-3 rounded-xl text-[15px] font-semibold text-espresso hover:bg-cream-deep [&.active]:text-brand-orange [&.active]:bg-cream-deep/60 transition-colors"
+                          className="flex items-center justify-between px-3 py-3 rounded-xl text-[15px] font-semibold text-espresso hover:bg-[#F8F5EF] [&.active]:text-brand-orange [&.active]:bg-[#F8F5EF]/60 transition-colors"
                           onClick={() => setMobileOpen(false)}
                         >
                           {l.label}
@@ -484,33 +524,8 @@ export function Navbar() {
                         </Link>
                       )}
                     </li>
-                  ))}
+                  )})}
                 </ul>
-
-                <div className="mt-5 pt-5 border-t border-border/80">
-                  <p className="text-[10px] tracking-[0.25em] uppercase text-gold-deep font-bold mb-2 px-3">
-                    Shop by Category
-                  </p>
-                  <ul className="space-y-1">
-                    {navCategories.map((cat) => {
-                      const Icon = categoryIcons[cat] ?? Leaf;
-                      return (
-                        <li key={cat}>
-                          <Link
-                            to="/shop"
-                            search={{ category: cat } as never}
-                            onClick={() => setMobileOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-foreground/85 hover:bg-cream-deep transition-colors"
-                          >
-                            <Icon className="size-4 text-gold-deep shrink-0" />
-                            <span className="truncate">{cat}</span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-
                 <div className="mt-5 pt-5 border-t border-border/80 pb-6">
                   <p className="text-[10px] tracking-[0.25em] uppercase text-gold-deep font-bold mb-2 px-3">
                     My Account

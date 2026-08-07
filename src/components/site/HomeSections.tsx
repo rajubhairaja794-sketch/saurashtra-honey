@@ -84,19 +84,22 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
   }, []);
 
   const fallbackItems = [
-    { label: "100% Pure No Additives", iconName: "ShieldCheck", Icon: ShieldCheck },
-    { label: "Raw & Unprocessed", iconName: "FlaskConical", Icon: FlaskConical },
-    { label: "Natural Floral Sources", iconName: "Leaf", Icon: Leaf },
-    { label: "Rich in Nutrients", iconName: "Sparkles", Icon: Sparkles },
-    { label: "Lab Tested", iconName: "Award", Icon: Award },
-    { label: "Ethical Beekeeping", iconName: "HeartHandshake", Icon: HeartHandshake },
+    { label: "100% Pure No Additives", img: "/images/trust/pure_no_additives.png" },
+    { label: "Raw & Unprocessed", img: "/images/trust/raw_unprocessed.png" },
+    { label: "Natural Floral Sources", img: "/images/trust/natural_floral.png" },
+    { label: "Rich in Nutrients", img: "/images/trust/rich_nutrients.png" },
+    { label: "Lab Tested", img: "/images/trust/lab_tested.png" },
+    { label: "Ethical Beekeeping", img: "/images/trust/ethical_beekeeping.png" },
   ];
 
   const items = dbItems.length > 0
-    ? dbItems.map(item => ({
-        label: item.title,
-        Icon: item.icon && (Icons as any)[item.icon] ? (Icons as any)[item.icon] : Icons.Check,
-      }))
+    ? dbItems.map(item => {
+        const matched = fallbackItems.find(f => f.label.toLowerCase() === item.title.toLowerCase());
+        return {
+          label: item.title,
+          img: matched ? matched.img : "/images/trust/pure_no_additives.png" // fallback image
+        };
+      })
     : fallbackItems;
 
   if (loading) return null;
@@ -105,15 +108,15 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
     <section className="bg-cream-deep/40 border-y border-border/80 py-8 sm:py-10">
       <div className="container-page">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8">
-          {items.map(({ label, Icon }, idx) => (
+          {items.map(({ label, img }, idx) => (
             <div
               key={idx}
-              className="flex flex-col items-center text-center p-3 rounded-2xl hover:bg-cream/60 transition-colors"
+              className="flex flex-col items-center text-center p-2 group"
             >
-              <div className="size-11 rounded-full bg-cream border border-border flex items-center justify-center text-brand-orange shadow-xs mb-3">
-                <Icon className="size-5" />
+              <div className="size-28 sm:size-36 lg:size-40 mb-5 flex items-center justify-center transition-transform duration-500 group-hover:scale-105 group-hover:-translate-y-1">
+                <img src={img} alt={label} className="w-full h-full object-contain" loading="lazy" />
               </div>
-              <span className="text-xs sm:text-[13px] font-bold text-espresso leading-snug">
+              <span className="text-xs sm:text-[13px] font-bold text-espresso leading-snug group-hover:text-brand-orange transition-colors">
                 {label}
               </span>
             </div>
@@ -121,6 +124,42 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
         </div>
       </div>
     </section>
+  );
+}
+
+/* =========================================================================
+   2.5 INFINITE MARQUEE STRIP
+   ========================================================================= */
+export function HomeMarqueeStrip() {
+  const block = (
+    <div className="flex items-center space-x-8 sm:space-x-12 px-4 sm:px-6 text-[11px] sm:text-xs font-semibold tracking-[0.15em] text-white uppercase">
+      <span>FROM THE HIVE</span>
+      <span className="text-white text-[10px]">●</span>
+      <span>PURE BY NATURE</span>
+      <span className="text-white text-[10px]">●</span>
+      <span>RAW &amp; UNPROCESSED</span>
+      <span className="text-white text-[10px]">●</span>
+      <span>FARM TO JAR</span>
+      <span className="text-white text-[10px]">●</span>
+      <span>NATURAL FLORAL SOURCES</span>
+      <span className="text-white text-[10px]">●</span>
+      <span>ETHICAL BEEKEEPING</span>
+      <span className="text-white text-[10px]">●</span>
+    </div>
+  );
+
+  return (
+    <div className="w-full bg-[#B96F12] py-4 sm:py-5 overflow-hidden ticker-wrap">
+      <div className="flex w-max items-center animate-ticker">
+        {/* Render enough blocks to cover large ultra-wide screens */}
+        <div className="flex items-center">
+          {block}{block}{block}
+        </div>
+        <div className="flex items-center">
+          {block}{block}{block}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -189,8 +228,16 @@ export function HomeShopByCategory({ settings }: { settings?: Record<string, any
   const s_cta_url = settings?.cta_url ?? "/shop";
 
   return (
-    <section className="pt-24 pb-20 bg-[#F8F5EF] overflow-hidden">
-      <div className="container-page mb-14">
+    <section className="pt-24 pb-20 bg-[#F8F5EF] overflow-hidden relative">
+      {/* PREMIUM VINTAGE ANIMATED BACKGROUND LAYER */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.15] sm:opacity-[0.18] z-0">
+        <img src="/images/bg_illustrations/floral_alpha.png" alt="" className="absolute -top-[10%] -left-[10%] sm:-left-[5%] w-[400px] sm:w-[500px] max-w-[70vw] object-contain animate-float-1" />
+        <img src="/images/bg_illustrations/honeycomb_alpha.png" alt="" className="absolute top-[15%] -right-[15%] sm:right-[5%] w-[350px] sm:w-[400px] max-w-[60vw] object-contain animate-float-2" />
+        <img src="/images/bg_illustrations/bees_alpha.png" alt="" className="absolute bottom-[25%] left-[5%] sm:left-[15%] w-[200px] sm:w-[300px] max-w-[40vw] object-contain animate-float-3" />
+        <img src="/images/bg_illustrations/dipper_alpha.png" alt="" className="absolute -bottom-[5%] -right-[10%] sm:-right-[5%] w-[350px] sm:w-[450px] max-w-[60vw] object-contain animate-float-4" />
+      </div>
+
+      <div className="container-page mb-14 relative z-10">
         <div className="flex flex-col items-center text-center">
           <div className="text-[12px] uppercase tracking-[6px] text-[#D97706] font-[600] mb-2 sm:mb-4">
             {s_eyebrow}
@@ -503,41 +550,84 @@ export function HomeWhyChoose({ settings }: { settings?: Record<string, any> }) 
    7. FARM / BEEKEEPING BANNER (Wide dark-overlay banner)
    ========================================================================= */
 export function HomeFarmBanner({ settings }: { settings?: Record<string, any> }) {
-  const fb_eyebrow = settings?.eyebrow ?? "BEEKEEPING";
-  const fb_heading = settings?.heading ?? "The Art of Beekeeping";
-  const fb_desc = settings?.description ?? "A closer look at the people, passion, and practices that make our honey naturally exceptional.";
-  const fb_cta_text = settings?.cta_text ?? "LEARN ABOUT OUR FARMS";
+  const storyPoints = [
+    {
+      title: "From Hive to Home",
+      desc: "Carefully harvested honey, brought directly from nature to your home.",
+      img: "/images/heritage/illus_hive_to_home.svg"
+    },
+    {
+      title: "Wildflower Richness",
+      desc: "Naturally influenced by the diverse flowers surrounding our hives.",
+      img: "/images/heritage/illus_wildflower.svg"
+    },
+    {
+      title: "Pure by Nature",
+      desc: "No unnecessary additives — just naturally pure honey.",
+      img: "/images/heritage/illus_pure.svg"
+    },
+    {
+      title: "Responsible Beekeeping",
+      desc: "Thoughtful beekeeping practices that respect bees and their natural environment.",
+      img: "/images/heritage/illus_beekeeping.svg"
+    }
+  ];
+
+  const fb_cta_text = settings?.cta_text ?? "EXPLORE OUR HIVE";
   const fb_cta_url = settings?.cta_url ?? "/bee-farming";
 
   return (
-    <section className="relative overflow-hidden my-6 sm:my-10 bg-espresso text-white">
-      <div className="absolute inset-0 z-0">
-        <img
-          src={beeFarmImg}
-          alt="Saurashtra Beekeeping farm"
-          loading="lazy"
-          className="w-full h-full object-cover object-center opacity-40"
+    <section className="relative overflow-hidden bg-[#F8F5EF] py-20 sm:py-32">
+      {/* 3. Large Heritage Illustrations (Parallax Background) */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.15] sm:opacity-[0.20] z-0">
+        <img 
+          src="/images/bg_illustrations/floral_alpha.png" 
+          alt="" 
+          className="absolute top-[20%] -left-[10%] sm:-left-[5%] w-[450px] sm:w-[600px] max-w-[60vw] object-contain animate-float-1" 
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-espresso/95 via-espresso/80 to-espresso/60" />
+        <img 
+          src="/images/bg_illustrations/honeycomb_alpha.png" 
+          alt="" 
+          className="absolute top-[40%] -right-[15%] sm:-right-[5%] w-[400px] sm:w-[500px] max-w-[60vw] object-contain animate-float-2" 
+        />
       </div>
 
-      <div className="relative z-10 container-page py-16 sm:py-24">
-        <div className="flex flex-col items-center text-center max-w-none mb-[70px]">
-          <div className="text-[12px] uppercase tracking-[6px] text-[#D97706] font-[600] mb-2 sm:mb-4">
-            {fb_eyebrow}
+      <div className="container-page relative z-10">
+        {/* 1. Cinematic Visual */}
+        <div className="w-full max-w-5xl mx-auto mb-20 sm:mb-28 rounded-[20px] sm:rounded-[32px] overflow-hidden shadow-2xl shadow-espresso/5 bg-[#F8F5EF] p-2 sm:p-4 border border-border/40">
+          <div className="rounded-xl sm:rounded-[24px] overflow-hidden relative group">
+            <img 
+              src="/images/heritage/cinematic.png" 
+              alt="Authentic Indian Beekeeping"
+              className="w-full h-auto aspect-[4/3] sm:aspect-[21/9] object-cover transform transition-transform duration-[20s] ease-out group-hover:scale-105"
+              loading="lazy"
+            />
           </div>
-          <h2 className="font-serif text-[34px] md:text-[44px] lg:text-[56px] font-[500] text-[#FFF9ED] leading-tight mb-[20px]">
-            {fb_heading}
-          </h2>
-          <p className="text-[17px] md:text-[21px] text-[#FFF9ED]/80 max-w-[700px] leading-[1.7] mb-[36px]">
-            {fb_desc}
-          </p>
+        </div>
+
+        {/* 2. Four Heritage Story Points */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 sm:gap-8 max-w-7xl mx-auto mb-20 sm:mb-28">
+          {storyPoints.map((point, idx) => (
+            <div key={idx} className="flex flex-col items-center text-center">
+              <div className="w-44 h-44 sm:w-52 sm:h-52 mb-6 transition-transform duration-700 hover:-translate-y-2 flex items-center justify-center">
+                <img src={point.img} alt={point.title} className="w-full h-full object-contain" />
+              </div>
+              <h3 className="font-serif text-[20px] sm:text-[22px] text-espresso mb-3 font-[500]">{point.title}</h3>
+              <p className="text-[14px] sm:text-[15px] text-espresso/70 leading-relaxed max-w-[280px]">
+                {point.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* 4. Center CTA */}
+        <div className="flex justify-center">
           <Link
             to={fb_cta_url as any}
-            className="inline-flex items-center gap-2 text-[14px] font-bold tracking-wider text-[#D97706] hover:text-[#B46204] uppercase group"
+            className="inline-flex items-center gap-3 text-[13px] sm:text-[14px] font-bold tracking-[0.2em] text-[#D97706] hover:text-[#B46204] uppercase group transition-colors"
           >
             <span>{fb_cta_text}</span>
-            <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-[6px]" />
+            <ArrowRight className="size-4 sm:size-5 transition-transform duration-300 group-hover:translate-x-[6px]" />
           </Link>
         </div>
       </div>

@@ -43,24 +43,22 @@ export function BeeLogo({ className = "max-h-[52px] w-auto object-contain shrink
   );
 }
 
-export function BrandMark({ dark = false, alwaysShowText = false }: { dark?: boolean; alwaysShowText?: boolean }) {
+export function BrandMark({ dark = false }: { dark?: boolean }) {
   const dynamicLogoUrl = useCompanyLogoUrl();
   const primarySrc = dynamicLogoUrl || logoAsset.url;
   const [srcIndex, setSrcIndex] = useState(0);
 
   const sources = [primarySrc, "/favicon.ico"];
 
-  const textContainerClasses = alwaysShowText ? "block" : "hidden sm:block";
-
   return (
-    <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+    <div className="flex flex-col items-center justify-center text-center">
       {srcIndex >= sources.length ? (
-        <FallbackBeeIcon className="h-[56px] w-auto sm:h-[64px] object-contain shrink-0" />
+        <FallbackBeeIcon className="h-10 sm:h-12 lg:h-[60px] w-auto object-contain shrink-0 mb-1.5 lg:mb-2" />
       ) : (
         <img
           src={sources[srcIndex]}
           alt="Saurashtra Honey Bee Farm"
-          className="h-[56px] w-auto sm:h-[64px] object-contain shrink-0"
+          className="h-10 sm:h-12 lg:h-[60px] w-auto object-contain shrink-0 mb-1.5 lg:mb-2"
           style={{
             filter: "none",
             opacity: 1,
@@ -73,10 +71,10 @@ export function BrandMark({ dark = false, alwaysShowText = false }: { dark?: boo
           onError={() => setSrcIndex((idx) => idx + 1)}
         />
       )}
-      <span className={`leading-none shrink-0 ${textContainerClasses}`}>
-        <span className={`block font-serif text-[18px] md:text-2xl font-bold tracking-tight ${dark ? "text-cream" : "text-espresso"}`}>Saurashtra</span>
-        <span className={`block text-[8.5px] md:text-[10px] tracking-[0.35em] uppercase font-semibold mt-1 ${dark ? "text-cream/70" : "text-brand-orange"}`}>Honey Bee Farm</span>
-      </span>
+      <div className="flex flex-col items-center leading-none">
+        <span className={`block font-serif text-[15px] sm:text-[18px] lg:text-[22px] font-bold tracking-tight ${dark ? "text-cream" : "text-espresso"}`}>SAURASHTRA</span>
+        <span className={`block text-[9px] sm:text-[10px] lg:text-[11.5px] tracking-[0.35em] uppercase font-semibold mt-1 ${dark ? "text-cream/70" : "text-brand-orange"}`}>HONEY</span>
+      </div>
     </div>
   );
 }
