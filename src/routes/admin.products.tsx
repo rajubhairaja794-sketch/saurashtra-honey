@@ -120,6 +120,7 @@ const EMPTY: Partial<P> = {
   is_bestseller: false,
   is_new_arrival: false,
   attributes: {},
+  show_on_homepage: false,
 };
 
 function ProductsPage() {

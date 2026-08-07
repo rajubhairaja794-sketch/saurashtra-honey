@@ -69,6 +69,7 @@ const productSchema = z.object({
   is_featured: z.boolean().default(false),
   is_bestseller: z.boolean().default(false),
   is_new_arrival: z.boolean().default(false),
+  show_on_homepage: z.boolean().default(false),
   images: z.array(z.string().max(2000)).default([]),
   additional_images: z.array(z.string().max(2000)).default([]).optional(),
   video_url: z.string().max(2000).nullable().optional(),
