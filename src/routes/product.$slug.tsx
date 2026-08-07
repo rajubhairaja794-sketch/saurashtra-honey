@@ -504,7 +504,7 @@ function ProductPage() {
           <button onClick={handleBuy} disabled={!inStock} className="btn-accent flex-1 py-3 text-xs tracking-widest disabled:opacity-50">BUY NOW</button>
         </div>
       </div>
-      <div className="md:hidden h-16" aria-hidden />
+      <div className="md:hidden h-[160px]" aria-hidden />
 
       {/* Zoom modal */}
       {zoom && (
@@ -563,12 +563,12 @@ function MobileProductGallery({ images, name }: { images: string[]; name: string
   );
 
   return (
-    <div className="md:hidden w-full -mx-4 px-4 sm:mx-0 sm:px-0 mb-4 relative">
+    <div className="md:hidden w-full min-w-0 mb-4 relative">
       <div className="overflow-hidden rounded-[28px] border border-[#2B2118]/10 bg-[#F8F5EF] shadow-sm relative" ref={emblaRef}>
         <div className="flex touch-pan-y cursor-grab active:cursor-grabbing">
           {images.map((src, idx) => (
-            <div key={idx} className="flex-[0_0_100%] min-w-0 aspect-square">
-              <img src={src} alt={`${name} view ${idx + 1}`} loading="lazy" className="w-full h-full object-contain bg-white object-center pointer-events-none" />
+            <div key={idx} className="flex-[0_0_100%] min-w-0 aspect-square relative">
+              <img src={src} alt={`${name} view ${idx + 1}`} loading="lazy" className="w-full max-w-full h-full object-contain bg-white object-center pointer-events-none" />
             </div>
           ))}
         </div>
@@ -589,7 +589,7 @@ function MobileProductGallery({ images, name }: { images: string[]; name: string
         ))}
       </div>
       {images.length > 1 && (
-        <div className="flex gap-2.5 overflow-x-auto py-3 px-1 no-scrollbar mt-1">
+        <div className="flex gap-2.5 overflow-x-auto overflow-y-hidden w-full min-w-0 py-3 px-1 no-scrollbar mt-1">
           {images.map((src, idx) => (
             <button
               key={idx}
