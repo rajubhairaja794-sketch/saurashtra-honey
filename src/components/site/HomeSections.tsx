@@ -606,14 +606,14 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
         </div>
 
         {/* 2. Four Heritage Story Points */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 sm:gap-8 max-w-7xl mx-auto mb-20 sm:mb-28">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 gap-y-8 sm:gap-8 max-w-7xl mx-auto mb-16 sm:mb-28">
           {storyPoints.map((point, idx) => (
             <div key={idx} className="flex flex-col items-center text-center">
-              <div className="h-[120px] sm:h-[150px] aspect-square mb-6 transition-transform duration-700 hover:-translate-y-2 flex items-center justify-center">
+              <div className="h-[90px] sm:h-[150px] aspect-square mb-4 sm:mb-6 transition-transform duration-700 hover:-translate-y-2 flex items-center justify-center">
                 <img src={point.img} alt={point.title} className="w-full h-full object-contain" />
               </div>
-              <h3 className="font-serif text-[20px] sm:text-[22px] text-espresso mb-3 font-[500]">{point.title}</h3>
-              <p className="text-[14px] sm:text-[15px] text-espresso/70 leading-relaxed max-w-[280px]">
+              <h3 className="font-serif text-[16px] sm:text-[22px] text-espresso mb-2 sm:mb-3 font-[500] leading-tight">{point.title}</h3>
+              <p className="text-[12px] sm:text-[15px] text-espresso/70 leading-relaxed max-w-[280px]">
                 {point.desc}
               </p>
             </div>

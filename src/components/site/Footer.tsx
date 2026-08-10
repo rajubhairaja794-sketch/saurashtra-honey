@@ -255,17 +255,7 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Scroll to Top */}
-      {showTopBtn && (
-        <button
-          type="button"
-          onClick={scrollToTop}
-          aria-label="Scroll to top of page"
-          className="fixed bottom-24 right-4 md:right-6 z-40 size-11 sm:size-12 rounded-full bg-[#2B1D14] hover:bg-[#C57A1C] text-[#FBF7F0] flex items-center justify-center transition-all duration-300 shadow-xl hover:scale-110 hover:-translate-y-0.5 cursor-pointer"
-        >
-          <ArrowUp className="size-4.5 sm:size-5" />
-        </button>
-      )}
+
     </footer>
   );
 }
