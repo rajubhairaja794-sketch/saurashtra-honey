@@ -1,5 +1,5 @@
 import { useSiteSettings } from "@/lib/site-settings";
-import { MessageCircle } from "lucide-react";
+import whatsappLogo from "@/assets/whatsapp-logo.png";
 
 export function WhatsAppFloat() {
   const { whatsapp } = useSiteSettings();
@@ -7,8 +7,8 @@ export function WhatsAppFloat() {
   const href = `https://wa.me/${whatsapp.number.replace(/\D/g, "")}?text=${encodeURIComponent(whatsapp.default_message)}`;
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp"
-      className="fixed z-50 bottom-[150px] md:bottom-6 right-4 md:right-6 size-14 rounded-full bg-[#25D366] text-white shadow-lift flex items-center justify-center hover:scale-105 transition-transform">
-      <MessageCircle className="size-6" fill="currentColor" />
+      className="fixed z-50 bottom-4 md:bottom-6 right-4 md:right-6 w-[56px] h-[56px] md:w-[64px] md:h-[64px] hover:scale-105 transition-transform flex items-center justify-center drop-shadow-lg">
+      <img src={whatsappLogo} alt="WhatsApp" className="w-full h-full object-contain scale-[1.6]" />
     </a>
   );
 }

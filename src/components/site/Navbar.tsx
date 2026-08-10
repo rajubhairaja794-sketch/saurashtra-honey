@@ -310,11 +310,11 @@ export function Navbar() {
               let orderedCats = desiredOrder.map(name => dbCategories.find(c => c.name.toLowerCase() === name.toLowerCase() || c.name.toLowerCase() === name.toLowerCase() + "s")).filter(Boolean) as typeof dbCategories;
               
               // If we didn't find all requested categories, append the rest
-              const remaining = dbCategories.filter(c => !orderedCats.find(o => o.id === c.id));
+              const remaining = dbCategories.filter(c => !orderedCats.find(o => o.slug === c.slug));
               const displayCats = [...orderedCats, ...remaining].slice(0, 7);
 
               return displayCats.map((cat) => (
-                <Link key={cat.id} to="/shop" search={{ category: cat.name } as never} onClick={() => setShopOpen(false)} className="group flex flex-col items-center text-center gap-4 outline-none w-full">
+                <Link key={cat.slug} to="/shop/$slug" params={{ slug: cat.slug }} onClick={() => setShopOpen(false)} className="group flex flex-col items-center text-center gap-4 outline-none w-full">
                   <div className="w-full max-w-[140px] aspect-square rounded-[20px] overflow-hidden bg-white shadow-sm border border-border/40 group-hover:shadow-md transition-all duration-300">
                     <img src={cat.image} alt={cat.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
                   </div>
@@ -441,11 +441,11 @@ export function Navbar() {
                               <div>
                                 <p className="text-[10px] tracking-[0.25em] uppercase text-brand-orange font-bold mb-3">Shop by Category</p>
                                 <div className="grid grid-cols-2 gap-2">
-                                  <Link to="/shop" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 p-2 rounded-lg bg-white border border-border/50 shadow-sm">
-                                    <span className="text-[13px] font-medium text-espresso">All Honey</span>
+                                  <Link to="/shop/$slug" params={{ slug: "all-products" }} onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 p-2 rounded-lg bg-white border border-border/50 shadow-sm">
+                                    <span className="text-[13px] font-medium text-espresso">All Products</span>
                                   </Link>
                                   {dbCategories.slice(0, 5).map((cat) => (
-                                    <Link key={cat.id} to="/shop" search={{ category: cat.name } as never} onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 p-2 rounded-lg bg-white border border-border/50 shadow-sm">
+                                    <Link key={cat.slug} to="/shop/$slug" params={{ slug: cat.slug }} onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 p-2 rounded-lg bg-white border border-border/50 shadow-sm">
                                       <img src={cat.image} alt="" className="size-7 rounded object-cover" />
                                       <span className="text-[13px] font-medium text-espresso truncate">{cat.name}</span>
                                     </Link>

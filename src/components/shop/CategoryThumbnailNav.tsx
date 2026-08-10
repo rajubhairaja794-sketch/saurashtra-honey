@@ -33,7 +33,8 @@ export function CategoryThumbnailNav({
   };
 
   // Combine All Honey + Supabase Categories
-  const displayCategories = [allCategory, ...categories.filter(c => c.is_active)];
+  // The backend already filters by active, so we just append them
+  const displayCategories = [allCategory, ...categories];
 
   return (
     <section className="bg-[#F8F5EF] pt-8 pb-6 border-b border-border/60 overflow-hidden select-none">
@@ -49,7 +50,7 @@ export function CategoryThumbnailNav({
 
             return (
               <button
-                key={cat.id}
+                key={cat.slug}
                 onClick={() => {
                   // If they click "All Honey", we pass "All Products" to keep existing shop logic intact
                   if (cat.name === "All Honey") {

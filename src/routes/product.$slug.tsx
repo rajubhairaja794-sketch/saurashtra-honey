@@ -22,6 +22,7 @@ import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { StructuredData, breadcrumbLd, productLd } from "@/components/site/StructuredData";
 import { getCategorySlug } from "@/lib/collection-helpers";
 import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel";
+import honeyProcessImg from "@/assets/honey-process-infographic.png";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: async ({ params }) => {
@@ -247,8 +248,8 @@ function ProductPage() {
             <span className="font-bold text-espresso">{p.rating}</span>
             <a href="#reviews" className="text-muted-foreground hover:text-burnt-orange underline underline-offset-2 font-medium">({p.reviews} verified reviews)</a>
           </div>
-          <div className="mt-5 flex items-baseline gap-2.5 flex-wrap">
-            <span className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-espresso">₹{activePrice}</span>
+          <div className="mt-5 flex items-center gap-2.5 flex-wrap">
+            <span className="text-xl md:text-2xl font-semibold text-espresso">₹{activePrice}</span>
             {activeMrp && activeMrp > activePrice && (
               <><span className="text-base text-muted-foreground line-through">₹{activeMrp}</span>
                 <span className="text-xs font-bold text-terracotta bg-cream-deep px-2 py-0.5 rounded-full shadow-xs">-{Math.round(((activeMrp - activePrice)/activeMrp)*100)}% OFF</span></>
@@ -287,9 +288,8 @@ function ProductPage() {
                 <button aria-label="Increase" onClick={() => setQty(qty + 1)} className="px-3.5 py-2.5 text-espresso hover:text-burnt-orange font-bold text-base">+</button>
               </div>
             </div>
-            <div className="ml-auto text-right">
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Total Price</div>
-              <div className="font-serif text-2xl md:text-3xl font-bold text-espresso">₹{totalPrice}</div>
+            <div className="ml-auto text-right self-end pb-1.5">
+              <div className="text-xl md:text-2xl font-semibold text-espresso">₹{totalPrice}</div>
             </div>
           </div>
 
@@ -395,6 +395,7 @@ function ProductPage() {
         </div>
       </section>
 
+
       {/* Frequently bought together */}
       {fbt.length > 0 && (
         <section className="container-product pb-12">
@@ -421,6 +422,27 @@ function ProductPage() {
           </div>
         </section>
       )}
+
+      {/* Honey Process Infographic */}
+      <section 
+        className="pb-14 relative" 
+        style={{ 
+          width: '100vw', 
+          maxWidth: 'none',
+          marginLeft: 'calc(50% - 50vw)', 
+          marginRight: 'calc(50% - 50vw)',
+          paddingLeft: '0',
+          paddingRight: '0'
+        }}
+      >
+        <img 
+          src={honeyProcessImg} 
+          alt="From Hive to Home, Pure Honey for You - Honey extraction process" 
+          style={{ width: '100%', display: 'block', height: 'auto' }}
+          className="w-full h-auto block object-contain" 
+          loading="lazy" 
+        />
+      </section>
 
       {/* FAQ Accordion */}
       <section className="container-product pb-14">

@@ -61,6 +61,8 @@ import { Route as CollectionsIndexRouteImport } from './routes/collections.index
 import { Route as CollectionsSlugRouteImport } from './routes/collections.$slug'
 import { Route as OrderIdRouteImport } from './routes/order.$id'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
+import { Route as ShopIndexRouteImport } from './routes/shop.index'
+import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 import { Route as AdminHomepageAnnouncementsRouteImport } from './routes/admin.homepage_.announcements'
 import { Route as AdminHomepageCategoriesRouteImport } from './routes/admin.homepage_.categories'
 import { Route as AdminHomepageProductsRouteImport } from './routes/admin.homepage_.products'
@@ -330,6 +332,16 @@ const ProductSlugRoute = ProductSlugRouteImport.update({
   path: '/product/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopIndexRoute = ShopIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ShopRoute,
+} as any)
+const ShopSlugRoute = ShopSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ShopRoute,
+} as any)
 const AdminHomepageAnnouncementsRoute =
   AdminHomepageAnnouncementsRouteImport.update({
     id: '/homepage_/announcements',
@@ -393,7 +405,7 @@ export interface FileRoutesByFullPath {
   '/private-label': typeof PrivateLabelRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/shop': typeof ShopRoute
+  '/shop': typeof ShopRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track-order': typeof TrackOrderRoute
   '/wishlist': typeof WishlistRoute
@@ -424,8 +436,10 @@ export interface FileRoutesByFullPath {
   '/collections/$slug': typeof CollectionsSlugRoute
   '/order/$id': typeof OrderIdRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/shop/$slug': typeof ShopSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/collections/': typeof CollectionsIndexRoute
+  '/shop/': typeof ShopIndexRoute
   '/admin/homepage/announcements': typeof AdminHomepageAnnouncementsRoute
   '/admin/homepage/categories': typeof AdminHomepageCategoriesRoute
   '/admin/homepage/products': typeof AdminHomepageProductsRoute
@@ -454,7 +468,6 @@ export interface FileRoutesByTo {
   '/private-label': typeof PrivateLabelRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track-order': typeof TrackOrderRoute
   '/wishlist': typeof WishlistRoute
@@ -485,8 +498,10 @@ export interface FileRoutesByTo {
   '/collections/$slug': typeof CollectionsSlugRoute
   '/order/$id': typeof OrderIdRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/shop/$slug': typeof ShopSlugRoute
   '/admin': typeof AdminIndexRoute
   '/collections': typeof CollectionsIndexRoute
+  '/shop': typeof ShopIndexRoute
   '/admin/homepage/announcements': typeof AdminHomepageAnnouncementsRoute
   '/admin/homepage/categories': typeof AdminHomepageCategoriesRoute
   '/admin/homepage/products': typeof AdminHomepageProductsRoute
@@ -517,7 +532,7 @@ export interface FileRoutesById {
   '/private-label': typeof PrivateLabelRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/shop': typeof ShopRoute
+  '/shop': typeof ShopRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track-order': typeof TrackOrderRoute
   '/wishlist': typeof WishlistRoute
@@ -548,8 +563,10 @@ export interface FileRoutesById {
   '/collections/$slug': typeof CollectionsSlugRoute
   '/order/$id': typeof OrderIdRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/shop/$slug': typeof ShopSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/collections/': typeof CollectionsIndexRoute
+  '/shop/': typeof ShopIndexRoute
   '/admin/homepage_/announcements': typeof AdminHomepageAnnouncementsRoute
   '/admin/homepage_/categories': typeof AdminHomepageCategoriesRoute
   '/admin/homepage_/products': typeof AdminHomepageProductsRoute
@@ -612,8 +629,10 @@ export interface FileRouteTypes {
     | '/collections/$slug'
     | '/order/$id'
     | '/product/$slug'
+    | '/shop/$slug'
     | '/admin/'
     | '/collections/'
+    | '/shop/'
     | '/admin/homepage/announcements'
     | '/admin/homepage/categories'
     | '/admin/homepage/products'
@@ -642,7 +661,6 @@ export interface FileRouteTypes {
     | '/private-label'
     | '/reset-password'
     | '/robots.txt'
-    | '/shop'
     | '/sitemap.xml'
     | '/track-order'
     | '/wishlist'
@@ -673,8 +691,10 @@ export interface FileRouteTypes {
     | '/collections/$slug'
     | '/order/$id'
     | '/product/$slug'
+    | '/shop/$slug'
     | '/admin'
     | '/collections'
+    | '/shop'
     | '/admin/homepage/announcements'
     | '/admin/homepage/categories'
     | '/admin/homepage/products'
@@ -735,8 +755,10 @@ export interface FileRouteTypes {
     | '/collections/$slug'
     | '/order/$id'
     | '/product/$slug'
+    | '/shop/$slug'
     | '/admin/'
     | '/collections/'
+    | '/shop/'
     | '/admin/homepage_/announcements'
     | '/admin/homepage_/categories'
     | '/admin/homepage_/products'
@@ -767,7 +789,7 @@ export interface RootRouteChildren {
   PrivateLabelRoute: typeof PrivateLabelRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
-  ShopRoute: typeof ShopRoute
+  ShopRoute: typeof ShopRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrackOrderRoute: typeof TrackOrderRoute
   WishlistRoute: typeof WishlistRoute
@@ -1148,6 +1170,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop/': {
+      id: '/shop/'
+      path: '/'
+      fullPath: '/shop/'
+      preLoaderRoute: typeof ShopIndexRouteImport
+      parentRoute: typeof ShopRoute
+    }
+    '/shop/$slug': {
+      id: '/shop/$slug'
+      path: '/$slug'
+      fullPath: '/shop/$slug'
+      preLoaderRoute: typeof ShopSlugRouteImport
+      parentRoute: typeof ShopRoute
+    }
     '/admin/homepage_/announcements': {
       id: '/admin/homepage_/announcements'
       path: '/homepage/announcements'
@@ -1279,6 +1315,18 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface ShopRouteChildren {
+  ShopSlugRoute: typeof ShopSlugRoute
+  ShopIndexRoute: typeof ShopIndexRoute
+}
+
+const ShopRouteChildren: ShopRouteChildren = {
+  ShopSlugRoute: ShopSlugRoute,
+  ShopIndexRoute: ShopIndexRoute,
+}
+
+const ShopRouteWithChildren = ShopRoute._addFileChildren(ShopRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
@@ -1299,7 +1347,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateLabelRoute: PrivateLabelRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
-  ShopRoute: ShopRoute,
+  ShopRoute: ShopRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrackOrderRoute: TrackOrderRoute,
   WishlistRoute: WishlistRoute,

@@ -554,22 +554,22 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
     {
       title: "From Hive to Home",
       desc: "Carefully harvested honey, brought directly from nature to your home.",
-      img: "/images/heritage/illus_hive_to_home.svg"
+      img: "/images/heritage/illus_hive_to_home.png"
     },
     {
       title: "Wildflower Richness",
       desc: "Naturally influenced by the diverse flowers surrounding our hives.",
-      img: "/images/heritage/illus_wildflower.svg"
+      img: "/images/heritage/illus_wildflower.png"
     },
     {
       title: "Pure by Nature",
       desc: "No unnecessary additives — just naturally pure honey.",
-      img: "/images/heritage/illus_pure.svg"
+      img: "/images/heritage/illus_pure.png"
     },
     {
       title: "Responsible Beekeeping",
       desc: "Thoughtful beekeeping practices that respect bees and their natural environment.",
-      img: "/images/heritage/illus_beekeeping.svg"
+      img: "/images/heritage/illus_beekeeping.png"
     }
   ];
 
@@ -609,7 +609,7 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 sm:gap-8 max-w-7xl mx-auto mb-20 sm:mb-28">
           {storyPoints.map((point, idx) => (
             <div key={idx} className="flex flex-col items-center text-center">
-              <div className="w-44 h-44 sm:w-52 sm:h-52 mb-6 transition-transform duration-700 hover:-translate-y-2 flex items-center justify-center">
+              <div className="h-[120px] sm:h-[150px] aspect-square mb-6 transition-transform duration-700 hover:-translate-y-2 flex items-center justify-center">
                 <img src={point.img} alt={point.title} className="w-full h-full object-contain" />
               </div>
               <h3 className="font-serif text-[20px] sm:text-[22px] text-espresso mb-3 font-[500]">{point.title}</h3>
