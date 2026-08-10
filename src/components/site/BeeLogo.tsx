@@ -1,5 +1,3 @@
-import logoAsset from "@/assets/saurashtra-honey-logo.png.asset.json";
-import { useCompanyLogoUrl } from "@/lib/company-settings";
 import React, { useState } from "react";
 
 function FallbackBeeIcon({ className = "size-10" }: { className?: string }) {
@@ -14,11 +12,8 @@ function FallbackBeeIcon({ className = "size-10" }: { className?: string }) {
 }
 
 export function BeeLogo({ className = "max-h-[52px] w-auto object-contain shrink-0" }: { className?: string }) {
-  const dynamicLogoUrl = useCompanyLogoUrl();
-  const primarySrc = dynamicLogoUrl || logoAsset.url;
   const [srcIndex, setSrcIndex] = useState(0);
-
-  const sources = [primarySrc, "/favicon.ico"];
+  const sources = ["/saurashtra-honey-logo-complete.png"];
 
   if (srcIndex >= sources.length) {
     return <FallbackBeeIcon className={className} />;
@@ -35,6 +30,7 @@ export function BeeLogo({ className = "max-h-[52px] w-auto object-contain shrink
         mixBlendMode: "normal",
         WebkitMask: "none",
         mask: "none",
+        backgroundColor: "transparent",
       }}
       loading="eager"
       decoding="async"
@@ -43,38 +39,25 @@ export function BeeLogo({ className = "max-h-[52px] w-auto object-contain shrink
   );
 }
 
-export function BrandMark({ dark = false }: { dark?: boolean }) {
-  const dynamicLogoUrl = useCompanyLogoUrl();
-  const primarySrc = dynamicLogoUrl || logoAsset.url;
+export function BrandMark() {
   const [srcIndex, setSrcIndex] = useState(0);
+  const sources = ["/saurashtra-honey-logo-complete.png"];
 
-  const sources = [primarySrc, "/favicon.ico"];
+  if (srcIndex >= sources.length) {
+    return <FallbackBeeIcon className="w-[100px] lg:w-[130px] h-auto object-contain" />;
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center text-center">
-      {srcIndex >= sources.length ? (
-        <FallbackBeeIcon className="h-10 sm:h-12 lg:h-[60px] w-auto object-contain shrink-0 mb-1.5 lg:mb-2" />
-      ) : (
-        <img
-          src={sources[srcIndex]}
-          alt="Saurashtra Honey Bee Farm"
-          className="h-10 sm:h-12 lg:h-[60px] w-auto object-contain shrink-0 mb-1.5 lg:mb-2"
-          style={{
-            filter: "none",
-            opacity: 1,
-            mixBlendMode: "normal",
-            WebkitMask: "none",
-            mask: "none",
-          }}
-          loading="eager"
-          decoding="async"
-          onError={() => setSrcIndex((idx) => idx + 1)}
-        />
-      )}
-      <div className="flex flex-col items-center leading-none">
-        <span className={`block font-serif text-[15px] sm:text-[18px] lg:text-[22px] font-bold tracking-tight ${dark ? "text-cream" : "text-espresso"}`}>SAURASHTRA</span>
-        <span className={`block text-[9px] sm:text-[10px] lg:text-[11.5px] tracking-[0.35em] uppercase font-semibold mt-1 ${dark ? "text-cream/70" : "text-brand-orange"}`}>HONEY</span>
-      </div>
-    </div>
+    <img
+      src={sources[srcIndex]}
+      alt="Saurashtra Honey Logo"
+      className="w-[100px] lg:w-[130px] h-auto object-contain"
+      style={{
+        backgroundColor: "transparent",
+      }}
+      loading="eager"
+      decoding="async"
+      onError={() => setSrcIndex((idx) => idx + 1)}
+    />
   );
 }

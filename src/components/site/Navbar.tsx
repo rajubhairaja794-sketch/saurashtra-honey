@@ -399,10 +399,10 @@ export function Navbar() {
               {/* Drawer Header: LOGO + X */}
               <div className="flex items-center justify-between p-4 border-b border-border min-h-[64px]">
                 <Link to="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 min-w-0">
-                  <BeeLogo className="max-h-[46px] w-auto object-contain shrink-0" />
+                  <BeeLogo className="max-h-[56px] w-auto object-contain shrink-0" />
                   <div className="min-w-0">
-                    <span className="block font-serif text-[15px] font-bold text-espresso truncate">Saurashtra Honey</span>
-                    <span className="block text-[9px] tracking-[0.2em] uppercase text-burnt-orange font-semibold truncate">Bee Farm</span>
+                    <span className="block font-serif text-[16px] font-bold text-espresso truncate">Saurashtra Honey</span>
+                    <span className="block text-[10px] tracking-[0.2em] uppercase text-burnt-orange font-semibold truncate">Bee Farm</span>
                   </div>
                 </Link>
                 <button
