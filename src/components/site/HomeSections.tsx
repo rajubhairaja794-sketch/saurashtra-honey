@@ -17,7 +17,8 @@ import Autoplay from "embla-carousel-autoplay";
 import { PremiumMobileCarousel } from "@/components/site/PremiumMobileCarousel";
 import { ProductCard } from "@/components/site/ProductCard";
 import { HeroSlider, type HeroSlide } from "@/components/site/HeroSlider";
-import { fetchHeroSlides, getDefaultHeroSlides } from "@/lib/hero-catalog";
+import { fetchPublicHeroRows, getDefaultHeroSlides, heroRowToSlide } from "@/lib/hero-catalog";
+import { useServerFn } from "@tanstack/react-start";
 import { type Product } from "@/lib/products";
 import { type ShopCategory, fetchShopCategories } from "@/lib/category-catalog";
 import { type BlogPost } from "@/lib/blog";
@@ -52,12 +53,16 @@ export function HomeHero() {
   const [slides, setSlides] = React.useState<HeroSlide[]>(() =>
     getDefaultHeroSlides("home")
   );
+  
+  const getRows = useServerFn(fetchPublicHeroRows);
 
   React.useEffect(() => {
-    void fetchHeroSlides("home").then((res) => {
-      if (res && res.length > 0) setSlides(res);
+    void getRows({ data: { page: "home" } }).then((res) => {
+      if (res && res.rows && res.rows.length > 0) {
+        setSlides(res.rows.map(r => heroRowToSlide(r)));
+      }
     });
-  }, []);
+  }, [getRows]);
 
   return (
     <HeroSlider
