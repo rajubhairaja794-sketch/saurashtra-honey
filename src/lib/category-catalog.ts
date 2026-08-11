@@ -48,6 +48,7 @@ export const DEFAULT_SHOP_CATEGORIES: ShopCategory[] = [
   { slug: "beeswax", name: "Beeswax" },
   { slug: "bee-pollen", name: "Bee Pollen" },
   { slug: "beeswax-candle", name: "Beeswax Candles" },
+  { slug: "beeswax-products", name: "Beeswax Products" },
   { slug: "beauty-products", name: "Beauty Products" },
 ].map((c) => ({
   ...c,

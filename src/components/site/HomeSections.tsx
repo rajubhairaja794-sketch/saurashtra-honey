@@ -189,27 +189,33 @@ export function HomeShopByCategory({ settings }: { settings?: Record<string, any
   }, [emblaApi]);
 
   React.useEffect(() => {
-    Promise.all([fetchShopCategories(), fetchAllHomepageCategories()])
-      .then(([allCats, selections]) => {
-        let baseCats = [];
-        if (selections.length > 0) {
-          baseCats = selections.map(sel => {
-            const cat = allCats.find(c => c.slug === sel.category_slug);
-            return {
-              name: cat?.name || sel.category_slug,
-              img: cat?.image || prodLiquidImg,
-              filter: cat?.name || sel.category_slug,
-            };
-          });
-        } else {
-          baseCats = allCats.map(cat => ({
-            name: cat.name,
-            img: cat.image || prodLiquidImg,
-            filter: cat.name,
+    fetchShopCategories()
+      .then((allCats) => {
+        const REQUIRED_ORDER = [
+          "all-products",
+          "honey",
+          "beeswax",
+          "bee-pollen",
+          "beeswax-candle",
+          "beeswax-products",
+          "beauty-products"
+        ];
+        
+        // Sort exactly as requested and only include active categories
+        const baseCats = REQUIRED_ORDER
+          .map(slug => allCats.find(c => c.slug === slug))
+          .filter(Boolean)
+          .map(cat => ({
+            name: cat!.name,
+            img: cat!.image || prodLiquidImg,
+            filter: cat!.name,
+            slug: cat!.slug
           }));
-        }
         
         setDisplayCats([...baseCats, ...baseCats, ...baseCats]);
+      })
+      .catch((err) => {
+        console.error("Failed to load categories on homepage:", err);
       })
       .finally(() => {
         setLoading(false);
@@ -293,6 +299,9 @@ export function HomeShopByCategory({ settings }: { settings?: Record<string, any
                       src={cat.img} 
                       alt={cat.name}
                       loading="lazy"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = prodLiquidImg;
+                      }}
                       className="w-full h-full object-cover transform transition-transform duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05] pointer-events-none"
                     />
                   </div>
