@@ -459,7 +459,13 @@ function ProductForm({
   const [isNewCat, setIsNewCat] = useState(false);
   useEffect(() => {
     void listCats({}).then((r) => {
-      if (r.rows) setCats((r.rows as any[]).map((x) => ({ name: x.name, slug: x.slug })));
+      if (r.rows) {
+        setCats(
+          (r.rows as any[])
+            .filter(x => x.slug !== "all-products")
+            .map((x) => ({ name: x.name, slug: x.slug }))
+        );
+      }
     });
   }, []);
 

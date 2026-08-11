@@ -188,36 +188,28 @@ export function HomeShopByCategory({ settings }: { settings?: Record<string, any
     if (emblaApi) emblaApi.scrollNext();
   }, [emblaApi]);
 
-  const HOME_CATEGORIES = [
-    { name: "Raw Honey", img: prodLiquidImg, filter: "raw-honey" },
-    { name: "Beeswax", img: honeycombBeesImg, filter: "beeswax" },
-    { name: "Bee Pollen", img: beeFlowerImg, filter: "bee-pollen" },
-    { name: "Beeswax Candles", img: honeyDrizzleImg, filter: "candles" },
-    { name: "Beauty & Personal Care", img: familyHoneyImg, filter: "beauty" },
-    { name: "Gift Hampers", img: prodGiftpackImg, filter: "gift-hampers" },
-    { name: "All Products", img: heroProductsImg, filter: "" },
-  ];
-
   React.useEffect(() => {
     Promise.all([fetchShopCategories(), fetchAllHomepageCategories()])
       .then(([allCats, selections]) => {
+        let baseCats = [];
         if (selections.length > 0) {
-          const mappedCats = selections.map(sel => {
+          baseCats = selections.map(sel => {
             const cat = allCats.find(c => c.slug === sel.category_slug);
             return {
               name: cat?.name || sel.category_slug,
               img: cat?.image || prodLiquidImg,
-              filter: sel.category_slug,
+              filter: cat?.name || sel.category_slug,
             };
           });
-          setDisplayCats([...mappedCats, ...mappedCats, ...mappedCats]);
         } else {
-          setDisplayCats([...HOME_CATEGORIES, ...HOME_CATEGORIES, ...HOME_CATEGORIES]);
+          baseCats = allCats.map(cat => ({
+            name: cat.name,
+            img: cat.image || prodLiquidImg,
+            filter: cat.name,
+          }));
         }
-      })
-      .catch(err => {
-        console.warn("Failed to fetch shop categories, using fallback", err);
-        setDisplayCats([...HOME_CATEGORIES, ...HOME_CATEGORIES, ...HOME_CATEGORIES]);
+        
+        setDisplayCats([...baseCats, ...baseCats, ...baseCats]);
       })
       .finally(() => {
         setLoading(false);

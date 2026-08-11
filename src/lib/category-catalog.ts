@@ -6,6 +6,7 @@ import pollenFallback from "@/assets/mortar-herbs.jpg";
 import candleFallback from "@/assets/honeycomb-bees.jpg";
 import giftpackFallback from "@/assets/prod-giftpack.jpg";
 import beautyFallback from "@/assets/prod-lychee.jpg";
+import allProductsFallback from "@/assets/hero-products.jpg";
 
 export type ShopCategory = {
   slug: string;
@@ -38,14 +39,15 @@ const FALLBACK_IMAGE_BY_SLUG: Record<string, string> = {
   "skin-care": beautyFallback,
   "wood-leather-care": beeswaxFallback,
   "beauty-products": beautyFallback,
+  "all-products": allProductsFallback,
 };
 
 export const DEFAULT_SHOP_CATEGORIES: ShopCategory[] = [
+  { slug: "all-products", name: "All Products" },
   { slug: "honey", name: "Honey" },
   { slug: "beeswax", name: "Beeswax" },
   { slug: "bee-pollen", name: "Bee Pollen" },
-  { slug: "beeswax-candle", name: "Beeswax Candle" },
-  { slug: "beeswax-products", name: "Beeswax Products" },
+  { slug: "beeswax-candle", name: "Beeswax Candles" },
   { slug: "beauty-products", name: "Beauty Products" },
 ].map((c) => ({
   ...c,

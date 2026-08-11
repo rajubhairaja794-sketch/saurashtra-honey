@@ -20,6 +20,39 @@ function CategoriesPage() {
 
   if (edit) return <Editor initial={edit} parents={rows} onCancel={() => setEdit(null)} onSaved={async () => { setEdit(null); await load(); }} />;
 
+  const virtualRows = rows.filter((r) => r.slug === "all-products");
+  const productRows = rows.filter((r) => r.slug !== "all-products");
+
+  const renderTable = (data: Cat[], emptyText: string) => (
+    <TableWrap>
+      <thead><tr>{["Sort","Image","Slug","Name","Parent","Status",""].map((h) => <Th key={h}>{h}</Th>)}</tr></thead>
+      <tbody className="divide-y divide-border">
+        {loading && <tr><Td className="text-center py-12 text-muted-foreground">Loading…</Td></tr>}
+        {!loading && data.length === 0 && <tr><Td className="text-center py-12 text-muted-foreground">{emptyText}</Td></tr>}
+        {!loading && data.map((r) => (
+          <tr key={r.id} className="hover:bg-cream/40">
+            <Td className="text-xs text-muted-foreground">{r.sort_order}</Td>
+            <Td>
+              <div className="size-11 rounded-lg overflow-hidden bg-cream border border-border grid place-items-center shrink-0">
+                {r.image_url ? <img src={r.image_url} alt={r.name} className="w-full h-full object-cover" loading="lazy" /> : <ImageOff className="size-4 text-muted-foreground/50" />}
+              </div>
+            </Td>
+            <Td className="text-xs font-mono">{r.slug}</Td>
+            <Td className="font-medium text-forest-dark">{r.name}</Td>
+            <Td className="text-xs">{rows.find((x) => x.id === r.parent_id)?.name ?? "—"}</Td>
+            <Td><StatusPill s={r.active ? "active" : "disabled"} /></Td>
+            <Td className="text-right">
+              <button onClick={() => setEdit(r)} className="text-gold-deep hover:underline text-xs font-bold mr-3"><Pencil className="size-3.5 inline" /> EDIT</button>
+              {r.slug !== "all-products" && (
+                <button onClick={async () => { if (!confirm("Delete?")) return; try { await del({ data: { id: r.id } }); toast.success("Deleted"); void load(); } catch (e) { toast.error((e as Error).message); } }} className="text-destructive hover:underline text-xs font-bold"><Trash2 className="size-3.5 inline" /></button>
+              )}
+            </Td>
+          </tr>
+        ))}
+      </tbody>
+    </TableWrap>
+  );
+
   return (
     <div>
       <PageHeader title="Categories" subtitle={`${rows.length} categories`} actions={
@@ -28,31 +61,18 @@ function CategoriesPage() {
           <BtnPrimary onClick={() => setEdit(EMPTY)}><Plus className="size-3.5" /> NEW CATEGORY</BtnPrimary>
         </>
       } />
-      <TableWrap>
-        <thead><tr>{["Sort","Image","Slug","Name","Parent","Status",""].map((h) => <Th key={h}>{h}</Th>)}</tr></thead>
-        <tbody className="divide-y divide-border">
-          {loading && <tr><Td className="text-center py-12 text-muted-foreground">Loading…</Td></tr>}
-          {!loading && rows.length === 0 && <tr><Td className="text-center py-12 text-muted-foreground">No categories yet.</Td></tr>}
-          {!loading && rows.map((r) => (
-            <tr key={r.id} className="hover:bg-cream/40">
-              <Td className="text-xs text-muted-foreground">{r.sort_order}</Td>
-              <Td>
-                <div className="size-11 rounded-lg overflow-hidden bg-cream border border-border grid place-items-center shrink-0">
-                  {r.image_url ? <img src={r.image_url} alt={r.name} className="w-full h-full object-cover" loading="lazy" /> : <ImageOff className="size-4 text-muted-foreground/50" />}
-                </div>
-              </Td>
-              <Td className="text-xs font-mono">{r.slug}</Td>
-              <Td className="font-medium text-forest-dark">{r.name}</Td>
-              <Td className="text-xs">{rows.find((x) => x.id === r.parent_id)?.name ?? "—"}</Td>
-              <Td><StatusPill s={r.active ? "active" : "disabled"} /></Td>
-              <Td className="text-right">
-                <button onClick={() => setEdit(r)} className="text-gold-deep hover:underline text-xs font-bold mr-3"><Pencil className="size-3.5 inline" /> EDIT</button>
-                <button onClick={async () => { if (!confirm("Delete?")) return; try { await del({ data: { id: r.id } }); toast.success("Deleted"); void load(); } catch (e) { toast.error((e as Error).message); } }} className="text-destructive hover:underline text-xs font-bold"><Trash2 className="size-3.5 inline" /></button>
-              </Td>
-            </tr>
-          ))}
-        </tbody>
-      </TableWrap>
+      
+      <div className="mb-12">
+        <h3 className="font-serif text-xl text-forest-dark mb-4">Virtual Collections</h3>
+        <p className="text-sm text-muted-foreground mb-4">Special collections that span across multiple product types.</p>
+        {renderTable(virtualRows, "No virtual collections.")}
+      </div>
+
+      <div>
+        <h3 className="font-serif text-xl text-forest-dark mb-4">Product Categories</h3>
+        <p className="text-sm text-muted-foreground mb-4">Database categories used to tag and filter actual products.</p>
+        {renderTable(productRows, "No product categories yet.")}
+      </div>
     </div>
   );
 }

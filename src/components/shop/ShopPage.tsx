@@ -73,8 +73,8 @@ export function ShopPage({ overrideCategorySlug }: { overrideCategorySlug?: stri
         });
       }
 
-      // 3. Normalize categories to ensure exactly one of the 6 categories
-      const validCategories = ["Honey", "Beeswax", "Bee Pollen", "Beeswax Candles", "Beauty Products", "Gift Hampers"];
+      // 3. Normalize categories to ensure exactly one of the 5 categories
+      const validCategories = ["Honey", "Beeswax", "Bee Pollen", "Beeswax Candles", "Beauty Products"];
       
       const normalizedProducts = Array.from(mergedMap.values()).map((p) => {
         let finalCat = p.category;
@@ -82,7 +82,7 @@ export function ShopPage({ overrideCategorySlug }: { overrideCategorySlug?: stri
         // Fix legacy categories
         if (finalCat === "Beeswax Candle") finalCat = "Beeswax Candles";
         if (finalCat === "Beeswax Products") finalCat = "Beauty Products";
-        if (p.name.includes("Gift Pack")) finalCat = "Gift Hampers";
+        if (p.name.includes("Gift Pack")) finalCat = "Honey";
 
         // Fallback if somehow totally invalid
         if (!validCategories.includes(finalCat)) {
