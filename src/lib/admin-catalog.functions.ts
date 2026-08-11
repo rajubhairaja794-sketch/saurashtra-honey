@@ -281,6 +281,7 @@ export const listAdminSlides = createServerFn({ method: "POST" })
 const slideSchema = z.object({
   id: z.string().uuid().optional(),
   page: z.string().min(1).max(40).default("home"),
+  title: z.string().min(1, "Title is required for Admin / SEO").max(120),
   image_key: z.string().max(120).nullable().optional(),
   image_url: z.string().max(2000).nullable().optional(),
   mobile_image_url: z.string().max(2000).nullable().optional(),

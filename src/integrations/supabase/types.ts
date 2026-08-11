@@ -474,7 +474,7 @@ export type Database = {
       hero_slides: {
         Row: {
           active: boolean
-          align: string
+          align: string | null
           created_at: string
           cta_href: string
           cta_label: string | null
@@ -491,7 +491,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
-          align?: string
+          align?: string | null
           created_at?: string
           cta_href?: string
           cta_label?: string | null
@@ -508,7 +508,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
-          align?: string
+          align?: string | null
           created_at?: string
           cta_href?: string
           cta_label?: string | null

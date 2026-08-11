@@ -37,6 +37,7 @@ type Slide = {
   image_key: string | null;
   image_url: string | null;
   mobile_image_url: string | null;
+  title: string;
   cta_label: string;
   cta_href: string;
   sort_order: number;
@@ -48,6 +49,7 @@ const EMPTY: Partial<Slide> = {
   image_key: "hero-honey",
   image_url: null,
   mobile_image_url: null,
+  title: "",
   cta_label: "Shop Now",
   cta_href: "/shop",
   sort_order: 1,
@@ -157,7 +159,7 @@ function HeroPage() {
       <TableWrap>
         <thead>
           <tr>
-            {["Page", "Sort", "Preview", "Target", "Status", ""].map((h) => (
+            {["Page", "Sort", "Title & Preview", "Target", "Status", ""].map((h) => (
               <Th key={h}>{h}</Th>
             ))}
           </tr>
@@ -193,12 +195,17 @@ function HeroPage() {
                     {r.sort_order}
                   </Td>
                   <Td>
-                    <div className="size-12 rounded-lg overflow-hidden border border-border bg-cream shrink-0">
-                      <img
-                        src={previewImg}
-                        alt="Slide preview"
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="flex items-center gap-3">
+                      <div className="size-12 rounded-lg overflow-hidden border border-border bg-cream shrink-0">
+                        <img
+                          src={previewImg}
+                          alt="Slide preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="text-sm font-semibold text-forest-dark truncate max-w-[200px]">
+                        {r.title || "(No Title)"}
+                      </div>
                     </div>
                   </Td>
                   <Td className="text-xs">
@@ -312,6 +319,15 @@ function Editor({
                 </select>
               </Field>
 
+              <Field label="Slide Title (Admin & SEO) *">
+                <input
+                  value={f.title ?? ""}
+                  onChange={(e) => setF({ ...f, title: e.target.value })}
+                  placeholder="e.g. Summer Sale Banner"
+                  className={inp}
+                />
+              </Field>
+
               <Field label="Sort Order">
                 <input
                   type="number"
@@ -375,6 +391,10 @@ function Editor({
               <BtnPrimary
                 disabled={busy || uploading}
                 onClick={async () => {
+                  if (!f.title) {
+                    toast.error("Please provide a Slide Title.");
+                    return;
+                  }
                   if (!f.image_url || !/^https?:\/\//i.test(f.image_url)) {
                     toast.error("Please provide a valid HTTPS URL for the desktop banner image");
                     return;
@@ -412,6 +432,7 @@ function Editor({
                       data: {
                         id: f.id,
                         page: f.page || "home",
+                        title: f.title,
                         image_key: f.image_key || null,
                         image_url: f.image_url || null,
                         mobile_image_url: f.mobile_image_url || null,

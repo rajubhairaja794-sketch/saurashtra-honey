@@ -16,6 +16,7 @@ import familyHoneyImg from "@/assets/family-honey.jpg";
 export type HeroRow = {
   id: string;
   page: string;
+  title: string;
   image_key?: string;
   image_url?: string;
   mobile_image_url?: string;
@@ -26,6 +27,7 @@ export type HeroRow = {
 
 export function heroRowToSlide(r: HeroRow): HeroSlide {
   return {
+    title: r.title || "Promotional Banner",
     image: resolveImage(r.image_key, r.image_url, FALLBACK_IMAGE),
     mobileImage: r.mobile_image_url || undefined,
     ctaTo: r.cta_href || "/shop",
@@ -36,14 +38,17 @@ export function getDefaultHeroSlides(p: string = "home"): HeroSlide[] {
   if (p === "home") {
     return [
       {
+        title: "Pure Honey",
         image: heroHoneyImg,
         ctaTo: "/shop",
       },
       {
+        title: "Our Story",
         image: honeycombBeesImg,
         ctaTo: "/our-story",
       },
       {
+        title: "Ethical Beekeeping",
         image: beeFarmImg,
         ctaTo: "/our-story",
       },
@@ -53,14 +58,17 @@ export function getDefaultHeroSlides(p: string = "home"): HeroSlide[] {
   if (p === "bee-farming") {
     return [
       {
+        title: "Bee Farming Process",
         image: beeFarmImg,
         ctaTo: "/bee-farming",
       },
       {
+        title: "Floral Sources",
         image: beeFlowerImg,
         ctaTo: "/bee-farming",
       },
       {
+        title: "Happy Bees",
         image: honeycombBeesImg,
         ctaTo: "/bee-farming",
       },
@@ -70,14 +78,17 @@ export function getDefaultHeroSlides(p: string = "home"): HeroSlide[] {
   if (p === "blog") {
     return [
       {
+        title: "Honey Journal",
         image: honeycombBeesImg,
         ctaTo: "/blog",
       },
       {
+        title: "Recipes & Uses",
         image: honeyDrizzleImg,
         ctaTo: "/blog",
       },
       {
+        title: "Health Benefits",
         image: beeFlowerImg,
         ctaTo: "/blog",
       },
@@ -87,14 +98,17 @@ export function getDefaultHeroSlides(p: string = "home"): HeroSlide[] {
   if (p === "bulk-orders") {
     return [
       {
+        title: "Bulk Supply",
         image: honeyDrizzleImg,
         ctaTo: "/bulk-orders",
       },
       {
+        title: "Corporate Gifting",
         image: heroProductsImg,
         ctaTo: "/bulk-orders",
       },
       {
+        title: "Wholesale Honey",
         image: heroHoneyImg,
         ctaTo: "/bulk-orders",
       },
@@ -104,14 +118,17 @@ export function getDefaultHeroSlides(p: string = "home"): HeroSlide[] {
   if (p === "contact") {
     return [
       {
+        title: "Get in Touch",
         image: beeFarmImg,
         ctaTo: "/contact",
       },
       {
+        title: "Visit Our Farm",
         image: familyHoneyImg,
         ctaTo: "/contact",
       },
       {
+        title: "Customer Support",
         image: heroHoneyImg,
         ctaTo: "/contact",
       },

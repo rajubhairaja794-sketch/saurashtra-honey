@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 export type HeroSlide = {
   image: string;
   mobileImage?: string | null;
+  title: string;
   ctaTo?: string;
   ctaParams?: Record<string, string>;
 };
@@ -90,7 +91,7 @@ export function HeroSlider({
                   )}
                   <img
                     src={s.image}
-                    alt="Promotional Banner"
+                    alt={s.title}
                     className="w-full h-full object-cover object-center"
                     loading={idx === 0 ? "eager" : "lazy"}
                     // @ts-ignore: fetchpriority is valid in newer React versions
