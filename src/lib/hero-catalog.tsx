@@ -135,7 +135,7 @@ export function getDefaultHeroSlides(p: string = "home"): HeroSlide[] {
     ];
   }
 
-  return getDefaultHeroSlides("home");
+  return []; // Return empty array for unknown pages to avoid leaking Home slides
 }
 
 export async function fetchHeroSlides(page: string): Promise<HeroSlide[]> {

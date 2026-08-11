@@ -309,7 +309,8 @@ function Editor({
                 <select
                   value={f.page ?? "home"}
                   onChange={(e) => setF({ ...f, page: e.target.value })}
-                  className={inp}
+                  disabled={!!f.id}
+                  className={`${inp} ${f.id ? "opacity-50 cursor-not-allowed bg-cream/50" : ""}`}
                 >
                   {PAGE_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
