@@ -48,17 +48,17 @@ export function HeroSlider({
 
   const effVariant = variant === "home" || size === "home" || size === "md" ? "home" : "inner";
   const heightCls = effVariant === "home"
-    ? "h-[600px] max-h-[85vh] sm:h-[650px] md:h-[700px] lg:h-auto lg:aspect-[1920/700]"
-    : "h-[400px] max-h-[70vh] sm:h-[450px] md:h-[500px] lg:h-auto lg:aspect-[1920/600]";
+    ? "h-[700px] max-h-[90vh] md:h-[700px] lg:h-auto lg:aspect-[1920/700]"
+    : "h-[450px] max-h-[70vh] md:h-[500px] lg:h-auto lg:aspect-[1920/600]";
   const titleCls = effVariant === "inner"
-    ? "mt-2 font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-[1.06] font-bold text-cream"
-    : "mt-2.5 font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.04] font-bold text-cream";
+    ? "mt-2 font-serif text-[32px] md:text-4xl lg:text-5xl leading-[1.06] font-bold text-cream wrap-balance"
+    : "mt-3 font-serif text-[42px] md:text-5xl lg:text-6xl xl:text-7xl leading-[1] md:leading-[1.04] font-bold text-cream [&>span]:text-[36px] md:[&>span]:text-[inherit] break-words";
 
   if (!slides || slides.length === 0) return null;
 
   return (
     <section
-      className="relative w-full overflow-hidden bg-[#120E0C]"
+      className="relative w-full max-w-[100vw] overflow-x-hidden bg-[#120E0C]"
       onMouseEnter={() => { paused.current = true; if (timer.current) clearTimeout(timer.current); }}
       onMouseLeave={() => { paused.current = false; setI((v) => v); }}
       onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
@@ -84,7 +84,7 @@ export function HeroSlider({
                 <img
                   src={s.image}
                   alt=""
-                  className="w-full h-full object-cover object-center"
+                  className="w-full h-full object-cover object-[75%_center] md:object-center"
                 />
               </div>
               {/* Overall neutral dark film for cinematic contrast without warm/orange color cast */}
@@ -102,18 +102,19 @@ export function HeroSlider({
                       : "linear-gradient(90deg, rgba(15, 12, 10, 0.48) 0%, rgba(15, 12, 10, 0.18) 38%, rgba(15, 12, 10, 0.00) 72%)",
                 }}
               />
-              <div className="absolute inset-0 flex items-center">
-                <div className="container-page w-full py-10">
+              <div className="absolute inset-0 pointer-events-none md:hidden bg-gradient-to-r from-[#120E0C]/90 via-[#120E0C]/60 to-transparent z-[1]" />
+              <div className="absolute inset-0 flex items-center z-[2]">
+                <div className="container-page w-full py-10 px-6 md:px-8 max-w-full">
                   <div className={`grid ${s.align === "center" ? "place-items-center text-center" : "lg:grid-cols-[1fr_auto] items-center gap-10"}`}>
-                    <div className={`max-w-md md:max-w-xl lg:max-w-2xl ${s.align === "center" ? "mx-auto" : ""}`}>
-                      <div className="inline-flex items-center gap-2 bg-espresso/85 border border-burnt-orange/40 px-4.5 py-1.5 rounded-full backdrop-blur-md mb-4 shadow-md">
-                        <span className="text-[15px] sm:text-[17px] md:text-[19px] lg:text-[22px] font-semibold tracking-[0.14em] text-burnt-orange uppercase leading-snug">{s.eyebrow}</span>
+                    <div className={`w-full max-w-full md:max-w-xl lg:max-w-2xl ${s.align === "center" ? "mx-auto" : ""}`}>
+                      <div className="inline-flex max-w-[calc(100vw-48px)] items-center gap-2 bg-espresso/85 border border-burnt-orange/40 px-3 md:px-4.5 py-1.5 rounded-full backdrop-blur-md mb-4 shadow-md overflow-hidden">
+                        <span className="text-[12px] md:text-[15px] lg:text-[22px] font-semibold tracking-[0.05em] md:tracking-[0.14em] text-burnt-orange uppercase leading-snug whitespace-normal break-words min-w-0">{s.eyebrow}</span>
                       </div>
                       <h1 className={titleCls}>
                         {s.title}
                       </h1>
-                      <p className="mt-3 md:mt-5 text-cream/90 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl font-normal">{s.subtitle}</p>
-                      <div className="mt-6 md:mt-8 flex flex-wrap items-center gap-4">
+                      <p className="mt-4 md:mt-5 text-cream/90 text-[17px] md:text-lg leading-[1.45] md:leading-relaxed w-full max-w-[330px] md:max-w-xl font-normal break-words">{s.subtitle}</p>
+                      <div className="mt-6 md:mt-8 flex flex-wrap items-center gap-4 max-w-full">
                         <Link
                           to={s.ctaTo as string}
                           params={s.ctaParams as never}
@@ -157,16 +158,16 @@ export function HeroSlider({
             <button
               onClick={prev}
               aria-label="Previous slide"
-              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 size-8 md:size-10 rounded-full bg-cream/15 hover:bg-cream/35 text-cream backdrop-blur-sm flex items-center justify-center transition-colors"
+              className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 z-20 size-[42px] md:size-10 rounded-full bg-cream/15 hover:bg-cream/35 text-cream backdrop-blur-sm flex items-center justify-center transition-colors"
             >
-              <ChevronLeft className="size-4 md:size-5" />
+              <ChevronLeft className="size-5 md:size-5" />
             </button>
             <button
               onClick={next}
               aria-label="Next slide"
-              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 size-8 md:size-10 rounded-full bg-cream/15 hover:bg-cream/35 text-cream backdrop-blur-sm flex items-center justify-center transition-colors"
+              className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 z-20 size-[42px] md:size-10 rounded-full bg-cream/15 hover:bg-cream/35 text-cream backdrop-blur-sm flex items-center justify-center transition-colors"
             >
-              <ChevronRight className="size-4 md:size-5" />
+              <ChevronRight className="size-5 md:size-5" />
             </button>
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
               {slides.map((_, idx) => (
