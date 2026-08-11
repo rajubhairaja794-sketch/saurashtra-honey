@@ -327,7 +327,7 @@ export function ReviewsSection({ productSlug, productName }: { productSlug?: str
                     <video key={i} src={m.url} controls className="w-28 h-28 object-cover rounded-lg border border-border" />
                   ) : (
                     <a key={i} href={m.url} target="_blank" rel="noreferrer">
-                      <img src={m.url} alt="review" className="w-20 h-20 object-cover rounded-lg border border-border" />
+                      <img loading="lazy" src={m.url} alt="review" className="w-20 h-20 object-cover rounded-lg border border-border" />
                     </a>
                   ))}
                 </div>

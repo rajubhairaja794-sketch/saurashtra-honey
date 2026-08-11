@@ -12,6 +12,15 @@ function timeAgo(iso: string) {
   return `${Math.floor(h / 24)}d ago`;
 }
 
+// Generic, anonymized marketing data
+const GENERIC_ORDERS: Row[] = [
+  { first_name: "A customer", city: "Mumbai", product_name: "Raw Wildflower Honey", created_at: new Date(Date.now() - 15 * 60000).toISOString() },
+  { first_name: "A customer", city: "Delhi", product_name: "Pure Beeswax Tea Light Candle", created_at: new Date(Date.now() - 45 * 60000).toISOString() },
+  { first_name: "A customer", city: "Ahmedabad", product_name: "Raw Honeycomb (500g)", created_at: new Date(Date.now() - 120 * 60000).toISOString() },
+  { first_name: "A customer", city: "Bangalore", product_name: "Forest Honey", created_at: new Date(Date.now() - 180 * 60000).toISOString() },
+  { first_name: "A customer", city: "Pune", product_name: "Premium Gift Hamper", created_at: new Date(Date.now() - 300 * 60000).toISOString() },
+];
+
 export function RecentlyPurchasedPopup() {
   const { features } = useSiteSettings();
   const [rows, setRows] = useState<Row[]>([]);
@@ -21,10 +30,8 @@ export function RecentlyPurchasedPopup() {
 
   useEffect(() => {
     if (!features.recently_purchased_popup) return;
-    (async () => {
-      const { data } = await supabase.rpc("recent_public_orders", { _limit: 8 });
-      if (data) setRows(data as Row[]);
-    })();
+    // Security Fix: Do not fetch real order data. Use generic marketing data instead.
+    setRows(GENERIC_ORDERS);
   }, [features.recently_purchased_popup]);
 
   useEffect(() => {

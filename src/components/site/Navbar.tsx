@@ -347,7 +347,7 @@ export function Navbar() {
                   <li key={p.slug}>
                     <Link to="/product/$slug" params={{ slug: p.slug }} onClick={() => { setSearchOpen(false); setQ(""); }}
                       className="flex items-center gap-3 p-2 rounded-lg hover:bg-cream-deep">
-                      <img src={p.image} alt="" className="size-10 rounded object-cover" />
+                      <img loading="lazy" src={p.image} alt="" className="size-10 rounded object-cover" />
                       <span className="flex-1 text-sm truncate">{p.name}</span>
                       <span className="text-xs text-muted-foreground shrink-0">₹{p.price}</span>
                     </Link>
@@ -446,7 +446,7 @@ export function Navbar() {
                                   </Link>
                                   {dbCategories.slice(0, 5).map((cat) => (
                                     <Link key={cat.slug} to="/shop/$slug" params={{ slug: cat.slug }} onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 p-2 rounded-lg bg-white border border-border/50 shadow-sm">
-                                      <img src={cat.image} alt="" className="size-7 rounded object-cover" />
+                                      <img loading="lazy" src={cat.image} alt="" className="size-7 rounded object-cover" />
                                       <span className="text-[13px] font-medium text-espresso truncate">{cat.name}</span>
                                     </Link>
                                   ))}
@@ -460,7 +460,7 @@ export function Navbar() {
                                   {bestSellers.map(p => (
                                     <li key={p.slug}>
                                       <Link to="/product/$slug" params={{ slug: p.slug }} onClick={() => setMobileOpen(false)} className="flex items-center gap-3">
-                                        <img src={p.image} alt="" className="size-10 rounded-md object-cover border border-border/50" />
+                                        <img loading="lazy" src={p.image} alt="" className="size-10 rounded-md object-cover border border-border/50" />
                                         <div className="flex flex-col">
                                           <span className="text-[13px] font-medium text-espresso truncate">{p.name}</span>
                                           <span className="text-[11px] text-foreground/60 font-semibold">₹{p.price}</span>
@@ -484,7 +484,7 @@ export function Navbar() {
                               {/* Featured */}
                               {featuredForMenu[0] && (
                                 <Link to="/product/$slug" params={{ slug: featuredForMenu[0].slug }} onClick={() => setMobileOpen(false)} className="block relative rounded-xl overflow-hidden h-[120px] shadow-sm">
-                                  <img src={featuredForMenu[0].image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                                  <img loading="lazy" src={featuredForMenu[0].image} alt="" className="absolute inset-0 w-full h-full object-cover" />
                                   <div className="absolute inset-0 bg-gradient-to-t from-[#1A120A]/90 to-transparent" />
                                   <div className="absolute bottom-3 left-3 text-white">
                                     <p className="text-[9px] tracking-[0.25em] text-brand-orange font-bold uppercase mb-0.5">Featured</p>

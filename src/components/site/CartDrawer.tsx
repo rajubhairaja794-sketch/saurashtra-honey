@@ -107,7 +107,7 @@ export function CartDrawer() {
               <ul className="space-y-2">
                 {saved.map((i) => (
                   <li key={i.slug + i.size} className="flex gap-3 items-center bg-background border border-border rounded-xl p-2.5">
-                    <img src={i.image} alt="" className="size-12 rounded-md object-cover" />
+                    <img loading="lazy" src={i.image} alt="" className="size-12 rounded-md object-cover" />
                     <div className="flex-1 min-w-0 text-xs">
                       <div className="font-medium text-forest-dark truncate">{i.name}</div>
                       <div className="text-muted-foreground">{i.size} · ₹{i.price}</div>

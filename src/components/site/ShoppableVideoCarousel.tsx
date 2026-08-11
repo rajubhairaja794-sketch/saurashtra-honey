@@ -135,7 +135,7 @@ function ShoppableVideoCard({
             style={{ transition: `transform ${customDuration} ${customBezier}` }}
           />
         ) : (
-          <img
+          <img loading="lazy"
             src={item.thumbnail_url || item.fallbackImage}
             alt=""
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
@@ -152,7 +152,7 @@ function ShoppableVideoCard({
         {/* Left: Product Thumbnail */}
         {product && (
           <div className="shrink-0 size-10 sm:size-14 rounded-xl border border-white/20 bg-cream/10 backdrop-blur-md overflow-hidden shadow-sm">
-            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+            <img loading="lazy" src={product.image} alt={product.name} className="w-full h-full object-cover" />
           </div>
         )}
         

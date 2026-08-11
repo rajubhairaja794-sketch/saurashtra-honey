@@ -236,10 +236,10 @@ export function HomeShopByCategory({ settings }: { settings?: Record<string, any
     <section className="pt-24 pb-20 bg-[#F8F5EF] overflow-hidden relative">
       {/* PREMIUM VINTAGE ANIMATED BACKGROUND LAYER */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.15] sm:opacity-[0.18] z-0">
-        <img src="/images/bg_illustrations/floral_alpha.png" alt="" className="absolute -top-[10%] -left-[10%] sm:-left-[5%] w-[400px] sm:w-[500px] max-w-[70vw] object-contain animate-float-1" />
-        <img src="/images/bg_illustrations/honeycomb_alpha.png" alt="" className="absolute top-[15%] -right-[15%] sm:right-[5%] w-[350px] sm:w-[400px] max-w-[60vw] object-contain animate-float-2" />
-        <img src="/images/bg_illustrations/bees_alpha.png" alt="" className="absolute bottom-[25%] left-[5%] sm:left-[15%] w-[200px] sm:w-[300px] max-w-[40vw] object-contain animate-float-3" />
-        <img src="/images/bg_illustrations/dipper_alpha.png" alt="" className="absolute -bottom-[5%] -right-[10%] sm:-right-[5%] w-[350px] sm:w-[450px] max-w-[60vw] object-contain animate-float-4" />
+        <img loading="lazy" src="/images/bg_illustrations/floral_alpha.png" alt="" className="absolute -top-[10%] -left-[10%] sm:-left-[5%] w-[400px] sm:w-[500px] max-w-[70vw] object-contain animate-float-1" />
+        <img loading="lazy" src="/images/bg_illustrations/honeycomb_alpha.png" alt="" className="absolute top-[15%] -right-[15%] sm:right-[5%] w-[350px] sm:w-[400px] max-w-[60vw] object-contain animate-float-2" />
+        <img loading="lazy" src="/images/bg_illustrations/bees_alpha.png" alt="" className="absolute bottom-[25%] left-[5%] sm:left-[15%] w-[200px] sm:w-[300px] max-w-[40vw] object-contain animate-float-3" />
+        <img loading="lazy" src="/images/bg_illustrations/dipper_alpha.png" alt="" className="absolute -bottom-[5%] -right-[10%] sm:-right-[5%] w-[350px] sm:w-[450px] max-w-[60vw] object-contain animate-float-4" />
       </div>
 
       <div className="container-page mb-14 relative z-10">
@@ -585,12 +585,12 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
     <section className="relative overflow-hidden bg-[#F8F5EF] py-20 sm:py-32">
       {/* 3. Large Heritage Illustrations (Parallax Background) */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.15] sm:opacity-[0.20] z-0">
-        <img 
+        <img loading="lazy" 
           src="/images/bg_illustrations/floral_alpha.png" 
           alt="" 
           className="absolute top-[20%] -left-[10%] sm:-left-[5%] w-[450px] sm:w-[600px] max-w-[60vw] object-contain animate-float-1" 
         />
-        <img 
+        <img loading="lazy" 
           src="/images/bg_illustrations/honeycomb_alpha.png" 
           alt="" 
           className="absolute top-[40%] -right-[15%] sm:-right-[5%] w-[400px] sm:w-[500px] max-w-[60vw] object-contain animate-float-2" 
@@ -615,7 +615,7 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
           {storyPoints.map((point, idx) => (
             <div key={idx} className="flex flex-col items-center text-center">
               <div className="h-[90px] sm:h-[150px] aspect-square mb-4 sm:mb-6 transition-transform duration-700 hover:-translate-y-2 flex items-center justify-center">
-                <img src={point.img} alt={point.title} className="w-full h-full object-contain" />
+                <img loading="lazy" src={point.img} alt={point.title} className="w-full h-full object-contain" />
               </div>
               <h3 className="font-serif text-[16px] sm:text-[22px] text-espresso mb-2 sm:mb-3 font-[500] leading-tight">{point.title}</h3>
               <p className="text-[12px] sm:text-[15px] text-espresso/70 leading-relaxed max-w-[280px]">

@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, Fragment } from "react";
+import { Suspense, lazy } from "react";
 import { SiteLayout } from "@/components/site/Layout";
-import { QuickView } from "@/components/site/QuickView";
+const QuickViewLazy = lazy(() => import("@/components/site/QuickView").then(m => ({ default: m.QuickView })));
 import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel";
 import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
@@ -91,46 +92,50 @@ function Home() {
         setCmsLoaded(true);
       });
 
-    // Fetch latest blog posts for journal preview
-    void fetchPostsFn({ data: { page: 1, pageSize: 3 } }).then((res) => {
-      if (res.rows && res.rows.length > 0) {
-        setHomePosts(
-          res.rows.map((p) => ({
-            slug: p.slug,
-            title: p.title,
-            excerpt: p.excerpt || "",
-            category: p.category_name || "Journal",
-            displayDate: formatPostDate(p.published_at || p.created_at),
-            readTime: p.reading_time || "5 min read",
-            image: resolvePostImage(p.cover_image_url, p.category_name || p.slug),
-          }))
-        );
-      }
-    });
-
-    // Fetch featured reviews for testimonials
-    void (supabase
-      .from("reviews")
-      .select("id, author_name, content, rating, location") as any)
-      .eq("featured_on_homepage", true)
-      .order("created_at", { ascending: false })
-      .limit(6)
-      .then(({ data, error }: { data: any[] | null; error: any }) => {
-        if (!error && data && data.length >= 3) {
-          setReviews(data as any);
-        } else {
-          // Fallback: most recent approved reviews
-          void supabase
-            .from("reviews")
-            .select("id, author_name, content, rating, location")
-            .eq("status", "approved")
-            .order("created_at", { ascending: false })
-            .limit(6)
-            .then((res) => {
-              if (res.data && res.data.length >= 3) setReviews(res.data as any);
-            });
+    const nonCriticalTimer = setTimeout(() => {
+      // Fetch latest blog posts for journal preview
+      void fetchPostsFn({ data: { page: 1, pageSize: 3 } }).then((res) => {
+        if (res.rows && res.rows.length > 0) {
+          setHomePosts(
+            res.rows.map((p) => ({
+              slug: p.slug,
+              title: p.title,
+              excerpt: p.excerpt || "",
+              category: p.category_name || "Journal",
+              displayDate: formatPostDate(p.published_at || p.created_at),
+              readTime: p.reading_time || "5 min read",
+              image: resolvePostImage(p.cover_image_url, p.category_name || p.slug),
+            }))
+          );
         }
       });
+
+      // Fetch featured reviews for testimonials
+      void (supabase
+        .from("reviews")
+        .select("id, author_name, content, rating, location") as any)
+        .eq("featured_on_homepage", true)
+        .order("created_at", { ascending: false })
+        .limit(6)
+        .then(({ data, error }: { data: any[] | null; error: any }) => {
+          if (!error && data && data.length >= 3) {
+            setReviews(data as any);
+          } else {
+            // Fallback: most recent approved reviews
+            void supabase
+              .from("reviews")
+              .select("id, author_name, content, rating, location")
+              .eq("status", "approved")
+              .order("created_at", { ascending: false })
+              .limit(6)
+              .then((res) => {
+                if (res.data && res.data.length >= 3) setReviews(res.data as any);
+              });
+          }
+        });
+    }, 300);
+
+    return () => clearTimeout(nonCriticalTimer);
   }, []);
 
   // ─── Build ordered + filtered section list ──────────────────────────────────
@@ -221,8 +226,12 @@ function Home() {
       */}
       {orderedSections.map(renderSection)}
 
-      {/* QUICK VIEW MODAL */}
-      <QuickView product={quick} onClose={() => setQuick(null)} />
+      {/* QUICK VIEW MODAL - LAZY LOADED */}
+      {quick && (
+        <Suspense fallback={null}>
+          <QuickViewLazy product={quick} onClose={() => setQuick(null)} />
+        </Suspense>
+      )}
     </SiteLayout>
   );
 }

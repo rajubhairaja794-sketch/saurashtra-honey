@@ -4,14 +4,9 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
 export type HeroSlide = {
   image: string;
-  mobileImage?: string;
-  eyebrow: string;
-  title: React.ReactNode;
-  subtitle: string;
-  ctaText: string;
-  ctaTo: string;
+  mobileImage?: string | null;
+  ctaTo?: string;
   ctaParams?: Record<string, string>;
-  align?: "left" | "center";
 };
 
 export function HeroSlider({
@@ -47,12 +42,9 @@ export function HeroSlider({
   }, [i, interval, slides?.length]);
 
   const effVariant = variant === "home" || size === "home" || size === "md" ? "home" : "inner";
-  const heightCls = effVariant === "home"
-    ? "h-[700px] max-h-[90vh] md:h-[700px] lg:h-auto lg:aspect-[1920/700]"
-    : "h-[450px] max-h-[70vh] md:h-[500px] lg:h-auto lg:aspect-[1920/600]";
-  const titleCls = effVariant === "inner"
-    ? "mt-2 font-serif text-[32px] md:text-4xl lg:text-5xl leading-[1.06] font-bold text-cream wrap-balance"
-    : "mt-3 font-serif text-[42px] md:text-5xl lg:text-6xl xl:text-7xl leading-[1] md:leading-[1.04] font-bold text-cream [&>span]:text-[36px] md:[&>span]:text-[inherit] break-words";
+  const aspectCls = effVariant === "home" 
+    ? "aspect-square md:aspect-[1920/700]" 
+    : "aspect-square md:aspect-[1920/600]";
 
   if (!slides || slides.length === 0) return null;
 
@@ -70,7 +62,8 @@ export function HeroSlider({
       }}
       aria-roledescription="carousel"
     >
-      <div className={`relative w-full ${heightCls}`}>
+      <div className={`relative w-full ${aspectCls}`}>
+
         {slides.map((s, idx) => {
           const isActive = idx === i;
           const offset = isActive ? "translate-x-0 opacity-100 z-10" : `${dir === 1 ? "translate-x-full" : "-translate-x-full"} opacity-0 z-0`;
@@ -80,75 +73,31 @@ export function HeroSlider({
               aria-hidden={!isActive}
               className={`absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${offset}`}
             >
-              <div className="absolute inset-0 z-0">
-                <img
-                  src={s.image}
-                  alt=""
-                  className="w-full h-full object-cover object-[75%_center] md:object-center"
-                />
-              </div>
-              {/* Overall neutral dark film for cinematic contrast without warm/orange color cast */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{ backgroundColor: "rgba(18, 14, 12, 0.18)" }}
-              />
-              {/* Localized neutral gradient behind text for legibility while keeping photography original */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  backgroundImage:
-                    s.align === "center"
-                      ? "radial-gradient(ellipse at center, rgba(15, 12, 10, 0.45) 0%, rgba(15, 12, 10, 0.18) 45%, rgba(15, 12, 10, 0.00) 80%)"
-                      : "linear-gradient(90deg, rgba(15, 12, 10, 0.48) 0%, rgba(15, 12, 10, 0.18) 38%, rgba(15, 12, 10, 0.00) 72%)",
-                }}
-              />
-              <div className="absolute inset-0 pointer-events-none md:hidden bg-gradient-to-r from-[#120E0C]/90 via-[#120E0C]/60 to-transparent z-[1]" />
-              <div className="absolute inset-0 flex items-center z-[2]">
-                <div className="container-page w-full py-10 px-6 md:px-8 max-w-full">
-                  <div className={`grid ${s.align === "center" ? "place-items-center text-center" : "lg:grid-cols-[1fr_auto] items-center gap-10"}`}>
-                    <div className={`w-full max-w-full md:max-w-xl lg:max-w-2xl ${s.align === "center" ? "mx-auto" : ""}`}>
-                      <div className="inline-flex max-w-[calc(100vw-48px)] items-center gap-2 bg-espresso/85 border border-burnt-orange/40 px-3 md:px-4.5 py-1.5 rounded-full backdrop-blur-md mb-4 shadow-md overflow-hidden">
-                        <span className="text-[12px] md:text-[15px] lg:text-[22px] font-semibold tracking-[0.05em] md:tracking-[0.14em] text-burnt-orange uppercase leading-snug whitespace-normal break-words min-w-0">{s.eyebrow}</span>
-                      </div>
-                      <h1 className={titleCls}>
-                        {s.title}
-                      </h1>
-                      <p className="mt-4 md:mt-5 text-cream/90 text-[17px] md:text-lg leading-[1.45] md:leading-relaxed w-full max-w-[330px] md:max-w-xl font-normal break-words">{s.subtitle}</p>
-                      <div className="mt-6 md:mt-8 flex flex-wrap items-center gap-4 max-w-full">
-                        <Link
-                          to={s.ctaTo as string}
-                          params={s.ctaParams as never}
-                          className="inline-flex items-center gap-2.5 bg-burnt-orange hover:bg-terracotta text-white rounded-full px-7 md:px-8 py-3.5 md:py-4 text-xs md:text-sm font-bold tracking-widest shadow-lift transition-all hover:scale-105"
-                        >
-                          {s.ctaText} <ArrowRight className="size-4" />
-                        </Link>
-                      </div>
-                      {effVariant === "home" && s.align !== "center" && (
-                        <div className="mt-7 hidden sm:flex items-center gap-6 text-xs text-cream/85 font-semibold tracking-wide">
-                          <span className="flex items-center gap-2">
-                            <span className="size-2 rounded-full bg-burnt-orange" /> Lab Tested Purity
-                          </span>
-                          <span className="flex items-center gap-2">
-                            <span className="size-2 rounded-full bg-burnt-orange" /> 100% Raw & Unprocessed
-                          </span>
-                          <span className="flex items-center gap-2">
-                            <span className="size-2 rounded-full bg-burnt-orange" /> Direct From Wildflower Farms
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    {effVariant === "home" && s.align !== "center" && (
-                      <div className="hidden lg:flex items-center justify-center">
-                        <div className="size-36 rounded-full border border-burnt-orange/50 bg-espresso/70 backdrop-blur-md p-4 flex flex-col items-center justify-center text-center shadow-2xl transition-transform hover:scale-105">
-                          <span className="text-[10px] uppercase tracking-[0.25em] text-cream/80 font-bold">Saurashtra</span>
-                          <span className="font-serif text-sm font-bold text-cream mt-0.5">100% PURE</span>
-                          <span className="text-[11px] font-bold text-burnt-orange tracking-widest mt-1">LAB TESTED</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <Link 
+                to={s.ctaTo || "/"} 
+                params={s.ctaParams as never}
+                className="absolute inset-0 z-0 block cursor-pointer"
+                aria-label={`Go to ${s.ctaTo || "/"}`}
+              >
+                <picture className="w-full h-full block">
+                  {s.mobileImage && (
+                    <source 
+                      media="(max-width: 767px)" 
+                      srcSet={s.mobileImage} 
+                      // @ts-ignore: fetchpriority is valid in newer React versions
+                      fetchpriority={idx === 0 ? "high" : "auto"}
+                    />
+                  )}
+                  <img
+                    src={s.image}
+                    alt="Promotional Banner"
+                    className="w-full h-full object-cover object-center"
+                    loading={idx === 0 ? "eager" : "lazy"}
+                    // @ts-ignore: fetchpriority is valid in newer React versions
+                    fetchpriority={idx === 0 ? "high" : "auto"}
+                  />
+                </picture>
+              </Link>
             </div>
           );
         })}

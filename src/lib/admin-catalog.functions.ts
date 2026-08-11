@@ -281,15 +281,10 @@ export const listAdminSlides = createServerFn({ method: "POST" })
 const slideSchema = z.object({
   id: z.string().uuid().optional(),
   page: z.string().min(1).max(40).default("home"),
-  eyebrow: z.string().max(200).nullable().optional(),
-  title: z.string().min(1).max(200),
-  title_accent: z.string().max(200).nullable().optional(),
-  subtitle: z.string().max(500).nullable().optional(),
   image_key: z.string().max(120).nullable().optional(),
   image_url: z.string().max(2000).nullable().optional(),
-  cta_label: z.string().max(60).nullable().optional(),
+  mobile_image_url: z.string().max(2000).nullable().optional(),
   cta_href: z.string().min(1).max(300).default("/shop"),
-  align: z.enum(["left", "center"]).default("left"),
   sort_order: z.number().int().default(0),
   active: z.boolean().default(true),
 });
@@ -299,15 +294,36 @@ export const upsertSlide = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof slideSchema>) => slideSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: { session } } = await context.supabase.auth.getSession();
+    const { data: { user }, error: userError } = await context.supabase.auth.getUser();
+
+    console.log('[HERO_SAVE_AUTH]', {
+      hasSession: !!session,
+      userId: user?.id,
+      email: user?.email,
+      accessTokenExists: !!session?.access_token,
+      userError
+    });
+
     const { id, ...rest } = data;
+    
+    console.log('[HERO_SAVE_START]', {
+      operation: id ? 'UPDATE' : 'INSERT',
+      table: 'hero_slides',
+      userId: user?.id
+    });
+
     if (id) {
-      const { error } = await supabaseAdmin.from("hero_slides").update(rest as never).eq("id", id);
-      if (error) throw new Error(error.message);
+      const result = await context.supabase.from("hero_slides").update(rest as never).eq("id", id);
+      console.log('[HERO_SAVE_RESULT]', { data: result.data, error: result.error });
+      if (result.error) throw new Error(result.error.message);
       return { ok: true };
     }
-    const { error } = await supabaseAdmin.from("hero_slides").insert(rest as never);
-    if (error) throw new Error(error.message);
+    
+    const result = await context.supabase.from("hero_slides").insert(rest as never);
+    console.log('[HERO_SAVE_RESULT]', { data: result.data, error: result.error });
+    if (result.error) throw new Error(result.error.message);
     return { ok: true };
   });
 
@@ -316,8 +332,7 @@ export const deleteSlide = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("hero_slides").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("hero_slides").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

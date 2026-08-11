@@ -89,20 +89,21 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server
       }
     );
 
-    const { data, error } = await supabase.auth.getClaims(token);
-    if (error || !data?.claims) {
-      throw new Error('Unauthorized: Invalid token');
-    }
+    // Explicitly set the session so supabase-js attaches it to Postgres queries
+    await supabase.auth.setSession({
+      access_token: token,
+      refresh_token: '',
+    });
 
-    if (!data.claims.sub) {
-      throw new Error('Unauthorized: No user ID found in token');
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) {
+      throw new Error('Unauthorized: Invalid token');
     }
 
     return next({
       context: {
         supabase,
-        userId: data.claims.sub,
-        claims: data.claims,
+        userId: user.id,
       },
     });
   },
