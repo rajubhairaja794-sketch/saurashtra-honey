@@ -57,7 +57,24 @@ export function resolveImage(
   url: string | null | undefined,
   fallback: string = FALLBACK_IMAGE,
 ): string {
-  if (url && /^https?:\/\//.test(url)) return url;
+  let cleanUrl = url?.trim();
+  if (cleanUrl) {
+    if (cleanUrl.includes('lxdkcqdkfuuqjudsysrr.supabase.co') || cleanUrl.includes('/media/')) {
+       const parts = cleanUrl.split('/media/');
+       let path = parts[parts.length - 1];
+       path = path.split('?')[0].split('#')[0];
+       if (path.includes('supabase.co')) {
+           const pathParts = path.split('/');
+           path = "hero/" + pathParts[pathParts.length - 1];
+       }
+       return `https://lxdkcqdkfuuqjudsysrr.supabase.co/storage/v1/object/public/media/${path}`;
+    }
+    
+    if (/^https?:\/\//i.test(cleanUrl)) {
+      return cleanUrl;
+    }
+    return `https://lxdkcqdkfuuqjudsysrr.supabase.co/storage/v1/object/public/media/${cleanUrl.replace(/^\//, '')}`;
+  }
   if (key && imageMap[key]) return imageMap[key];
   return fallback;
 }

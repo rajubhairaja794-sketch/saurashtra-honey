@@ -80,18 +80,13 @@ export function HeroSlider({
               aria-hidden={!isActive}
               className={`absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${offset}`}
             >
-              <picture className="absolute inset-0 w-full h-full">
-                {s.mobileImage && (
-                  <source media="(max-width: 767px)" srcSet={s.mobileImage} />
-                )}
+              <div className="absolute inset-0 z-0">
                 <img
                   src={s.image}
                   alt=""
-                  className="absolute inset-0 w-full h-full object-cover object-center"
-                  fetchPriority={idx === 0 ? "high" : "low"}
-                  loading={idx === 0 ? "eager" : "lazy"}
+                  className="w-full h-full object-cover object-center"
                 />
-              </picture>
+              </div>
               {/* Overall neutral dark film for cinematic contrast without warm/orange color cast */}
               <div
                 className="absolute inset-0 pointer-events-none"

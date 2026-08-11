@@ -580,12 +580,14 @@ function Editor({
                 isHome ? "aspect-[1920/700]" : "aspect-[1920/600]"
               }`}
             >
-              <img
-                src={previewImage}
-                alt={f.title || "Preview"}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-espresso/80 via-espresso/45 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 z-0">
+                <img
+                  src={previewImage}
+                  alt={f.title || "Preview"}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-espresso/80 via-espresso/45 to-transparent pointer-events-none z-0" />
 
               <div className="absolute inset-0 flex flex-col justify-center p-6 text-cream z-10">
                 {f.eyebrow && (
