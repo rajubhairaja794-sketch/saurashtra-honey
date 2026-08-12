@@ -11,8 +11,8 @@ import { z } from "zod";
 // Photographic assets
 import ajwainImg from "@/assets/prod-ajwain.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
-import beeFarmImg from "@/assets/bee-farm.webp";
-import honeycombBeesImg from "@/assets/honeycomb-bees.webp";
+import beeFarmImg from "@/assets/bee-farm.jpg";
+import honeycombBeesImg from "@/assets/honeycomb-bees.jpg";
 
 export const Route = createFileRoute("/private-label")({
   head: () => ({

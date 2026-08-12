@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import honeyFallback from "@/assets/hero-honey.webp";
+import honeyFallback from "@/assets/hero-honey.jpg";
 import beeswaxFallback from "@/assets/prod-honeycomb.jpg";
 import pollenFallback from "@/assets/mortar-herbs.jpg";
-import candleFallback from "@/assets/honeycomb-bees.webp";
+import candleFallback from "@/assets/honeycomb-bees.jpg";
 import giftpackFallback from "@/assets/prod-giftpack.jpg";
 import beautyFallback from "@/assets/prod-lychee.jpg";
 import allProductsFallback from "@/assets/hero-products.jpg";
@@ -93,7 +93,7 @@ export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler
     .map((r: Row) => ({
       slug: r.slug,
       name: r.name,
-      image: r.image_url || FALLBACK_IMAGE_BY_SLUG[r.slug] || honeyFallback,
+      image: r.image_url ? `${r.image_url}${r.image_url.includes('?') ? '&' : '?'}v=${new Date(r.updated_at).getTime()}` : (FALLBACK_IMAGE_BY_SLUG[r.slug] || honeyFallback),
       hasCustomImage: !!r.image_url,
       updatedAt: r.updated_at,
     }));

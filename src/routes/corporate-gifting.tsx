@@ -11,7 +11,7 @@ import { z } from "zod";
 // Photographic assets
 import giftPackImg from "@/assets/prod-giftpack.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
-import familyHoneyImg from "@/assets/family-honey.webp";
+import familyHoneyImg from "@/assets/family-honey.jpg";
 
 export const Route = createFileRoute("/corporate-gifting")({
   head: () => ({

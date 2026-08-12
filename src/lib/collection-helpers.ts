@@ -1,14 +1,14 @@
 import type { Product } from "@/lib/products";
 import type { ShopCategory } from "@/lib/category-catalog";
 
-import heroHoneyImg from "@/assets/hero-honey.webp";
-import honeycombBeesImg from "@/assets/honeycomb-bees.webp";
+import heroHoneyImg from "@/assets/hero-honey.jpg";
+import honeycombBeesImg from "@/assets/honeycomb-bees.jpg";
 import beeFlowerImg from "@/assets/bee-flower.jpg";
 import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
-import familyHoneyImg from "@/assets/family-honey.webp";
+import familyHoneyImg from "@/assets/family-honey.jpg";
 import prodGiftpackImg from "@/assets/prod-giftpack.jpg";
-import beeFarmImg from "@/assets/bee-farm.webp";
-import teamBeekeepersImg from "@/assets/team-beekeepers.webp";
+import beeFarmImg from "@/assets/bee-farm.jpg";
+import teamBeekeepersImg from "@/assets/team-beekeepers.jpg";
 import prodLiquidImg from "@/assets/prod-liquid.jpg";
 import prodHoneycombImg from "@/assets/prod-honeycomb.jpg";
 

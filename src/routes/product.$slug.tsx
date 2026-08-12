@@ -22,7 +22,7 @@ import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { StructuredData, breadcrumbLd, productLd } from "@/components/site/StructuredData";
 import { getCategorySlug } from "@/lib/collection-helpers";
 import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel";
-import honeyProcessImg from "@/assets/honey-process-infographic.webp";
+import honeyProcessImg from "@/assets/honey-process-infographic.png";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: async ({ params }) => {

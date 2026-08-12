@@ -10,8 +10,8 @@ import { z } from "zod";
 
 // Photographic assets
 import heroProductsImg from "@/assets/hero-products.jpg";
-import beeFarmImg from "@/assets/bee-farm.webp";
-import familyHoneyImg from "@/assets/family-honey.webp";
+import beeFarmImg from "@/assets/bee-farm.jpg";
+import familyHoneyImg from "@/assets/family-honey.jpg";
 
 export const Route = createFileRoute("/bulk-orders")({
   head: () => ({

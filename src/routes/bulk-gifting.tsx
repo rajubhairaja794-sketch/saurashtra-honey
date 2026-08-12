@@ -10,9 +10,9 @@ import { ArrowRight, Package, Gift, Sparkles, Tag, ShieldCheck, HeartHandshake, 
 // Photographic assets
 import heroProductsImg from "@/assets/hero-products.jpg";
 import giftPackImg from "@/assets/prod-giftpack.jpg";
-import heroHoneyImg from "@/assets/hero-honey.webp";
+import heroHoneyImg from "@/assets/hero-honey.jpg";
 import ajwainImg from "@/assets/prod-ajwain.jpg";
-import beeFarmImg from "@/assets/bee-farm.webp";
+import beeFarmImg from "@/assets/bee-farm.jpg";
 
 export const Route = createFileRoute("/bulk-gifting")({
   head: () => ({

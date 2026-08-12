@@ -7,13 +7,3 @@ VITE_SUPABASE_URL = "https://lxdkcqdkfuuqjudsysrr.supabase.co"
 VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_E3rv2tJCU_jTt1wL_TyWDQ_u1_9ztgY"
 SUPABASE_URL = "https://lxdkcqdkfuuqjudsysrr.supabase.co"
 SUPABASE_PUBLISHABLE_KEY = "sb_publishable_E3rv2tJCU_jTt1wL_TyWDQ_u1_9ztgY"
-
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"

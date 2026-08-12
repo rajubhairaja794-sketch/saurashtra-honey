@@ -5,13 +5,13 @@ import type { HeroSlide } from "@/components/site/HeroSlider";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import heroHoneyImg from "@/assets/hero-honey.webp";
+import heroHoneyImg from "@/assets/hero-honey.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
 import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
-import honeycombBeesImg from "@/assets/honeycomb-bees.webp";
+import honeycombBeesImg from "@/assets/honeycomb-bees.jpg";
 import beeFlowerImg from "@/assets/bee-flower.jpg";
-import beeFarmImg from "@/assets/bee-farm.webp";
-import familyHoneyImg from "@/assets/family-honey.webp";
+import beeFarmImg from "@/assets/bee-farm.jpg";
+import familyHoneyImg from "@/assets/family-honey.jpg";
 
 export type HeroRow = {
   id: string;

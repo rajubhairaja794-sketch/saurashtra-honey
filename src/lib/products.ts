@@ -5,18 +5,18 @@ import multiflora from "@/assets/prod-multiflora.jpg";
 import squeeze from "@/assets/prod-squeeze.jpg";
 import honeycomb from "@/assets/prod-honeycomb.jpg";
 import giftpack from "@/assets/prod-giftpack.jpg";
-import beeswaxPellets from "@/assets/prod-beeswax-pellets.webp";
-import beePollen from "@/assets/prod-bee-pollen.webp";
-import beeswaxCandles from "@/assets/prod-beeswax-candles.webp";
-import beautyProducts from "@/assets/prod-beauty.webp";
-import luxuryHamper from "@/assets/prod-luxury-hamper.webp";
-import beeFarm from "@/assets/bee-farm.webp";
+import beeswaxPellets from "@/assets/prod-beeswax-pellets.png";
+import beePollen from "@/assets/prod-bee-pollen.png";
+import beeswaxCandles from "@/assets/prod-beeswax-candles.png";
+import beautyProducts from "@/assets/prod-beauty.png";
+import luxuryHamper from "@/assets/prod-luxury-hamper.png";
+import beeFarm from "@/assets/bee-farm.jpg";
 import beeFlower from "@/assets/bee-flower.jpg";
-import familyHoney from "@/assets/family-honey.webp";
+import familyHoney from "@/assets/family-honey.jpg";
 import honeyDrizzle from "@/assets/honey-drizzle.jpg";
-import honeycombBees from "@/assets/honeycomb-bees.webp";
+import honeycombBees from "@/assets/honeycomb-bees.jpg";
 import prodLiquid from "@/assets/prod-liquid.jpg";
-import teamBeekeepers from "@/assets/team-beekeepers.webp";
+import teamBeekeepers from "@/assets/team-beekeepers.jpg";
 
 export type ProductVariant = {
   id?: string;

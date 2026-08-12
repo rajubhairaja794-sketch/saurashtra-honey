@@ -10,7 +10,7 @@ import { z } from "zod";
 
 // Photographic assets
 import giftPackImg from "@/assets/prod-giftpack.jpg";
-import heroHoneyImg from "@/assets/hero-honey.webp";
+import heroHoneyImg from "@/assets/hero-honey.jpg";
 import beeFlowerImg from "@/assets/bee-flower.jpg";
 
 export const Route = createFileRoute("/gift-hampers")({

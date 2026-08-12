@@ -1,0 +1,1 @@
+var e=`/assets/hero-honey-_5XoWxQ5.jpg`;export{e as t};

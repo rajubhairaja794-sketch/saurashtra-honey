@@ -5,18 +5,18 @@ import multiflora from "@/assets/prod-multiflora.jpg";
 import squeeze from "@/assets/prod-squeeze.jpg";
 import honeycomb from "@/assets/prod-honeycomb.jpg";
 import giftpack from "@/assets/prod-giftpack.jpg";
-import hero from "@/assets/hero-honey.webp";
-import beeFarm from "@/assets/bee-farm.webp";
+import hero from "@/assets/hero-honey.jpg";
+import beeFarm from "@/assets/bee-farm.jpg";
 import drizzle from "@/assets/honey-drizzle.jpg";
-import family from "@/assets/family-honey.webp";
+import family from "@/assets/family-honey.jpg";
 import beeFlower from "@/assets/bee-flower.jpg";
 import liquid from "@/assets/prod-liquid.jpg";
-import team from "@/assets/team-beekeepers.webp";
-import beeswaxPellets from "@/assets/prod-beeswax-pellets.webp";
-import beePollen from "@/assets/prod-bee-pollen.webp";
-import beeswaxCandles from "@/assets/prod-beeswax-candles.webp";
-import beautyProducts from "@/assets/prod-beauty.webp";
-import luxuryHamper from "@/assets/prod-luxury-hamper.webp";
+import team from "@/assets/team-beekeepers.jpg";
+import beeswaxPellets from "@/assets/prod-beeswax-pellets.png";
+import beePollen from "@/assets/prod-bee-pollen.png";
+import beeswaxCandles from "@/assets/prod-beeswax-candles.png";
+import beautyProducts from "@/assets/prod-beauty.png";
+import luxuryHamper from "@/assets/prod-luxury-hamper.png";
 
 export const imageMap: Record<string, string> = {
   "ajwain-honey": ajwain,
@@ -77,6 +77,14 @@ export function resolveImage(
     }
   } else if (key && imageMap[key]) {
       resultUrl = imageMap[key];
+  }
+  
+  if (updatedAt && resultUrl.includes('lxdkcqdkfuuqjudsysrr.supabase.co')) {
+      const ts = new Date(updatedAt).getTime();
+      if (!isNaN(ts)) {
+          const separator = resultUrl.includes('?') ? '&' : '?';
+          resultUrl += `${separator}v=${ts}`;
+      }
   }
   
   return resultUrl;

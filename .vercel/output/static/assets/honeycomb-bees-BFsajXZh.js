@@ -1,0 +1,1 @@
+var e=`/assets/honeycomb-bees-C0mOiH5S.jpg`;export{e as t};

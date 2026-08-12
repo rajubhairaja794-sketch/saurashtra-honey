@@ -31,13 +31,13 @@ import {
 } from "@/lib/homepage-cms.functions";
 
 // Assets
-import heroHoneyImg from "@/assets/hero-honey.webp";
+import heroHoneyImg from "@/assets/hero-honey.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
 import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
-import honeycombBeesImg from "@/assets/honeycomb-bees.webp";
+import honeycombBeesImg from "@/assets/honeycomb-bees.jpg";
 import beeFlowerImg from "@/assets/bee-flower.jpg";
-import beeFarmImg from "@/assets/bee-farm.webp";
-import familyHoneyImg from "@/assets/family-honey.webp";
+import beeFarmImg from "@/assets/bee-farm.jpg";
+import familyHoneyImg from "@/assets/family-honey.jpg";
 
 import prodAjwainImg from "@/assets/prod-ajwain.jpg";
 import prodLycheeImg from "@/assets/prod-lychee.jpg";
@@ -91,7 +91,7 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
   const fallbackItems = [
     { label: "100% Pure No Additives", img: "/images/trust/pure_no_additives.png" },
     { label: "Raw & Unprocessed", img: "/images/trust/raw_unprocessed.png" },
-    { label: "Natural Floral Sources", img: "/images/trust/natural_floral.webp" },
+    { label: "Natural Floral Sources", img: "/images/trust/natural_floral.png" },
     { label: "Rich in Nutrients", img: "/images/trust/rich_nutrients.png" },
     { label: "Lab Tested", img: "/images/trust/lab_tested.png" },
     { label: "Ethical Beekeeping", img: "/images/trust/ethical_beekeeping.png" },
@@ -223,8 +223,8 @@ export function HomeShopByCategory({ settings }: { settings?: Record<string, any
       <div className="absolute inset-0 pointer-events-none opacity-[0.15] sm:opacity-[0.18] z-0">
         <img loading="lazy" src="/images/bg_illustrations/floral_alpha.png" alt="" className="absolute -top-[10%] -left-[10%] sm:-left-[5%] w-[400px] sm:w-[500px] max-w-[70vw] object-contain animate-float-1" />
         <img loading="lazy" src="/images/bg_illustrations/honeycomb_alpha.png" alt="" className="absolute top-[15%] -right-[15%] sm:right-[5%] w-[350px] sm:w-[400px] max-w-[60vw] object-contain animate-float-2" />
-        <img loading="lazy" src="/images/bg_illustrations/bees_alpha.webp" alt="" className="absolute bottom-[25%] left-[5%] sm:left-[15%] w-[200px] sm:w-[300px] max-w-[40vw] object-contain animate-float-3" />
-        <img loading="lazy" src="/images/bg_illustrations/dipper_alpha.webp" alt="" className="absolute -bottom-[5%] -right-[10%] sm:-right-[5%] w-[350px] sm:w-[450px] max-w-[60vw] object-contain animate-float-4" />
+        <img loading="lazy" src="/images/bg_illustrations/bees_alpha.png" alt="" className="absolute bottom-[25%] left-[5%] sm:left-[15%] w-[200px] sm:w-[300px] max-w-[40vw] object-contain animate-float-3" />
+        <img loading="lazy" src="/images/bg_illustrations/dipper_alpha.png" alt="" className="absolute -bottom-[5%] -right-[10%] sm:-right-[5%] w-[350px] sm:w-[450px] max-w-[60vw] object-contain animate-float-4" />
       </div>
 
       <div className="container-page mb-14 relative z-10">
@@ -548,22 +548,22 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
     {
       title: "From Hive to Home",
       desc: "Carefully harvested honey, brought directly from nature to your home.",
-      img: "/images/heritage/illus_hive_to_home.webp"
+      img: "/images/heritage/illus_hive_to_home.png"
     },
     {
       title: "Wildflower Richness",
       desc: "Naturally influenced by the diverse flowers surrounding our hives.",
-      img: "/images/heritage/illus_wildflower.webp"
+      img: "/images/heritage/illus_wildflower.png"
     },
     {
       title: "Pure by Nature",
       desc: "No unnecessary additives — just naturally pure honey.",
-      img: "/images/heritage/illus_pure.webp"
+      img: "/images/heritage/illus_pure.png"
     },
     {
       title: "Responsible Beekeeping",
       desc: "Thoughtful beekeeping practices that respect bees and their natural environment.",
-      img: "/images/heritage/illus_beekeeping.webp"
+      img: "/images/heritage/illus_beekeeping.png"
     }
   ];
 
@@ -591,7 +591,7 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
         <div className="w-full max-w-5xl mx-auto mb-20 sm:mb-28 rounded-[20px] sm:rounded-[32px] overflow-hidden shadow-2xl shadow-espresso/5 bg-[#F8F5EF] p-2 sm:p-4 border border-border/40">
           <div className="rounded-xl sm:rounded-[24px] overflow-hidden relative group">
             <img 
-              src="/images/heritage/cinematic.webp" 
+              src="/images/heritage/cinematic.png" 
               alt="Authentic Indian Beekeeping"
               className="w-full h-auto aspect-[4/3] sm:aspect-[21/9] object-cover transform transition-transform duration-[20s] ease-out group-hover:scale-105"
               loading="lazy"
