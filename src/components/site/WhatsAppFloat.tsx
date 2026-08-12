@@ -1,5 +1,5 @@
 import { useSiteSettings } from "@/lib/site-settings";
-import whatsappLogo from "@/assets/whatsapp-logo.png";
+import whatsappLogo from "@/assets/whatsapp-logo.webp";
 
 export function WhatsAppFloat() {
   const { whatsapp } = useSiteSettings();

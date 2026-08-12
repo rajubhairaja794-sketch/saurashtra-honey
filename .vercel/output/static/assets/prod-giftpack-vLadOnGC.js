@@ -1,1 +1,0 @@
-var e=`/assets/prod-lychee-CEQKBjKQ.jpg`,t=`/assets/prod-honeycomb-D8_aKc35.jpg`,n=`/assets/prod-giftpack-ysMgcFCY.jpg`;export{t as n,e as r,n as t};

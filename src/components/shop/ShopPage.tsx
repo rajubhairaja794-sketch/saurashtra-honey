@@ -28,15 +28,15 @@ import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
 
 // Assets for Shop Hero and Discover By Shop collections
 import heroProductsImg from "@/assets/hero-products.jpg";
-import heroHoneyImg from "@/assets/hero-honey.jpg";
+import heroHoneyImg from "@/assets/hero-honey.webp";
 import prodMultifloraImg from "@/assets/prod-multiflora.jpg";
 import prodHoneycombImg from "@/assets/prod-honeycomb.jpg";
 import prodGiftpackImg from "@/assets/prod-giftpack.jpg";
-import honeycombBeesImg from "@/assets/honeycomb-bees.jpg";
+import honeycombBeesImg from "@/assets/honeycomb-bees.webp";
 import prodLiquidImg from "@/assets/prod-liquid.jpg";
 import beeFlowerImg from "@/assets/bee-flower.jpg";
 import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
-import familyHoneyImg from "@/assets/family-honey.jpg";
+import familyHoneyImg from "@/assets/family-honey.webp";
 
 export function ShopPage({ overrideCategorySlug }: { overrideCategorySlug?: string }) {
   const search = useSearch({ strict: false }) as Record<string, any>;

@@ -78,12 +78,12 @@ function useDragScroll() {
 }
 
 // Assets matching our warm golden farm-origin photography
-import beeFarmImg from "@/assets/bee-farm.jpg";
+import beeFarmImg from "@/assets/bee-farm.webp";
 import beeFlowerImg from "@/assets/bee-flower.jpg";
 import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
-import combImg from "@/assets/honeycomb-bees.jpg";
-import familyImg from "@/assets/family-honey.jpg";
+import combImg from "@/assets/honeycomb-bees.webp";
+import familyImg from "@/assets/family-honey.webp";
 import ajwainImg from "@/assets/prod-ajwain.jpg";
 
 type BlogSearch = {

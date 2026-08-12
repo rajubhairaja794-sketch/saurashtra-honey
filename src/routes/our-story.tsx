@@ -13,10 +13,10 @@ import { SiteLayout } from "@/components/site/Layout";
 import { StructuredData, breadcrumbLd, organizationLd } from "@/components/site/StructuredData";
 
 // Assets matching the Our Story photographic language
-import heroHoneyImg from "@/assets/hero-honey.jpg";
-import beeFarmImg from "@/assets/bee-farm.jpg";
-import honeycombBeesImg from "@/assets/honeycomb-bees.jpg";
-import familyHoneyImg from "@/assets/family-honey.jpg";
+import heroHoneyImg from "@/assets/hero-honey.webp";
+import beeFarmImg from "@/assets/bee-farm.webp";
+import honeycombBeesImg from "@/assets/honeycomb-bees.webp";
+import familyHoneyImg from "@/assets/family-honey.webp";
 import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
 import beeFlowerImg from "@/assets/bee-flower.jpg";

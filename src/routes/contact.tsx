@@ -21,7 +21,7 @@ import { z } from "zod";
 // Assets matching our warm golden farm-origin photography
 import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
-import beeFarmImg from "@/assets/bee-farm.jpg";
+import beeFarmImg from "@/assets/bee-farm.webp";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({

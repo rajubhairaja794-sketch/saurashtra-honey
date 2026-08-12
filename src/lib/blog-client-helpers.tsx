@@ -1,10 +1,10 @@
 import React from "react";
 import drizzle from "@/assets/honey-drizzle.jpg";
-import beeFarm from "@/assets/bee-farm.jpg";
+import beeFarm from "@/assets/bee-farm.webp";
 import beeFlower from "@/assets/bee-flower.jpg";
-import comb from "@/assets/honeycomb-bees.jpg";
+import comb from "@/assets/honeycomb-bees.webp";
 import ajwain from "@/assets/prod-ajwain.jpg";
-import family from "@/assets/family-honey.jpg";
+import family from "@/assets/family-honey.webp";
 
 export function resolvePostImage(url?: string | null, categoryOrSlug?: string | null): string {
   if (url && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/"))) {
