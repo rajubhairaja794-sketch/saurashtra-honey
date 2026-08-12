@@ -24,6 +24,7 @@ type Row = {
   attributes?: unknown;
   additional_images?: unknown;
   show_on_homepage: boolean | null;
+  updated_at: string;
 };
 
 type VariantRow = {
@@ -84,6 +85,7 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     r.image_key,
     r.image_url,
     galleryImages && galleryImages.length > 0 ? galleryImages[0] : fallbackImage(r.slug),
+    r.updated_at
   );
 
   const rawAdditional = Array.isArray(r.additional_images)
@@ -120,6 +122,7 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
         ? (r.attributes as Record<string, string | string[]>)
         : undefined,
     showOnHomepage: !!r.show_on_homepage,
+    updatedAt: r.updated_at,
   };
 }
 
@@ -147,7 +150,7 @@ export async function fetchProducts(): Promise<Product[]> {
   try {
     const { data, error } = await supabase
       .from("products")
-      .select("id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,image_key,image_url,images,attributes,show_on_homepage")
+      .select("id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,image_key,image_url,images,attributes,show_on_homepage,updated_at")
       .eq("status", "published")
       .order("sort_order", { ascending: true });
     
@@ -173,7 +176,7 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
   try {
     const { data, error } = await supabase
       .from("products")
-      .select("id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,image_key,image_url,images,attributes,show_on_homepage")
+      .select("id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,image_key,image_url,images,attributes,show_on_homepage,updated_at")
       .eq("slug", slug)
       .maybeSingle();
 

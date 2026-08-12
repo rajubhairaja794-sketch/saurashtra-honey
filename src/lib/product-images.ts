@@ -56,8 +56,10 @@ export function resolveImage(
   key: string | null | undefined,
   url: string | null | undefined,
   fallback: string = FALLBACK_IMAGE,
+  updatedAt?: string | null,
 ): string {
   let cleanUrl = url?.trim();
+  let resultUrl = fallback;
   if (cleanUrl) {
     if (cleanUrl.includes('lxdkcqdkfuuqjudsysrr.supabase.co') || cleanUrl.includes('/media/')) {
        const parts = cleanUrl.split('/media/');
@@ -67,14 +69,23 @@ export function resolveImage(
            const pathParts = path.split('/');
            path = "hero/" + pathParts[pathParts.length - 1];
        }
-       return `https://lxdkcqdkfuuqjudsysrr.supabase.co/storage/v1/object/public/media/${path}`;
+       resultUrl = `https://lxdkcqdkfuuqjudsysrr.supabase.co/storage/v1/object/public/media/${path}`;
+    } else if (/^https?:\/\//i.test(cleanUrl)) {
+      resultUrl = cleanUrl;
+    } else {
+      resultUrl = `https://lxdkcqdkfuuqjudsysrr.supabase.co/storage/v1/object/public/media/${cleanUrl.replace(/^\//, '')}`;
     }
-    
-    if (/^https?:\/\//i.test(cleanUrl)) {
-      return cleanUrl;
-    }
-    return `https://lxdkcqdkfuuqjudsysrr.supabase.co/storage/v1/object/public/media/${cleanUrl.replace(/^\//, '')}`;
+  } else if (key && imageMap[key]) {
+      resultUrl = imageMap[key];
   }
-  if (key && imageMap[key]) return imageMap[key];
-  return fallback;
+  
+  if (updatedAt && resultUrl.includes('lxdkcqdkfuuqjudsysrr.supabase.co')) {
+      const ts = new Date(updatedAt).getTime();
+      if (!isNaN(ts)) {
+          const separator = resultUrl.includes('?') ? '&' : '?';
+          resultUrl += `${separator}v=${ts}`;
+      }
+  }
+  
+  return resultUrl;
 }

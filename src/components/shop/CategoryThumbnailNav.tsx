@@ -19,22 +19,12 @@ export function CategoryThumbnailNav({
   const normalizedActive =
     activeCategory.toLowerCase() === "all products" ||
     activeCategory.toLowerCase() === "all"
-      ? "all honey"
+      ? "all products"
       : activeCategory.toLowerCase();
 
-  // Create the "All Honey" default category
-  const allCategory = {
-    id: "all",
-    name: "All Honey",
-    slug: "all",
-    image: heroProductsImg,
-    description: "",
-    is_active: true,
-  };
-
   // Combine All Honey + Supabase Categories
-  // The backend already filters by active, so we just append them
-  const displayCategories = [allCategory, ...categories];
+  // The backend already filters by active, and includes All Products as the first item.
+  const displayCategories = categories;
 
   return (
     <section className="bg-[#F8F5EF] pt-8 pb-6 border-b border-border/60 overflow-hidden select-none">
@@ -52,12 +42,7 @@ export function CategoryThumbnailNav({
               <button
                 key={cat.slug}
                 onClick={() => {
-                  // If they click "All Honey", we pass "All Products" to keep existing shop logic intact
-                  if (cat.name === "All Honey") {
-                    onSelectCategory("All Products");
-                  } else {
-                    onSelectCategory(cat.name);
-                  }
+                  onSelectCategory(cat.name);
                 }}
                 className={`flex flex-col items-center gap-3 shrink-0 snap-start group outline-none`}
               >
@@ -73,6 +58,7 @@ export function CategoryThumbnailNav({
                   `}
                 >
                   <img
+                    key={cat.updatedAt || cat.image}
                     src={cat.image || heroProductsImg}
                     alt={cat.name}
                     className={`w-full h-full object-cover transition-transform duration-500 ${

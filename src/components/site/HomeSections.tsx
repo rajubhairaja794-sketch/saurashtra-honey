@@ -191,26 +191,13 @@ export function HomeShopByCategory({ settings }: { settings?: Record<string, any
   React.useEffect(() => {
     fetchShopCategories()
       .then((allCats) => {
-        const REQUIRED_ORDER = [
-          "all-products",
-          "honey",
-          "beeswax",
-          "bee-pollen",
-          "beeswax-candle",
-          "beeswax-products",
-          "beauty-products"
-        ];
-        
-        // Sort exactly as requested and only include active categories
-        const baseCats = REQUIRED_ORDER
-          .map(slug => allCats.find(c => c.slug === slug))
-          .filter(Boolean)
-          .map(cat => ({
-            name: cat!.name,
-            img: cat!.image || prodLiquidImg,
-            filter: cat!.name,
-            slug: cat!.slug
-          }));
+        const baseCats = allCats.map(cat => ({
+          name: cat.name,
+          img: cat.image,
+          filter: cat.name,
+          slug: cat.slug,
+          updatedAt: cat.updatedAt
+        }));
         
         setDisplayCats([...baseCats, ...baseCats, ...baseCats]);
       })
@@ -296,6 +283,7 @@ export function HomeShopByCategory({ settings }: { settings?: Record<string, any
                   {/* Image Section */}
                   <div className="flex-1 w-full overflow-hidden bg-[#F8F5EF]/50">
                     <img 
+                      key={cat.updatedAt || cat.img}
                       src={cat.img} 
                       alt={cat.name}
                       loading="lazy"

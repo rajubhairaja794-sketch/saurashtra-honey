@@ -57,7 +57,7 @@ export function ProductCard({ p, onQuickView }: { p: Product; onQuickView?: (p: 
           </button>
         </div>
         <Link to="/product/$slug" params={{ slug: p.slug }} onClick={() => track("select_item", { items: [toItem(p, { size })] })} className="block w-full h-full">
-          <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover object-center md:group-hover:scale-108 transition-transform duration-700 ease-out" />
+          <img key={p.updatedAt || p.image} src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover object-center md:group-hover:scale-108 transition-transform duration-700 ease-out" />
         </Link>
         {onQuickView && (
           <button

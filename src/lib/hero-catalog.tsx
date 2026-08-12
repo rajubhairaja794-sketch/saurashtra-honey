@@ -23,14 +23,18 @@ export type HeroRow = {
   cta_href: string;
   sort_order: number;
   active: boolean;
+  updated_at: string;
 };
 
 export function heroRowToSlide(r: HeroRow): HeroSlide {
   return {
     title: r.title || "Promotional Banner",
-    image: resolveImage(r.image_key, r.image_url, FALLBACK_IMAGE),
-    mobileImage: r.mobile_image_url || undefined,
+    image: resolveImage(r.image_key, r.image_url, FALLBACK_IMAGE, r.updated_at),
+    mobileImage: r.mobile_image_url 
+      ? `${r.mobile_image_url}${r.mobile_image_url.includes('?') ? '&' : '?'}v=${new Date(r.updated_at).getTime()}` 
+      : undefined,
     ctaTo: r.cta_href || "/shop",
+    updatedAt: r.updated_at,
   };
 }
 

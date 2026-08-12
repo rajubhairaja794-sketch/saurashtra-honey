@@ -85,11 +85,11 @@ const catSchema = z.object({
 export async function seedDefaultCategoriesIfEmpty(supabaseAdmin: SB) {
   try {
     const defaults = [
-      { slug: "honey", name: "Honey", sort_order: 1, active: true },
-      { slug: "beeswax", name: "Beeswax", sort_order: 2, active: true },
-      { slug: "bee-pollen", name: "Bee Pollen", sort_order: 3, active: true },
-      { slug: "beeswax-candle", name: "Beeswax Candle", sort_order: 4, active: true },
-      { slug: "beeswax-products", name: "Beeswax Products", sort_order: 5, active: true },
+      { slug: "all-products", name: "All Products", sort_order: 1, active: true },
+      { slug: "honey", name: "Honey", sort_order: 2, active: true },
+      { slug: "beeswax", name: "Beeswax", sort_order: 3, active: true },
+      { slug: "bee-pollen", name: "Bee Pollen", sort_order: 4, active: true },
+      { slug: "beeswax-candle", name: "Beeswax Candles", sort_order: 5, active: true },
       { slug: "beauty-products", name: "Beauty Products", sort_order: 6, active: true },
     ];
     await supabaseAdmin
@@ -610,10 +610,10 @@ export const listMedia = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const withUrls = await Promise.all(
       (rows ?? []).map(async (r: { bucket: string; path: string }) => {
-        const { data: signed } = await supabaseAdmin.storage
+        const { data: pub } = supabaseAdmin.storage
           .from(r.bucket)
-          .createSignedUrl(r.path, 60 * 60);
-        return { ...r, url: signed?.signedUrl ?? null };
+          .getPublicUrl(r.path);
+        return { ...r, url: pub?.publicUrl ?? null };
       }),
     );
     return { rows: withUrls };
@@ -688,14 +688,14 @@ export const uploadMedia = createServerFn({ method: "POST" })
       .select("id,bucket,path")
       .single();
     if (error) throw new Error(error.message);
-    const { data: signed } = await supabaseAdmin.storage
+    const { data: pub } = supabaseAdmin.storage
       .from(data.bucket)
-      .createSignedUrl(path, 60 * 60);
+      .getPublicUrl(path);
     await audit(context.userId, "media.upload", "media", row.id, {
       filename: data.filename,
       bucket: data.bucket,
     });
-    return { id: row.id, url: signed?.signedUrl ?? null, path };
+    return { id: row.id, url: pub?.publicUrl ?? null, path };
   });
 
 /* -------------------- USERS / ROLES -------------------- */

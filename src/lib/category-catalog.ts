@@ -15,6 +15,7 @@ export type ShopCategory = {
   image: string;
   /** Whether the image came from the Admin-managed image_url (vs. a local fallback). */
   hasCustomImage: boolean;
+  updatedAt?: string;
 };
 
 type Row = {
@@ -23,6 +24,7 @@ type Row = {
   image_url: string | null;
   sort_order: number;
   active: boolean;
+  updated_at: string;
 };
 
 // High-resolution local fallback photos so the storefront never renders an empty or
@@ -48,7 +50,6 @@ export const DEFAULT_SHOP_CATEGORIES: ShopCategory[] = [
   { slug: "beeswax", name: "Beeswax" },
   { slug: "bee-pollen", name: "Bee Pollen" },
   { slug: "beeswax-candle", name: "Beeswax Candles" },
-  { slug: "beeswax-products", name: "Beeswax Products" },
   { slug: "beauty-products", name: "Beauty Products" },
 ].map((c) => ({
   ...c,
@@ -73,6 +74,8 @@ const DISALLOWED_SLUGS = [
   "skin-care",
   "wood-leather-care",
   "single-flora",
+  "multiflora",
+  "beeswax-products"
 ];
 
 export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler(async () => {
@@ -81,7 +84,7 @@ export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler
   await seedDefaultCategoriesIfEmpty(supabaseAdmin);
   const { data, error } = await supabaseAdmin
     .from("categories")
-    .select("slug,name,image_url,sort_order,active")
+    .select("slug,name,image_url,sort_order,active,updated_at")
     .eq("active", true)
     .order("sort_order", { ascending: true });
   if (error) throw new Error(error.message);
@@ -90,8 +93,9 @@ export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler
     .map((r: Row) => ({
       slug: r.slug,
       name: r.name,
-      image: r.image_url || FALLBACK_IMAGE_BY_SLUG[r.slug] || honeyFallback,
+      image: r.image_url ? `${r.image_url}${r.image_url.includes('?') ? '&' : '?'}v=${new Date(r.updated_at).getTime()}` : (FALLBACK_IMAGE_BY_SLUG[r.slug] || honeyFallback),
       hasCustomImage: !!r.image_url,
+      updatedAt: r.updated_at,
     }));
 });
 

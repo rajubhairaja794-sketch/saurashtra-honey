@@ -11,9 +11,7 @@ export function ShopCategorySection({
 }: {
   activeCategory: string;
 }) {
-  const [categories, setCategories] = useState<{name: string, img: string, filter: string, slug: string}[]>([
-    { name: "All Products", img: heroProductsImg, filter: "", slug: "all" }
-  ]);
+  const [categories, setCategories] = useState<{name: string, img: string, filter: string, slug: string, updatedAt?: string}[]>([]);
 
   useEffect(() => {
     void fetchShopCategories().then((cats) => {
@@ -21,12 +19,10 @@ export function ShopCategorySection({
         name: c.name,
         img: c.image,
         filter: c.name.toLowerCase(),
-        slug: c.slug
+        slug: c.slug,
+        updatedAt: c.updatedAt
       }));
-      setCategories([
-        { name: "All Products", img: heroProductsImg, filter: "", slug: "all" },
-        ...formatted
-      ]);
+      setCategories(formatted);
     });
   }, []);
   const [emblaRef, emblaApi] = useEmblaCarousel(
@@ -145,6 +141,7 @@ export function ShopCategorySection({
                     {/* Image Section (80%) */}
                     <div className="h-[80%] w-full overflow-hidden bg-[#F8F5EF]/50">
                       <img
+                        key={cat.updatedAt || cat.img}
                         src={cat.img}
                         alt={cat.name}
                         loading="lazy"

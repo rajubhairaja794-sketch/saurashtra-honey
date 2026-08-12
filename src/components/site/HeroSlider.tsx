@@ -8,6 +8,7 @@ export type HeroSlide = {
   title: string;
   ctaTo?: string;
   ctaParams?: Record<string, string>;
+  updatedAt?: string;
 };
 
 export function HeroSlider({
@@ -83,6 +84,7 @@ export function HeroSlider({
                 <picture className="w-full h-full block">
                   {s.mobileImage && (
                     <source 
+                      key={`mob-${s.updatedAt || s.mobileImage}`}
                       media="(max-width: 767px)" 
                       srcSet={s.mobileImage} 
                       // @ts-ignore: fetchpriority is valid in newer React versions
@@ -90,6 +92,7 @@ export function HeroSlider({
                     />
                   )}
                   <img
+                    key={`desk-${s.updatedAt || s.image}`}
                     src={s.image}
                     alt={s.title}
                     className="w-full h-full object-cover object-center"
