@@ -9,21 +9,21 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
   .inputValidator((input: { email: string; source?: string }) =>
     ({ email: emailSchema.parse(input.email), source: (input.source ?? "footer").slice(0, 60) }))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { supabase } = await import("@/integrations/supabase/client");
     const confirm = token(), unsub = token();
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await supabase
       .from("newsletter_subscribers").select("id, confirmed_at, unsubscribed_at, confirm_token, unsubscribe_token")
       .eq("email", data.email).maybeSingle();
     if (existing?.confirmed_at && !existing.unsubscribed_at) {
       return { ok: true, already: true };
     }
     if (existing) {
-      await supabaseAdmin.from("newsletter_subscribers").update({
+      await supabase.from("newsletter_subscribers").update({
         source: data.source, confirm_token: existing.confirm_token ?? confirm,
         unsubscribe_token: existing.unsubscribe_token ?? unsub, unsubscribed_at: null,
       }).eq("id", existing.id);
     } else {
-      await supabaseAdmin.from("newsletter_subscribers").insert({
+      await supabase.from("newsletter_subscribers").insert({
         email: data.email, source: data.source, confirm_token: confirm, unsubscribe_token: unsub,
       });
     }
@@ -33,12 +33,12 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
 export const confirmNewsletter = createServerFn({ method: "POST" })
   .inputValidator((input: { token: string }) => ({ token: String(input.token).slice(0, 128) }))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row } = await supabaseAdmin.from("newsletter_subscribers")
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data: row } = await supabase.from("newsletter_subscribers")
       .select("id, confirmed_at").eq("confirm_token", data.token).maybeSingle();
     if (!row) throw new Error("Invalid or expired link");
     if (!row.confirmed_at) {
-      await supabaseAdmin.from("newsletter_subscribers")
+      await supabase.from("newsletter_subscribers")
         .update({ confirmed_at: new Date().toISOString() }).eq("id", row.id);
     }
     return { ok: true };
@@ -47,8 +47,8 @@ export const confirmNewsletter = createServerFn({ method: "POST" })
 export const unsubscribeNewsletter = createServerFn({ method: "POST" })
   .inputValidator((input: { token: string }) => ({ token: String(input.token).slice(0, 128) }))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("newsletter_subscribers")
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { error } = await supabase.from("newsletter_subscribers")
       .update({ unsubscribed_at: new Date().toISOString() })
       .eq("unsubscribe_token", data.token);
     if (error) throw error;

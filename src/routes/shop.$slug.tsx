@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ShopPage } from "@/components/shop/ShopPage";
+import { fetchShopCategories } from "@/lib/category-catalog";
+import { fetchProducts } from "@/lib/product-catalog";
 import { z } from "zod";
 
 const searchSchema = z
@@ -11,6 +13,13 @@ const searchSchema = z
 
 export const Route = createFileRoute("/shop/$slug")({
   validateSearch: (s) => searchSchema.parse(s),
+  loader: async () => {
+    const [categories, products] = await Promise.all([
+      fetchShopCategories(),
+      fetchProducts(),
+    ]);
+    return { categories, products };
+  },
   head: ({ params }) => {
     const title = `${params.slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())} | Saurashtra Honey`;
     return {
@@ -22,6 +31,7 @@ export const Route = createFileRoute("/shop/$slug")({
   },
   component: () => {
     const { slug } = Route.useParams();
-    return <ShopPage overrideCategorySlug={slug} />;
+    const data = Route.useLoaderData();
+    return <ShopPage overrideCategorySlug={slug} initialCategories={data.categories} initialProducts={data.products} />;
   },
 });

@@ -2,8 +2,7 @@ import React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, FALLBACK_IMAGE } from "@/lib/product-images";
 import type { HeroSlide } from "@/components/site/HeroSlider";
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
+
 
 import heroHoneyImg from "@/assets/hero-honey.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
@@ -159,24 +158,4 @@ export async function fetchHeroSlides(page: string): Promise<HeroSlide[]> {
   }
 }
 
-export const fetchPublicHeroRows = createServerFn({ method: "POST" })
-  .inputValidator((d: { page: string }) => z.object({ page: z.string() }).parse(d))
-  .handler(async ({ data: { page } }) => {
-    try {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data, error } = await supabaseAdmin
-        .from("hero_slides")
-        .select("*")
-        .eq("page", page)
-        .eq("active", true)
-        .order("sort_order", { ascending: true });
-        
-      if (error || !data || data.length === 0) {
-        return { rows: [] };
-      }
-      return { rows: data as unknown as HeroRow[] };
-    } catch (err) {
-      console.error("fetchPublicHeroRows error:", err);
-      return { rows: [] };
-    }
-  });
+

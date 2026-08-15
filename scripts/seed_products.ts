@@ -46,11 +46,9 @@ async function seedProducts() {
       image_key: null,
       image_url: imageUrl, 
       images: gallery,
-      additional_images: additional,
       stock_quantity: 100,
       in_stock: true,
       published: true,
-      attributes: product.attributes || {},
       status: 'published'
     };
     

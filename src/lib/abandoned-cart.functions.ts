@@ -16,8 +16,8 @@ export const trackAbandonedCart = createServerFn({ method: "POST" })
   }))
   .handler(async ({ data }) => {
     if (!data.items.length) return { ok: true };
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("abandoned_carts").upsert({
+    const { supabase } = await import("@/integrations/supabase/client");
+    await supabase.from("abandoned_carts").upsert({
       session_id: data.session_id, email: data.email, full_name: data.full_name,
       cart: data.items, subtotal_paise: data.subtotal_paise,
     }, { onConflict: "session_id" });

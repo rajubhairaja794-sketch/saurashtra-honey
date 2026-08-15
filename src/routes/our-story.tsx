@@ -209,8 +209,8 @@ function OurStory() {
 
   return (
     <SiteLayout>
-      <StructuredData items={[
-        breadcrumbLd([ { name: "Home", item: "/" }, { name: "Our Story", item: "/our-story" } ]),
+      <StructuredData data={[
+        breadcrumbLd([ { name: "Home", url: "/" }, { name: "Our Story", url: "/our-story" } ]),
         organizationLd(),
       ]} />
 

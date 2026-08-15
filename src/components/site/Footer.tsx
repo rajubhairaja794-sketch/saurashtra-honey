@@ -136,7 +136,7 @@ export function Footer() {
             {/* BRAND COLUMN */}
             <div className="lg:col-span-4 space-y-8">
               <div className="space-y-6">
-                <BrandMark alwaysShowText={true} />
+                <BrandMark />
                 <p className="text-[14px] sm:text-[15px] text-[#2B1D14]/80 max-w-[280px] leading-relaxed font-serif italic">
                   "{settings?.company?.tagline || "Handcrafted honey from the heart of Saurashtra.\nPure. Natural. Honest."}"
                 </p>

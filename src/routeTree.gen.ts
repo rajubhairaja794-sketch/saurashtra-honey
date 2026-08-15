@@ -40,6 +40,7 @@ import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminHeroRouteImport } from './routes/admin.hero'
 import { Route as AdminHomepageRouteImport } from './routes/admin.homepage'
+import { Route as AdminInstagramRouteImport } from './routes/admin.instagram'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
@@ -225,6 +226,11 @@ const AdminHeroRoute = AdminHeroRouteImport.update({
 const AdminHomepageRoute = AdminHomepageRouteImport.update({
   id: '/homepage',
   path: '/homepage',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInstagramRoute = AdminInstagramRouteImport.update({
+  id: '/instagram',
+  path: '/instagram',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminInventoryRoute = AdminInventoryRouteImport.update({
@@ -416,6 +422,7 @@ export interface FileRoutesByFullPath {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/homepage': typeof AdminHomepageRoute
+  '/admin/instagram': typeof AdminInstagramRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/marketing': typeof AdminMarketingRoute
@@ -478,6 +485,7 @@ export interface FileRoutesByTo {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/homepage': typeof AdminHomepageRoute
+  '/admin/instagram': typeof AdminInstagramRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/marketing': typeof AdminMarketingRoute
@@ -543,6 +551,7 @@ export interface FileRoutesById {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/homepage': typeof AdminHomepageRoute
+  '/admin/instagram': typeof AdminInstagramRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/marketing': typeof AdminMarketingRoute
@@ -609,6 +618,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/hero'
     | '/admin/homepage'
+    | '/admin/instagram'
     | '/admin/inventory'
     | '/admin/loyalty'
     | '/admin/marketing'
@@ -671,6 +681,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/hero'
     | '/admin/homepage'
+    | '/admin/instagram'
     | '/admin/inventory'
     | '/admin/loyalty'
     | '/admin/marketing'
@@ -735,6 +746,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/hero'
     | '/admin/homepage'
+    | '/admin/instagram'
     | '/admin/inventory'
     | '/admin/loyalty'
     | '/admin/marketing'
@@ -1023,6 +1035,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminHomepageRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/instagram': {
+      id: '/admin/instagram'
+      path: '/instagram'
+      fullPath: '/admin/instagram'
+      preLoaderRoute: typeof AdminInstagramRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/inventory': {
       id: '/admin/inventory'
       path: '/inventory'
@@ -1251,6 +1270,7 @@ interface AdminRouteChildren {
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminHeroRoute: typeof AdminHeroRoute
   AdminHomepageRoute: typeof AdminHomepageRoute
+  AdminInstagramRoute: typeof AdminInstagramRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminLoyaltyRoute: typeof AdminLoyaltyRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
@@ -1281,6 +1301,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCustomersRoute: AdminCustomersRoute,
   AdminHeroRoute: AdminHeroRoute,
   AdminHomepageRoute: AdminHomepageRoute,
+  AdminInstagramRoute: AdminInstagramRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminLoyaltyRoute: AdminLoyaltyRoute,
   AdminMarketingRoute: AdminMarketingRoute,

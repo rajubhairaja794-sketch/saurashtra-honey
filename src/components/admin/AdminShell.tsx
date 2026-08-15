@@ -32,6 +32,7 @@ import {
   Home,
   Film,
   Layers,
+  Instagram,
 } from "lucide-react";
 import { AutoSeeder } from "./AutoSeeder";
 
@@ -71,6 +72,7 @@ const NAV: NavItem[] = [
   { label: "Newsletter", to: "/admin/newsletter", icon: Mail, perm: "settings.manage" },
   { label: "Loyalty & Rewards", to: "/admin/loyalty", icon: Award, perm: "settings.manage" },
   { label: "Marketing & SEO", to: "/admin/marketing", icon: Megaphone, perm: "settings.manage" },
+  { label: "Instagram Integration", to: "/admin/instagram", icon: Instagram, perm: "settings.manage" },
   { label: "Redirects", to: "/admin/redirects", icon: ArrowLeftRight, perm: "settings.manage" },
   { label: "Site Settings", to: "/admin/settings", icon: Settings, perm: "settings.manage" },
   { label: "Users & Roles", to: "/admin/users", icon: ShieldCheck, perm: "users.manage" },

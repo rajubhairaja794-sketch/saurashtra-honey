@@ -10,6 +10,7 @@ import { fetchProducts } from "@/lib/product-catalog";
 import { listPublicPosts } from "@/lib/blog-server.functions";
 import { resolvePostImage, formatPostDate } from "@/lib/blog-client-helpers";
 import { supabase } from "@/integrations/supabase/client";
+import { getPublicInstagramFeed } from "@/lib/instagram.functions";
 import { StructuredData, breadcrumbLd, organizationLd } from "@/components/site/StructuredData";
 import { fetchHomepageSections, type HomepageSection } from "@/lib/homepage-cms.functions";
 import {
@@ -22,10 +23,20 @@ import {
   HomeStatsStrip,
   HomeTestimonials,
   HomeJournalPreview,
+  HomeInstagramPreview,
   HomeMarqueeStrip,
 } from "@/components/site/HomeSections";
 
+import { fetchShopCategories } from "@/lib/category-catalog";
+
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    const [categories, products] = await Promise.all([
+      fetchShopCategories(),
+      fetchProducts(),
+    ]);
+    return { categories, products };
+  },
   head: () => ({
     meta: [
       { title: "Saurashtra Honey — Pure, Raw & Unfiltered Honey from Saurashtra" },
@@ -68,7 +79,9 @@ function Home() {
   const [cmsMap, setCmsMap] = useState<Record<string, HomepageSection>>({});
   const [cmsLoaded, setCmsLoaded] = useState(false);
   const [homePosts, setHomePosts] = useState<any[]>([]);
+  const [instaFeed, setInstaFeed] = useState<any>(null);
   const fetchPostsFn = useServerFn(listPublicPosts);
+  const fetchInstaFn = useServerFn(getPublicInstagramFeed);
 
   useEffect(() => {
     // Fetch live products
@@ -133,6 +146,11 @@ function Home() {
               });
           }
         });
+        
+      // Fetch Instagram Feed
+      void fetchInstaFn().then((res) => {
+        setInstaFeed(res);
+      });
     }, 300);
 
     return () => clearTimeout(nonCriticalTimer);
@@ -172,6 +190,7 @@ function Home() {
   })();
 
   // ─── Render a single section by key ────────────────────────────────────────
+  const data = Route.useLoaderData();
   const renderSection = (key: SectionKey) => {
     const sec = cmsMap[key];
     const settings = sec?.settings ?? {};
@@ -182,12 +201,12 @@ function Home() {
       case "trust_strip":
         return <HomeTrustStrip key="trust_strip" settings={settings} />;
       case "shop_by_category":
-        return <HomeShopByCategory key="shop_by_category" settings={settings} />;
+        return <HomeShopByCategory key="shop_by_category" settings={settings} initialCategories={data.categories} />;
       case "featured_products":
         return (
           <HomeBestSellers
             key="featured_products"
-            products={list}
+            products={data.products && data.products.length > 0 ? data.products : list}
             onQuickView={setQuick}
             settings={settings}
           />
@@ -208,6 +227,9 @@ function Home() {
       case "testimonials":
         return <HomeTestimonials key="testimonials" reviews={reviews} settings={settings} />;
       case "journal":
+        if (instaFeed?.settings?.is_enabled) {
+          return <HomeInstagramPreview key="journal" feed={instaFeed} settings={settings} />;
+        }
         return <HomeJournalPreview key="journal" posts={homePosts} settings={settings} />;
       default:
         return null;

@@ -127,18 +127,23 @@ function ProductsPage() {
   const list = useServerFn(listAdminProducts);
   const save = useServerFn(upsertProduct);
   const del = useServerFn(deleteProduct);
+  const getCats = useServerFn(listCategories);
   const [rows, setRows] = useState<P[]>([]);
+  const [cats, setCats] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [edit, setEdit] = useState<Partial<P> | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [q, setQ] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
   const saveV = useServerFn(saveProductVariants);
 
   async function load() {
     setLoading(true);
     try {
-      const r = await list({});
+      const [r, c] = await Promise.all([list({}), getCats({})]);
       setRows(r.rows as unknown as P[]);
+      setCats(c.rows || []);
       setSelected(new Set());
     } catch (e) {
       toast.error((e as Error).message);
@@ -279,12 +284,22 @@ function ProductsPage() {
       />
     );
 
-  const filtered = q
-    ? rows.filter((r) =>
-        [r.name, r.slug, r.sku, r.category].join(" ").toLowerCase().includes(q.toLowerCase()),
-      )
-    : rows;
-  const cols = ["slug", "name", "sku", "category", "price", "stock_quantity", "status"];
+
+  let filtered = rows;
+  if (q.trim()) {
+    const ql = q.toLowerCase();
+    filtered = filtered.filter((r) =>
+      [r.name, r.slug, r.sku, r.category].join(" ").toLowerCase().includes(ql),
+    );
+  }
+  if (filterCategory !== "all") {
+    filtered = filtered.filter((r) => r.category === filterCategory);
+  }
+  if (filterStatus !== "all") {
+    filtered = filtered.filter((r) => r.status === filterStatus);
+  }
+
+  const cols = ["name", "slug", "sku", "category", "price", "stock_quantity", "status"];
 
   return (
     <div>
@@ -313,28 +328,55 @@ function ProductsPage() {
           </>
         }
       />
-      <Card className="p-3 mb-4 flex flex-wrap gap-2 items-center">
+      <div className="flex flex-col sm:flex-row gap-3 mb-6 items-start sm:items-center">
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search name, SKU, slug…"
-          className="flex-1 min-w-[220px] border border-border rounded-lg px-3 py-2 text-xs bg-white"
+          placeholder="Search products..."
+          className="flex-1 w-full sm:max-w-xs border border-border rounded-xl px-4 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all"
         />
-        <span className="text-xs text-muted-foreground">{selected.size} selected</span>
-        <BtnGhost onClick={() => bulkPublish(true)} disabled={!selected.size}>
-          PUBLISH
-        </BtnGhost>
-        <BtnGhost onClick={() => bulkPublish(false)} disabled={!selected.size}>
-          DRAFT
-        </BtnGhost>
-        <BtnGhost
-          onClick={bulkDelete}
-          disabled={!selected.size}
-          className="hover:border-destructive hover:text-destructive"
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          className="border border-border rounded-xl px-4 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all cursor-pointer w-full sm:w-auto"
         >
-          DELETE
-        </BtnGhost>
-      </Card>
+          <option value="all">All Categories</option>
+          {cats.map((c) => (
+            <option key={c.id} value={c.name}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="border border-border rounded-xl px-4 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all cursor-pointer w-full sm:w-auto"
+        >
+          <option value="all">All Statuses</option>
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+        </select>
+      </div>
+
+      {selected.size > 0 && (
+        <Card className="p-3 mb-6 flex flex-wrap gap-4 items-center bg-cream-deep border-brand-orange/30 shadow-sm rounded-xl">
+          <span className="text-sm font-bold text-forest-dark pl-2">{selected.size} selected</span>
+          <div className="flex items-center gap-2">
+            <BtnGhost onClick={() => bulkPublish(true)} className="bg-white hover:bg-cream border border-border">
+              PUBLISH
+            </BtnGhost>
+            <BtnGhost onClick={() => bulkPublish(false)} className="bg-white hover:bg-cream border border-border">
+              DRAFT
+            </BtnGhost>
+            <BtnGhost
+              onClick={bulkDelete}
+              className="bg-white border border-destructive/20 text-destructive hover:bg-destructive hover:text-white transition-colors"
+            >
+              DELETE
+            </BtnGhost>
+          </div>
+        </Card>
+      )}
       <TableWrap>
         <thead>
           <tr>
@@ -347,7 +389,7 @@ function ProductsPage() {
                 }
               />
             </Th>
-            {["Sort", "SKU", "Name", "Category", "Price", "Stock", "Status", ""].map((h) => (
+            {["PRODUCT", "CATEGORY", "PRICE", "STOCK", "STATUS", "ACTIONS"].map((h) => (
               <Th key={h}>{h}</Th>
             ))}
           </tr>
@@ -377,11 +419,24 @@ function ProductsPage() {
                     }}
                   />
                 </Td>
-                <Td className="text-xs text-muted-foreground">{r.sort_order}</Td>
-                <Td className="text-xs font-mono">{r.sku ?? "—"}</Td>
                 <Td>
-                  <div className="font-medium text-forest-dark">{r.name}</div>
-                  <div className="text-xs text-muted-foreground font-mono">{r.slug}</div>
+                  <div className="flex items-center gap-3">
+                    {r.image_url ? (
+                      <div className="size-10 rounded-lg overflow-hidden border border-border/50 shrink-0 bg-cream">
+                        <img src={r.image_url} alt={r.name} className="w-full h-full object-cover" loading="lazy" />
+                      </div>
+                    ) : (
+                      <div className="size-10 rounded-lg border border-border/50 shrink-0 bg-cream flex items-center justify-center text-muted-foreground">
+                        <ImageOff className="size-4" />
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-bold text-forest-dark text-[15px]">{r.name}</div>
+                      <div className="text-xs text-muted-foreground font-mono mt-0.5">
+                        {r.sku ? `${r.sku} • ${r.slug}` : r.slug}
+                      </div>
+                    </div>
+                  </div>
                 </Td>
                 <Td className="text-xs">{r.category ?? "—"}</Td>
                 <Td className="text-xs">

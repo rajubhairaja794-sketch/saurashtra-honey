@@ -1,0 +1,120 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { z } from "zod";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SB = any;
+
+async function assertStaff(supabase: SB, userId: string) {
+  const { data, error } = await supabase.rpc("is_staff", { _user_id: userId });
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Forbidden: staff role required");
+}
+async function assertPerm(supabase: SB, userId: string, key: string) {
+  const { data, error } = await supabase.rpc("has_permission", {
+    _user_id: userId,
+    _permission_key: key,
+  });
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error(`Forbidden: missing permission ${key}`);
+}
+async function audit(
+  actor: string,
+  action: string,
+  entity_type?: string,
+  entity_id?: string,
+  metadata: Record<string, unknown> = {},
+) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  await context.supabase
+    .from("audit_logs")
+    .insert({ actor_id: actor, action, entity_type, entity_id, metadata } as never);
+}
+
+/* -------------------- DASHBOARD -------------------- */
+
+export const getDashboardStats = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ stats: DashboardStats }> => {
+    await assertStaff(context.supabase, context.userId);
+    const { data, error } = await context.supabase.rpc("admin_dashboard_stats");
+    if (error) throw new Error(error.message);
+    return { stats: data as DashboardStats };
+  });
+
+export type DashboardStats = {
+  revenue_total_paise: number;
+  revenue_month_paise: number;
+  orders_today: number;
+  orders_pending: number;
+  orders_delivered: number;
+  orders_cancelled: number;
+  customers_total: number;
+  products_total: number;
+  low_stock_products: number;
+  out_of_stock: number;
+  sales_last_30: { day: string; revenue_paise: number; orders: number }[];
+  top_products: { name: string | null; slug: string | null; units: number; revenue: number }[];
+  top_customers: { name: string; email: string | null; orders: number; spent_paise: number }[];
+  recent_orders: {
+    id: string;
+    order_number: string | null;
+    full_name: string | null;
+    email: string | null;
+    total_paise: number;
+    status: string;
+    created_at: string;
+  }[];
+};
+
+/* -------------------- CATEGORIES -------------------- */
+
+const catSchema = z.object({
+  id: z.string().uuid().optional(),
+  slug: z.string().min(1).max(120),
+  name: z.string().min(1).max(200),
+  description: z.string().max(2000).nullable().optional(),
+  image_url: z.string().max(2000).nullable().optional(),
+  parent_id: z.string().uuid().nullable().optional(),
+  sort_order: z.number().int().default(0),
+  active: z.boolean().default(true),
+  seo_title: z.string().max(200).nullable().optional(),
+  seo_description: z.string().max(400).nullable().optional(),
+});
+
+export async function seedDefaultCategoriesIfEmpty(supabaseAdmin: SB) {
+  try {
+    const defaults = [
+      { slug: "all-products", name: "All Products", sort_order: 1, active: true },
+      { slug: "honey", name: "Honey", sort_order: 2, active: true },
+      { slug: "beeswax", name: "Beeswax", sort_order: 3, active: true },
+      { slug: "bee-pollen", name: "Bee Pollen", sort_order: 4, active: true },
+      { slug: "beeswax-candle", name: "Beeswax Candles", sort_order: 5, active: true },
+      { slug: "beauty-products", name: "Beauty Products", sort_order: 6, active: true },
+    ];
+    await context.supabase
+      .from("categories")
+      .upsert(defaults, { onConflict: "slug", ignoreDuplicates: true });
+
+    // Safely migrate any products associated with disallowed categories and clean up disallowed category rows
+    await context.supabase
+      .from("products")
+      .update({ category: "Beauty Products" })
+      .in("name", ["Soft Skin Gel", "Royal Honey Glow Serum"]);
+
+    await context.supabase
+      .from("products")
+      .update({ category: "Beeswax Products" })
+      .in("category", ["Lip Care", "Body Care", "Wood & Leather Care"]);
+
+    await context.supabase
+      .from("products")
+      .update({ category: "Honey" })
+      .in("category", ["Skin Care", "Hair Care", "Single Flora"]);
+
+    await context.supabase
+      .from("categories")
+      .delete()
+      .in("slug", [
+        "body-care",
+        "hair-care",

@@ -31,7 +31,7 @@ export const listSubmissions = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let q = supabaseAdmin.from("form_submissions").select("*").order("created_at", { ascending: false }).limit(1000);
+    let q = context.supabase.from("form_submissions").select("*").order("created_at", { ascending: false }).limit(1000);
     if (data.form_type && data.form_type !== "all") q = q.eq("form_type", data.form_type);
     if (data.status && data.status !== "all") q = q.eq("status", data.status);
     if (data.from) q = q.gte("created_at", data.from);
@@ -53,7 +53,7 @@ export const getSubmission = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error } = await supabaseAdmin.from("form_submissions").select("*").eq("id", data.id).single();
+    const { data: row, error } = await context.supabase.from("form_submissions").select("*").eq("id", data.id).single();
     if (error) throw new Error(error.message);
     return { row };
   });
@@ -68,7 +68,7 @@ export const updateSubmission = createServerFn({ method: "POST" })
     const patch: { status?: string; admin_notes?: string } = {};
     if (data.status !== undefined) patch.status = data.status;
     if (data.admin_notes !== undefined) patch.admin_notes = data.admin_notes;
-    const { error } = await supabaseAdmin.from("form_submissions").update(patch).eq("id", data.id);
+    const { error } = await context.supabase.from("form_submissions").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -79,7 +79,7 @@ export const listOrders = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let q = supabaseAdmin.from("orders").select("*").order("created_at", { ascending: false }).limit(1000);
+    let q = context.supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(1000);
     if (data.status && data.status !== "all") q = q.eq("status", data.status as never);
     if (data.from) q = q.gte("created_at", data.from);
     if (data.to) q = q.lte("created_at", data.to);
@@ -103,7 +103,7 @@ export const updateOrder = createServerFn({ method: "POST" })
     const patch: { status?: string; admin_notes?: string } = {};
     if (data.status !== undefined) patch.status = data.status;
     if (data.admin_notes !== undefined) patch.admin_notes = data.admin_notes;
-    const { error } = await supabaseAdmin.from("orders").update(patch as never).eq("id", data.id);
+    const { error } = await context.supabase.from("orders").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

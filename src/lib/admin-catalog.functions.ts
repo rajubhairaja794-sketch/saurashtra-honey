@@ -15,8 +15,7 @@ export const listAdminProducts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await context.supabase
       .from("products")
       .select("*")
       .order("sort_order", { ascending: true });
@@ -85,7 +84,6 @@ export const upsertProduct = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof productSchema>) => productSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { id, ...rest } = data;
     if (rest.images && Array.isArray(rest.images) && rest.images.length > 0) {
       rest.image_url = rest.images[0];
@@ -97,11 +95,11 @@ export const upsertProduct = createServerFn({ method: "POST" })
     rest.attributes = attrs as never;
     delete (rest as Record<string, unknown>).additional_images;
     if (id) {
-      const { data: updated, error } = await supabaseAdmin.from("products").update(rest as never).eq("id", id).select("id").single();
+      const { data: updated, error } = await context.supabase.from("products").update(rest as never).eq("id", id).select("id").single();
       if (error) throw new Error(error.message);
       return { ok: true, id: updated?.id || id };
     }
-    const { data: inserted, error } = await supabaseAdmin.from("products").insert(rest as never).select("id").single();
+    const { data: inserted, error } = await context.supabase.from("products").insert(rest as never).select("id").single();
     if (error) throw new Error(error.message);
     return { ok: true, id: inserted?.id };
   });
@@ -111,8 +109,7 @@ export const deleteProduct = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("products").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("products").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -143,8 +140,7 @@ export const listProductVariants = createServerFn({ method: "POST" })
   .inputValidator((d: { product_id: string }) => z.object({ product_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin
+    const { data: rows, error } = await context.supabase
       .from("product_variants")
       .select("*")
       .eq("product_id", data.product_id)
@@ -166,7 +162,6 @@ export const saveProductVariants = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { product_id, variants } = data;
 
     let hasDefault = false;
@@ -182,7 +177,7 @@ export const saveProductVariants = createServerFn({ method: "POST" })
       normalized[0].is_default = true;
     }
 
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await context.supabase
       .from("product_variants")
       .select("id")
       .eq("product_id", product_id);
@@ -192,14 +187,14 @@ export const saveProductVariants = createServerFn({ method: "POST" })
 
     const toDelete = [...existingIds].filter((id) => !incomingIds.has(id));
     if (toDelete.length > 0) {
-      const { error: delErr } = await supabaseAdmin
+      const { error: delErr } = await context.supabase
         .from("product_variants")
         .delete()
         .in("id", toDelete);
       if (delErr) throw new Error(delErr.message);
     }
 
-    await supabaseAdmin
+    await context.supabase
       .from("product_variants")
       .update({ is_default: false } as never)
       .eq("product_id", product_id);
@@ -208,7 +203,7 @@ export const saveProductVariants = createServerFn({ method: "POST" })
     for (const v of normalized) {
       if (v.id) {
         const { id, ...rest } = v;
-        const { data: updated, error: updErr } = await supabaseAdmin
+        const { data: updated, error: updErr } = await context.supabase
           .from("product_variants")
           .update(rest as never)
           .eq("id", id)
@@ -217,7 +212,7 @@ export const saveProductVariants = createServerFn({ method: "POST" })
         if (updErr) throw new Error(updErr.message);
         results.push(updated);
       } else {
-        const { data: inserted, error: insErr } = await supabaseAdmin
+        const { data: inserted, error: insErr } = await context.supabase
           .from("product_variants")
           .insert(v as never)
           .select("*")
@@ -231,7 +226,7 @@ export const saveProductVariants = createServerFn({ method: "POST" })
     if (defaultVar) {
       const activeLabels = results.filter((x) => x.is_active).map((x) => x.label);
       const totalStock = results.filter((x) => x.is_active).reduce((sum, x) => sum + (x.stock_quantity || 0), 0);
-      await supabaseAdmin
+      await context.supabase
         .from("products")
         .update({
           price: defaultVar.price,
@@ -253,8 +248,7 @@ export const deleteProductVariant = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("product_variants")
       .delete()
       .eq("id", data.id);
@@ -268,8 +262,7 @@ export const listAdminSlides = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await context.supabase
       .from("hero_slides")
       .select("*")
       .order("page", { ascending: true })
@@ -345,8 +338,7 @@ export const listAdminReviews = createServerFn({ method: "POST" })
   .inputValidator((d: { status?: string; product_slug?: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let q = supabaseAdmin
+    let q = context.supabase
       .from("reviews")
       .select("*")
       .order("created_at", { ascending: false })
@@ -364,8 +356,7 @@ export const moderateReview = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), status: z.enum(["approved", "pending", "rejected"]) }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("reviews")
       .update({ status: data.status } as never)
       .eq("id", data.id);
@@ -378,8 +369,7 @@ export const deleteReview = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("reviews").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("reviews").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveImage } from "@/lib/product-images";
 import honeyFallback from "@/assets/hero-honey.jpg";
 import beeswaxFallback from "@/assets/prod-honeycomb.jpg";
 import pollenFallback from "@/assets/mortar-herbs.jpg";
@@ -79,21 +80,28 @@ const DISALLOWED_SLUGS = [
 ];
 
 export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { seedDefaultCategoriesIfEmpty } = await import("@/lib/admin-cms.functions");
-  await seedDefaultCategoriesIfEmpty(supabaseAdmin);
-  const { data, error } = await supabaseAdmin
+  const { supabase } = await import("@/integrations/supabase/client");
+  
+  // We remove the automatic seeding here because it requires admin privileges 
+  // and adds overhead to every public fetch. It should only be run in the admin area.
+  
+  const { data, error } = await supabase
     .from("categories")
     .select("slug,name,image_url,sort_order,active,updated_at")
     .eq("active", true)
     .order("sort_order", { ascending: true });
-  if (error) throw new Error(error.message);
+    
+  if (error) {
+    console.error("Failed to fetch categories from Supabase (listPublicCategoriesFn):", error);
+    throw new Error(error.message);
+  }
+  
   return (data ?? [])
     .filter((r: Row) => !DISALLOWED_SLUGS.includes(r.slug.toLowerCase().trim()))
     .map((r: Row) => ({
       slug: r.slug,
       name: r.name,
-      image: r.image_url ? `${r.image_url}${r.image_url.includes('?') ? '&' : '?'}v=${new Date(r.updated_at).getTime()}` : (FALLBACK_IMAGE_BY_SLUG[r.slug] || honeyFallback),
+      image: resolveImage(null, r.image_url, FALLBACK_IMAGE_BY_SLUG[r.slug] || honeyFallback, r.updated_at),
       hasCustomImage: !!r.image_url,
       updatedAt: r.updated_at,
     }));
@@ -102,8 +110,15 @@ export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler
 export async function fetchShopCategories(): Promise<ShopCategory[]> {
   try {
     const rows = await listPublicCategoriesFn();
+    // Only use fallback if database is completely empty (no categories returned)
+    // rather than falling back on ANY network/API key error.
+    if (!rows || rows.length === 0) {
+      console.warn("Database returned 0 categories, using defaults");
+      return DEFAULT_SHOP_CATEGORIES;
+    }
     return rows;
-  } catch {
+  } catch (err) {
+    console.error("fetchShopCategories caught an error. Falling back to defaults to prevent crash.", err);
     return DEFAULT_SHOP_CATEGORIES;
   }
 }

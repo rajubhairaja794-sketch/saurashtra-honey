@@ -82,9 +82,9 @@ function Partner() {
   return (
     <SiteLayout>
       <HeroSlider variant="inner" size="sm" slides={[
-        { image: handshake, eyebrow: "Become a Partner", title: (<>Let's Grow <span className="italic text-burnt-orange">Together.</span></>), subtitle: "Join a growing brand built on purity, trust and nature.", ctaText: "APPLY NOW", ctaTo: "/become-a-partner" },
-        { image: drizzle, eyebrow: "Retail & Distribution", title: (<>Stock a Brand <span className="italic text-burnt-orange">Customers Love.</span></>), subtitle: "Retailers, distributors, wholesalers and online sellers welcome.", ctaText: "SEE OPPORTUNITIES", ctaTo: "/become-a-partner" },
-        { image: handshake, eyebrow: "Growing Together", title: (<>Reliable Supply. <span className="italic text-burnt-orange">Real Support.</span></>), subtitle: "Consistent stock, marketing help and a partnership team that answers.", ctaText: "GET IN TOUCH", ctaTo: "/contact", align: "center" as const },
+        { image: handshake, title: "Let's Grow Together.", ctaTo: "/become-a-partner" },
+        { image: drizzle, title: "Stock a Brand Customers Love.", ctaTo: "/become-a-partner" },
+        { image: handshake, title: "Reliable Supply. Real Support.", ctaTo: "/contact" },
       ]} />
 
       {/* WHY */}

@@ -4,9 +4,6 @@ import { CategoryThumbnailNav } from "@/components/shop/CategoryThumbnailNav";
 import { PremiumMobileCarousel } from "@/components/site/PremiumMobileCarousel";
 import { DesktopFilterSheet, MobileFilterDrawer, defaultFilters, type FilterState } from "@/components/shop/ShopFilters";
 import {
-  ArrowRight,
-  LayoutGrid,
-  List,
   Search,
   X,
   Sparkles,
@@ -38,12 +35,51 @@ import beeFlowerImg from "@/assets/bee-flower.jpg";
 import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
 import familyHoneyImg from "@/assets/family-honey.jpg";
 
-export function ShopPage({ overrideCategorySlug }: { overrideCategorySlug?: string }) {
+export function ShopPage({ 
+  overrideCategorySlug, 
+  initialCategories = DEFAULT_SHOP_CATEGORIES, 
+  initialProducts = [] 
+}: { 
+  overrideCategorySlug?: string;
+  initialCategories?: ShopCategory[];
+  initialProducts?: Product[];
+}) {
   const search = useSearch({ strict: false }) as Record<string, any>;
   const navigate = useNavigate();
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<ShopCategory[]>(DEFAULT_SHOP_CATEGORIES);
+  // Normalize products synchronously based on passed initialProducts
+  const normalizedInitialProducts = useMemo(() => {
+    const mergedMap = new Map<string, Product>();
+    
+    // Add database products
+    if (initialProducts && initialProducts.length > 0) {
+      initialProducts.forEach((p) => {
+        mergedMap.set(p.slug, p);
+      });
+    }
+
+    // Normalize categories to ensure exactly one of the 6 categories
+    const validCategories = ["Honey", "Beeswax", "Bee Pollen", "Beeswax Candles", "Beeswax Products", "Beauty Products"];
+    
+    return Array.from(mergedMap.values()).map((p) => {
+      let finalCat = p.category;
+      
+      // Fix legacy categories
+      if (finalCat === "Beeswax Candle") finalCat = "Beeswax Candles";
+      if (p.name.includes("Gift Pack")) finalCat = "Honey";
+
+      // Fallback if somehow totally invalid
+      if (!validCategories.includes(finalCat)) {
+         if (p.name.includes("Honey")) finalCat = "Honey";
+         else finalCat = "Honey"; // safe fallback
+      }
+      
+      return { ...p, category: finalCat };
+    });
+  }, [initialProducts]);
+
+  const [products, setProducts] = useState<Product[]>(normalizedInitialProducts);
+  const [categories, setCategories] = useState<ShopCategory[]>(initialCategories);
   const [quick, setQuick] = useState<Product | null>(null);
 
   // Active state
@@ -53,7 +89,6 @@ export function ShopPage({ overrideCategorySlug }: { overrideCategorySlug?: stri
   const [sort, setSort] = useState<"popular" | "price-asc" | "price-desc" | "newest" | "rating">(
     search.sort || "popular",
   );
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
 
   const applyFilters = () => {
@@ -61,43 +96,14 @@ export function ShopPage({ overrideCategorySlug }: { overrideCategorySlug?: stri
     // In a real app we would refetch or filter the products list here.
   };
 
-  // Fetch real database products and categories
+  // Sync state if props change (unlikely in TanStack Start unless navigation occurs, but good practice)
   useEffect(() => {
-    void fetchProducts().then((r) => {
-      const mergedMap = new Map<string, Product>();
-      
-      // Add database products
-      if (r && r.length > 0) {
-        r.forEach((p) => {
-          mergedMap.set(p.slug, p);
-        });
-      }
-
-      // 3. Normalize categories to ensure exactly one of the 6 categories
-      const validCategories = ["Honey", "Beeswax", "Bee Pollen", "Beeswax Candles", "Beeswax Products", "Beauty Products"];
-      
-      const normalizedProducts = Array.from(mergedMap.values()).map((p) => {
-        let finalCat = p.category;
-        
-        // Fix legacy categories
-        if (finalCat === "Beeswax Candle") finalCat = "Beeswax Candles";
-        if (p.name.includes("Gift Pack")) finalCat = "Honey";
-
-        // Fallback if somehow totally invalid
-        if (!validCategories.includes(finalCat)) {
-           if (p.name.includes("Honey")) finalCat = "Honey";
-           else finalCat = "Honey"; // safe fallback
-        }
-        
-        return { ...p, category: finalCat };
-      });
-      
-      setProducts(normalizedProducts);
-    });
-    void fetchShopCategories().then((r) => {
-      if (r.length > 0) setCategories(r);
-    });
-  }, []);
+    setProducts(normalizedInitialProducts);
+  }, [normalizedInitialProducts]);
+  
+  useEffect(() => {
+    setCategories(initialCategories);
+  }, [initialCategories]);
 
   // Sync state with URL search params
   useEffect(() => {
@@ -278,26 +284,6 @@ export function ShopPage({ overrideCategorySlug }: { overrideCategorySlug?: stri
 
       {/* (Old ShopCategorySection removed in favor of the Premium Nav below) */}
 
-      {/* =========================================================================
-          3. SEARCH BAR
-         ========================================================================= */}
-      <section className="bg-cream pt-10 sm:pt-16 pb-4">
-        <div className="container-page">
-          <div className="relative max-w-xl mx-auto">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-5 text-espresso/40 pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search honey, bee products..."
-              value={q}
-              onChange={(e) => {
-                setQ(e.target.value);
-                updateUrlWithoutScrolling(cat, e.target.value, sort);
-              }}
-              className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white border border-border/80 shadow-[0_8px_30px_rgba(0,0,0,0.04)] text-[15px] text-espresso placeholder:text-espresso/40 focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all"
-            />
-          </div>
-        </div>
-      </section>
 
       {/* =========================================================================
           4. SHOP BY CATEGORY (Only show on main /shop route)
@@ -311,15 +297,10 @@ export function ShopPage({ overrideCategorySlug }: { overrideCategorySlug?: stri
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
             {[
-              { slug: "all-products", name: "All Products", image: heroProductsImg },
-              ...["Honey", "Beeswax", "Bee Pollen", "Beeswax Candle", "Beauty Products"]
-                .map((name) => categories.find((c) => 
-                  c.name.toLowerCase() === name.toLowerCase() || 
-                  c.name.toLowerCase() === `${name.toLowerCase()}s` || 
-                  c.name.toLowerCase() === name.toLowerCase().replace(/s$/, "")
-                ))
-                .filter(Boolean) as ShopCategory[],
-            ].map((c) => c.slug === "all-products" ? (
+              categories.find((c) => c.slug === "all-products" || c.name.toLowerCase() === "all products") || 
+              { slug: "all-products", name: "All Products", image: heroProductsImg, hasCustomImage: false },
+              ...categories.filter((c) => c.slug !== "all-products" && c.name.toLowerCase() !== "all products")
+            ].map((c) => c.slug === "all-products" || c.name.toLowerCase() === "all products" ? (
               <Link
                 key={c.slug}
                 to="/shop"
@@ -404,23 +385,7 @@ export function ShopPage({ overrideCategorySlug }: { overrideCategorySlug?: stri
                 <option value="rating">Highest Rated</option>
               </select>
 
-              {/* Grid / List Toggle (Desktop) */}
-              <div className="hidden sm:flex items-center gap-1 border border-border/80 rounded-xl p-1 bg-white shadow-xs">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("grid")}
-                  className={`size-10 rounded-lg flex items-center justify-center transition-colors ${viewMode === "grid" ? "bg-brand-orange text-white" : "text-muted-foreground hover:text-espresso"}`}
-                >
-                  <LayoutGrid className="size-4.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("list")}
-                  className={`size-10 rounded-lg flex items-center justify-center transition-colors ${viewMode === "list" ? "bg-brand-orange text-white" : "text-muted-foreground hover:text-espresso"}`}
-                >
-                  <List className="size-4.5" />
-                </button>
-              </div>
+
             </div>
           </div>
 
@@ -458,11 +423,7 @@ export function ShopPage({ overrideCategorySlug }: { overrideCategorySlug?: stri
             <>
               {/* Unified Mobile & Desktop View */}
               <div
-                className={`grid gap-5 sm:gap-8 ${
-                  viewMode === "grid"
-                    ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                    : "grid-cols-1 md:grid-cols-2"
-                }`}
+                className="grid gap-5 sm:gap-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
               >
                 {filtered.map((product, idx) => (
                   <div 

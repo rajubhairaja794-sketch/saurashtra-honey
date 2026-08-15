@@ -67,8 +67,6 @@ export function AutoSeeder() {
                 image_key: imageKey,
                 image_url: null,
                 images: images,
-                additional_images: additionalImages,
-                attributes: p.attributes || null,
                 published: true
             }, { onConflict: "slug" })
             .select("id")

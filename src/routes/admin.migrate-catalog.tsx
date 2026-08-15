@@ -4,7 +4,7 @@ import { products, getProductVariants, getProductGallery, getProductAdditionalIm
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 
-const runMigration = createServerFn("POST", async () => {
+const runMigration = createServerFn({ method: "POST" }).handler(async () => {
   // 1. Fetch current counts
   const { count: beforeCount } = await supabase.from("products").select("*", { count: "exact", head: true });
   
@@ -39,8 +39,6 @@ const runMigration = createServerFn("POST", async () => {
         image_key: p.image || null,
         image_url: p.image || null,
         images: getProductGallery(p),
-        additional_images: getProductAdditionalImages(p),
-        attributes: p.attributes || null,
         published: true, // Always publish
       }, { onConflict: "slug" }).select("id").single();
 
