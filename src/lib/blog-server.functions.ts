@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface PublicBlogPost {
   id: string;
@@ -33,13 +34,12 @@ const listInputSchema = z.object({
 export const listPublicPosts = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => listInputSchema.parse(d ?? {}))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const page = data.page || 1;
+        const page = data.page || 1;
     const pageSize = data.pageSize || 6;
     const start = (page - 1) * pageSize;
     const end = start + pageSize - 1;
 
-    let query = supabaseAdmin
+    let query = supabase
       .from("blog_posts")
       .select("*", { count: "exact" })
       .eq("status", "published")
@@ -82,9 +82,8 @@ export const listPublicPosts = createServerFn({ method: "POST" })
 export const getPublicPost = createServerFn({ method: "POST" })
   .inputValidator((d: { slug: string }) => z.object({ slug: z.string().min(1) }).parse(d))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { data: post, error } = await supabaseAdmin
+    
+    const { data: post, error } = await supabase
       .from("blog_posts")
       .select("*")
       .eq("slug", data.slug)
@@ -99,7 +98,7 @@ export const getPublicPost = createServerFn({ method: "POST" })
     const currentPost = post as unknown as PublicBlogPost;
 
     // Fetch up to 3 related published posts (same category first, then others)
-    let relatedQuery = supabaseAdmin
+    let relatedQuery = supabase
       .from("blog_posts")
       .select("*")
       .eq("status", "published")
@@ -130,10 +129,9 @@ export const getPopularPosts = createServerFn({ method: "POST" })
     z.object({ limit: z.number().int().min(1).max(20).default(4) }).parse(d ?? {})
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const limit = data.limit || 4;
+        const limit = data.limit || 4;
 
-    const { data: popularRows } = await supabaseAdmin
+    const { data: popularRows } = await supabase
       .from("blog_posts")
       .select("*")
       .eq("status", "published")
@@ -146,7 +144,7 @@ export const getPopularPosts = createServerFn({ method: "POST" })
     // If fewer than limit marked popular, fallback to top recent published posts
     if (rows.length < limit) {
       const existingIds = rows.map((r) => r.id);
-      let fallbackQuery = supabaseAdmin
+      let fallbackQuery = supabase
         .from("blog_posts")
         .select("*")
         .eq("status", "published")
@@ -169,9 +167,8 @@ export const getPopularPosts = createServerFn({ method: "POST" })
 
 export const getFeaturedPost = createServerFn({ method: "POST" })
   .handler(async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    let { data: post } = await supabaseAdmin
+    
+    let { data: post } = await supabase
       .from("blog_posts")
       .select("*")
       .eq("status", "published")
@@ -181,7 +178,7 @@ export const getFeaturedPost = createServerFn({ method: "POST" })
       .maybeSingle();
 
     if (!post) {
-      const { data: latest } = await supabaseAdmin
+      const { data: latest } = await supabase
         .from("blog_posts")
         .select("*")
         .eq("status", "published")

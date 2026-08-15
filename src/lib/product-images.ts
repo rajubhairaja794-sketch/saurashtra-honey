@@ -61,7 +61,9 @@ export function resolveImage(
   let cleanUrl = url?.trim();
   let resultUrl = fallback;
   if (cleanUrl) {
-    if (cleanUrl.includes('lxdkcqdkfuuqjudsysrr.supabase.co') || cleanUrl.includes('/media/')) {
+    if (cleanUrl.includes('lxdkcqdkfuuqjudsysrr.supabase.co')) {
+      resultUrl = cleanUrl;
+    } else if (cleanUrl.includes('/media/')) {
        const parts = cleanUrl.split('/media/');
        let path = parts[parts.length - 1];
        path = path.split('?')[0].split('#')[0];

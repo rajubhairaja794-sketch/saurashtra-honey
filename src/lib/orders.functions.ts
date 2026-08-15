@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const itemSchema = z.object({
   slug: z.string().max(120),
@@ -30,10 +31,9 @@ const createSchema = z.object({
   gift_note: z.string().trim().max(500).optional(),
 });
 
-async function resolveCoupon(code: string | undefined, subtotalPaise: number) {
+async function resolveCoupon(supabaseClient: any, code: string | undefined, subtotalPaise: number) {
   if (!code) return { discount: 0, freeShipping: false, id: null as string | null, codeText: null as string | null };
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
+    const { data } = await supabaseClient
     .from("coupons")
     .select("id,code,discount_type,discount_value,min_order_paise,max_discount_paise,usage_limit,usage_count,starts_at,expires_at,active")
     .ilike("code", code)
@@ -73,17 +73,16 @@ async function razorpayCreateOrder(amountPaise: number, receipt: string) {
   return (await res.json()) as { id: string; amount: number; currency: string };
 }
 
-async function insertOrderRow(data: z.infer<typeof createSchema>, userId: string | null) {
+async function insertOrderRow(supabaseClient: any, data: z.infer<typeof createSchema>, userId: string | null) {
   const subtotalPaise = data.items.reduce((s, i) => s + i.price * i.qty, 0) * 100;
-  const coupon = await resolveCoupon(data.coupon_code, subtotalPaise);
+  const coupon = await resolveCoupon(supabaseClient, data.coupon_code, subtotalPaise);
   const discountedSubtotal = subtotalPaise - coupon.discount;
   const shippingPaise = coupon.freeShipping || discountedSubtotal >= 79900 ? 0 : 4900;
   const totalPaise = discountedSubtotal + shippingPaise;
 
   const estDelivery = new Date(); estDelivery.setDate(estDelivery.getDate() + 5);
 
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const insert = {
+    const insert = {
     user_id: userId,
     email: data.email, phone: data.phone, full_name: data.full_name,
     shipping: data.shipping, items: data.items,
@@ -99,18 +98,18 @@ async function insertOrderRow(data: z.infer<typeof createSchema>, userId: string
     timeline: [{ at: new Date().toISOString(), status: "created", note: "Order placed" }],
     notes: data.notes ?? null,
   };
-  const { data: row, error } = await supabaseAdmin.from("orders").insert(insert as never).select("id, order_number").single();
+  const { data: row, error } = await supabaseClient.from("orders").insert(insert as never).select("id, order_number").single();
   if (error) throw new Error(error.message);
 
   if (coupon.id) {
-    await supabaseAdmin.from("coupon_redemptions").insert({ coupon_id: coupon.id, user_id: userId, order_id: row.id, discount_paise: coupon.discount } as never);
-    const { data: cur } = await supabaseAdmin.from("coupons").select("usage_count").eq("id", coupon.id).single();
-    if (cur) await supabaseAdmin.from("coupons").update({ usage_count: (cur.usage_count ?? 0) + 1 }).eq("id", coupon.id);
+    await supabaseClient.from("coupon_redemptions").insert({ coupon_id: coupon.id, user_id: userId, order_id: row.id, discount_paise: coupon.discount } as never);
+    const { data: cur } = await supabaseClient.from("coupons").select("usage_count").eq("id", coupon.id).single();
+    if (cur) await supabaseClient.from("coupons").update({ usage_count: (cur.usage_count ?? 0) + 1 }).eq("id", coupon.id);
   }
 
   // Customer notification for signed-in users
   if (userId) {
-    await supabaseAdmin.from("notifications").insert({
+    await supabaseClient.from("notifications").insert({
       user_id: userId, kind: "order",
       title: `Order ${row.order_number ?? ""} placed`,
       body: `Your order for ₹${(totalPaise/100).toFixed(0)} has been received.`,
@@ -121,7 +120,7 @@ async function insertOrderRow(data: z.infer<typeof createSchema>, userId: string
 
   if (data.payment_method === "razorpay") {
     const rp = await razorpayCreateOrder(totalPaise, `order_${row.id.slice(0, 30)}`);
-    await supabaseAdmin.from("orders").update({ razorpay_order_id: rp.id }).eq("id", row.id);
+    await supabaseClient.from("orders").update({ razorpay_order_id: rp.id }).eq("id", row.id);
     return { orderId: row.id, orderNumber: row.order_number, razorpay: { keyId: process.env.RAZORPAY_KEY_ID!, orderId: rp.id, amount: rp.amount, currency: rp.currency }, totals: { subtotalPaise, shippingPaise, totalPaise, discountPaise: coupon.discount } };
   }
   return { orderId: row.id, orderNumber: row.order_number, razorpay: null as null, totals: { subtotalPaise, shippingPaise, totalPaise, discountPaise: coupon.discount } };
@@ -130,11 +129,11 @@ async function insertOrderRow(data: z.infer<typeof createSchema>, userId: string
 export const createOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof createSchema>) => createSchema.parse(d))
-  .handler(async ({ data, context }) => insertOrderRow(data, context.userId));
+  .handler(async ({ data, context }) => insertOrderRow(context.supabase, data, context.userId));
 
 export const createGuestOrder = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof createSchema>) => createSchema.parse(d))
-  .handler(async ({ data }) => insertOrderRow(data, null));
+  .handler(async ({ data }) => insertOrderRow(supabase, data, null));
 
 const verifySchema = z.object({
   order_id: z.string().uuid(),
@@ -143,7 +142,7 @@ const verifySchema = z.object({
   razorpay_signature: z.string().min(1),
 });
 
-async function verifyAndMarkPaid(data: z.infer<typeof verifySchema>, callerUserId: string | null) {
+async function verifyAndMarkPaid(supabaseClient: any, data: z.infer<typeof verifySchema>, callerUserId: string | null) {
   const secret = process.env.RAZORPAY_KEY_SECRET;
   if (!secret) throw new Error("Razorpay not configured");
   const { createHmac, timingSafeEqual } = await import("node:crypto");
@@ -151,14 +150,13 @@ async function verifyAndMarkPaid(data: z.infer<typeof verifySchema>, callerUserI
   const a = Buffer.from(expected); const b = Buffer.from(data.razorpay_signature);
   if (a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("Invalid payment signature");
 
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: existing } = await supabaseAdmin.from("orders").select("user_id, razorpay_order_id, timeline").eq("id", data.order_id).single();
+    const { data: existing } = await supabaseClient.from("orders").select("user_id, razorpay_order_id, timeline").eq("id", data.order_id).single();
   if (!existing || existing.razorpay_order_id !== data.razorpay_order_id) throw new Error("Order mismatch");
   if (existing.user_id && existing.user_id !== callerUserId) throw new Error("Forbidden");
 
   const existingTimeline = Array.isArray(existing.timeline) ? (existing.timeline as unknown[]) : [];
   const newTimeline = [...existingTimeline, { at: new Date().toISOString(), status: "paid", note: "Payment received" }];
-  const { error } = await supabaseAdmin.from("orders").update({
+  const { error } = await supabaseClient.from("orders").update({
     status: "paid", razorpay_payment_id: data.razorpay_payment_id, timeline: newTimeline as never,
   }).eq("id", data.order_id);
   if (error) throw new Error(error.message);
@@ -168,8 +166,8 @@ async function verifyAndMarkPaid(data: z.infer<typeof verifySchema>, callerUserI
 export const verifyRazorpay = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof verifySchema>) => verifySchema.parse(d))
-  .handler(async ({ data, context }) => verifyAndMarkPaid(data, context.userId));
+  .handler(async ({ data, context }) => verifyAndMarkPaid(context.supabase, data, context.userId));
 
 export const verifyRazorpayGuest = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof verifySchema>) => verifySchema.parse(d))
-  .handler(async ({ data }) => verifyAndMarkPaid(data, null));
+  .handler(async ({ data }) => verifyAndMarkPaid(supabase, data, null));

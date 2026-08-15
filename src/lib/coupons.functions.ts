@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const validateSchema = z.object({
   code: z.string().trim().min(1).max(60),
@@ -17,9 +18,8 @@ type ValidResult = {
 };
 type InvalidResult = { ok: false; error: string };
 
-async function validateCoupon(code: string, subtotal_paise: number): Promise<ValidResult | InvalidResult> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+async function validateCoupon(supabase: any, code: string, subtotal_paise: number): Promise<ValidResult | InvalidResult> {
+    const { data, error } = await supabase
     .from("coupons")
     .select("id,code,discount_type,discount_value,min_order_paise,max_discount_paise,usage_limit,usage_count,starts_at,expires_at,active,description")
     .ilike("code", code)
@@ -54,7 +54,7 @@ async function validateCoupon(code: string, subtotal_paise: number): Promise<Val
 
 export const validateCouponFn = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof validateSchema>) => validateSchema.parse(d))
-  .handler(async ({ data }) => validateCoupon(data.code, data.subtotal_paise));
+  .handler(async ({ data }) => validateCoupon(supabase, data.code, data.subtotal_paise));
 
 // Public order tracking — anon RPC to look up by order number + email.
 const trackSchema = z.object({
@@ -64,8 +64,7 @@ const trackSchema = z.object({
 export const trackOrderFn = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof trackSchema>) => trackSchema.parse(d))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin.rpc("track_order", { _order_number: data.order_number.trim(), _email: data.email.trim() });
+        const { data: rows, error } = await supabase.rpc("track_order", { _order_number: data.order_number.trim(), _email: data.email.trim() });
     if (error) throw new Error(error.message);
     const row = (rows as unknown as Array<Record<string, unknown>> | null)?.[0];
     if (!row) return { ok: false, order: null };

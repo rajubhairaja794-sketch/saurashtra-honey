@@ -7,8 +7,7 @@ export const updateSiteSettings = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: role } = await context.supabase.rpc("is_staff", { _user_id: context.userId });
     if (!role) throw new Error("Forbidden");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await context.supabase
+        const { error } = await context.supabase
       .from("app_settings")
       .upsert({ id: 1, data: data.data as never, updated_by: context.userId, updated_at: new Date().toISOString() });
     if (error) throw error;

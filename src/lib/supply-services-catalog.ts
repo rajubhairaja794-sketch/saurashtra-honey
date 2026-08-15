@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function assertStaff(supabase: any, userId: string) {
@@ -130,26 +131,54 @@ export const DEFAULT_SUPPLY_SERVICES: SupplyServiceRow[] = [
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function seedWhoWeSupplyIfEmpty(supabaseAdmin: any) {
+export async function seedWhoWeSupplyIfEmpty(supabase: any) {
   try {
-    const { count, error } = await supabaseAdmin
+    const { count, error } = await supabase
       .from("who_we_supply_services")
       .select("id", { count: "exact", head: true });
     if (!error && (count === 0 || count === null)) {
-      const rowsToInsert = DEFAULT_SUPPLY_SERVICES.map(({ id, ...rest }) => rest);
-      await supabaseAdmin.from("who_we_supply_services").insert(rowsToInsert as never);
+      const rowsToInsert = [
+        {
+          title: "Premium Bakeries & Patisseries",
+          description: "Artisanal bakeries across India trust our pure honey and beeswax to create signature pastries, glazes, and naturally sweetened baked goods.",
+          image_url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop&q=60",
+          sort_order: 1,
+          active: true
+        },
+        {
+          title: "Luxury Hotels & Resorts",
+          description: "Five-star hospitality brands feature Saurashtra Honey at breakfast buffets, in premium rooms, and as part of exclusive wellness retreats.",
+          image_url: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&auto=format&fit=crop&q=60",
+          sort_order: 2,
+          active: true
+        },
+        {
+          title: "Ayurvedic & Wellness Brands",
+          description: "Leading natural health companies source our raw honey and bee pollen as foundational ingredients for traditional remedies and modern supplements.",
+          image_url: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800&auto=format&fit=crop&q=60",
+          sort_order: 3,
+          active: true
+        },
+        {
+          title: "Boutique Cafés",
+          description: "Specialty coffee shops and organic cafés serve our unique monofloral honeys to complement artisanal beverages and healthy breakfast bowls.",
+          image_url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=60",
+          sort_order: 4,
+          active: true
+        }
+      ];
+      await supabase.from("who_we_supply_services").insert(rowsToInsert as never);
     }
-  } catch {
-    // Ignore seeding error if table does not exist yet
+  } catch (e) {
+    console.error("Failed to seed who we supply:", e);
   }
 }
 
 export const listPublicSupplyServices = createServerFn({ method: "POST" }).handler(
   async (): Promise<{ rows: SupplyServiceRow[] }> => {
     try {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await seedWhoWeSupplyIfEmpty(supabaseAdmin);
-      const { data, error } = await supabaseAdmin
+      await seedWhoWeSupplyIfEmpty(supabase);
+      const { data, error } = await supabase
         .from("who_we_supply_services")
         .select("*")
         .eq("is_active", true)
@@ -168,9 +197,8 @@ export const listAdminSupplyServices = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ rows: SupplyServiceRow[] }> => {
     await assertStaff(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await seedWhoWeSupplyIfEmpty(supabaseAdmin);
-    const { data, error } = await supabaseAdmin
+        await seedWhoWeSupplyIfEmpty(context.supabase);
+    const { data, error } = await context.supabase
       .from("who_we_supply_services")
       .select("*")
       .order("sort_order", { ascending: true });
@@ -205,17 +233,16 @@ export const upsertSupplyService = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof supplyServiceSchema>) => supplyServiceSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { id, ...rest } = data;
+        const { id, ...rest } = data;
     if (id) {
-      const { error } = await supabaseAdmin
+      const { error } = await context.supabase
         .from("who_we_supply_services")
         .update(rest as never)
         .eq("id", id);
       if (error) throw new Error(error.message);
       return { ok: true };
     }
-    const { error } = await supabaseAdmin.from("who_we_supply_services").insert(rest as never);
+    const { error } = await context.supabase.from("who_we_supply_services").insert(rest as never);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -225,8 +252,7 @@ export const deleteSupplyService = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("who_we_supply_services").delete().eq("id", data.id);
+        const { error } = await context.supabase.from("who_we_supply_services").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

@@ -11,6 +11,7 @@ import {
   type VariantItem,
 } from "@/lib/admin-catalog.functions";
 import { listCategories, upsertCategory, uploadProductImage } from "@/lib/admin-cms.functions";
+import { resolveImage } from "@/lib/product-images";
 import { IMAGE_KEYS } from "@/lib/product-images";
 import {
   BtnGhost,
