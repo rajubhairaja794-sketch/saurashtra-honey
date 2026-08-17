@@ -64,7 +64,9 @@ export const listPublicPosts = createServerFn({ method: "POST" })
 
     const { data: rows, error, count } = await query;
     if (error) {
-      console.error("listPublicPosts error:", error.message);
+      if (error.code !== '42501') {
+        console.error("listPublicPosts error:", error.message);
+      }
       return { rows: [], total: 0, page, totalPages: 1 };
     }
 

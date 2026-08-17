@@ -5,6 +5,12 @@ import Autoplay from "embla-carousel-autoplay";
 import { fetchShopCategories, type ShopCategory } from "@/lib/category-catalog";
 
 import heroProductsImg from "@/assets/hero-products.jpg";
+import heroHoneyImg from "@/assets/hero-honey.jpg";
+import prodHoneycombImg from "@/assets/prod-honeycomb.jpg";
+import beeFarmImg from "@/assets/bee-farm.jpg";
+import honeycombBeesImg from "@/assets/honeycomb-bees.jpg";
+import prodGiftpackImg from "@/assets/prod-giftpack.jpg";
+import prodLycheeImg from "@/assets/prod-lychee.jpg";
 
 export function ShopCategorySection({
   activeCategory,
@@ -15,12 +21,22 @@ export function ShopCategorySection({
 
   useEffect(() => {
     void fetchShopCategories().then((cats) => {
+      const FALLBACK_IMAGE_BY_SLUG: Record<string, string> = {
+        honey: heroHoneyImg,
+        beeswax: prodHoneycombImg,
+        "bee-pollen": beeFarmImg,
+        "beeswax-candle": honeycombBeesImg,
+        "beeswax-products": prodGiftpackImg,
+        "beauty-products": prodLycheeImg,
+        "all-products": heroProductsImg,
+      };
+      
       const formatted = cats.map(c => ({
         name: c.name,
-        img: c.image,
+        img: c.image_url || FALLBACK_IMAGE_BY_SLUG[c.slug] || heroProductsImg,
         filter: c.name.toLowerCase(),
         slug: c.slug,
-        updatedAt: c.updatedAt
+        updatedAt: c.updated_at
       }));
       setCategories(formatted);
     });
@@ -124,8 +140,8 @@ export function ShopCategorySection({
                   className="flex-[0_0_48%] md:flex-[0_0_31%] lg:flex-[0_0_23%] xl:flex-[0_0_18.5%] min-w-0"
                 >
                   <Link
-                    to={cat.slug === "all" ? "/shop" : "/collections/$slug"}
-                    params={cat.slug === "all" ? undefined : { slug: cat.slug }}
+                    to="/shop"
+                    search={cat.filter ? ({ category: cat.filter } as never) : ({ category: "All Products" } as never)}
                     className={`group relative flex flex-col shrink-0 cursor-pointer overflow-hidden bg-white
                       rounded-[24px] shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_45px_rgba(0,0,0,0.12)]
                       transition-all duration-[350ms] ease-[cubic-bezier(0.22,1,0.36,1)]

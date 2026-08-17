@@ -15,6 +15,8 @@ export function PremiumMobileCarousel<T>({
   slideClassName = "flex-[0_0_86vw]",
   containerClassName = "pb-4",
 }: PremiumMobileCarouselProps<T>) {
+  if (!items || items.length === 0) return null;
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop: true,

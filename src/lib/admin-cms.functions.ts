@@ -145,19 +145,29 @@ export async function publishCategoriesJSON(contextSupabase: any) {
   try {
     const { data, error } = await contextSupabase
       .from("categories")
-      .select("slug,name,image_url,sort_order,active,updated_at")
+      .select("id, slug, name, image_url, parent_id, sort_order, active")
       .eq("active", true)
-      .order("sort_order", { ascending: true });
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true });
     
-    if (error || !data) return;
+    if (error || !data) {
+      console.error("Failed to query categories for cache:", error);
+      return;
+    }
     
     const json = JSON.stringify(data);
-    const buf = Buffer.from(json, "utf-8");
-    await contextSupabase.storage
+    
+    const { data: uploadData, error: uploadError } = await contextSupabase.storage
       .from("media")
-      .upload("public_cache/categories.json", buf, { contentType: "application/json", upsert: true });
+      .upload("public_cache/categories.json", json, { contentType: "application/json", upsert: true });
+      
+    if (uploadError) {
+      console.error("Upload cache error:", uploadError);
+    } else {
+      console.log("Successfully published public_cache/categories.json");
+    }
   } catch (e) {
-    console.error("Failed to publish categories JSON", e);
+    console.error("Exception in publishCategoriesJSON", e);
   }
 }
 

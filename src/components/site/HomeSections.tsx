@@ -191,9 +191,18 @@ export function HomeShopByCategory({
 
   React.useEffect(() => {
     const processCategories = (allCats: any[]) => {
+      const FALLBACK_IMAGE_BY_SLUG: Record<string, string> = {
+        honey: heroHoneyImg,
+        beeswax: prodHoneycombImg,
+        "bee-pollen": beeFarmImg,
+        "beeswax-candle": honeycombBeesImg,
+        "beeswax-products": prodGiftpackImg,
+        "beauty-products": prodLycheeImg,
+        "all-products": heroProductsImg,
+      };
       const baseCats = allCats.map(cat => ({
         name: cat.name,
-        img: cat.image,
+        img: cat.image_url || FALLBACK_IMAGE_BY_SLUG[cat.slug] || heroHoneyImg,
         filter: cat.name,
         slug: cat.slug,
         updatedAt: cat.updatedAt

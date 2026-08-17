@@ -135,7 +135,9 @@ export async function fetchPublicSiteSettings(): Promise<Record<string, any>> {
     .eq("is_public", true);
 
   if (error) {
-    console.error("Error fetching site settings:", error);
+    if (error.code !== '42501') {
+      console.error("Error fetching site settings:", error);
+    }
     return {};
   }
   
