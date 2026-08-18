@@ -58,13 +58,16 @@ export function CategoryThumbnailNav({
                   `}
                 >
                   <img
-                    key={cat.updatedAt || cat.image}
-                    src={cat.image || heroProductsImg}
+                    key={`${cat.slug}-${cat.updated_at ?? cat.image_url ?? "fallback"}`}
+                    src={cat.image_url || undefined}
                     alt={cat.name}
                     className={`w-full h-full object-cover transition-transform duration-500 ${
                       isSelected ? "scale-105" : "group-hover:scale-105"
                     }`}
                     draggable={false}
+                    onError={(event) => {
+                      console.error("[CATEGORY IMAGE FAILED]", { slug: cat.slug, name: cat.name, src: event.currentTarget.src });
+                    }}
                   />
                   {/* Subtle white overlay for unselected to make active pop more */}
                   <div 

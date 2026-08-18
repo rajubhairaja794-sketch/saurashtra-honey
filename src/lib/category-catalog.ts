@@ -14,7 +14,6 @@ export type ShopCategory = {
   slug: string;
   name: string;
   image_url: string | null;
-  image?: string;
   parent_id: string | null;
   sort_order: number;
   active: boolean;
@@ -54,15 +53,29 @@ export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler
     else if (c.slug === "premium-gift-pack" || c.slug === "gift-hampers") fallback = giftpackFallback;
     else if (c.slug === "beauty-products") fallback = beautyFallback;
 
+    if (!c.image_url) {
+      console.warn("CATEGORY IMAGE MISSING", { slug: c.slug, name: c.name, image_url: c.image_url, source: "database/cache" });
+    }
+
     const resolvedImg = resolveImage(null, c.image_url, fallback, c.updated_at);
+    
+    console.log("[CATEGORY FINAL IMAGE]", {
+      slug: c.slug,
+      name: c.name,
+      image_url: resolvedImg
+    });
+
     return {
       ...c,
-      image_url: resolvedImg,
-      image: resolvedImg // Add image property for components relying on cat.image
+      image_url: resolvedImg
     } as ShopCategory;
   };
 
   if (cachedData) {
+    console.log("[CATEGORY PIPELINE]", {
+      source: "PUBLIC_CACHE",
+      categories: cachedData
+    });
     return cachedData.map(mapCategory);
   }
 
@@ -95,7 +108,12 @@ export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler
         });
       });
 
-      return dynamicCats.map(mapCategory).sort((a, b) => a.sort_order - b.sort_order);
+      const finalCats = dynamicCats.map(mapCategory).sort((a, b) => a.sort_order - b.sort_order);
+      console.log("[CATEGORY PIPELINE]", {
+        source: "PRODUCTS_FALLBACK (42501)",
+        categories: finalCats
+      });
+      return finalCats;
     }
   }
 
@@ -103,7 +121,12 @@ export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler
     console.error("Failed to fetch categories from Supabase:", error);
   }
   
-  return (data || []).map(mapCategory) as ShopCategory[];
+  const finalCats = (data || []).map(mapCategory);
+  console.log("[CATEGORY PIPELINE]", {
+    source: "SUPABASE_DB",
+    categories: finalCats
+  });
+  return finalCats;
 });
 
 export async function fetchShopCategories(): Promise<ShopCategory[]> {

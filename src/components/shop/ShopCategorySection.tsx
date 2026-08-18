@@ -31,13 +31,20 @@ export function ShopCategorySection({
         "all-products": heroProductsImg,
       };
       
-      const formatted = cats.map(c => ({
-        name: c.name,
-        img: c.image_url || FALLBACK_IMAGE_BY_SLUG[c.slug] || heroProductsImg,
-        filter: c.name.toLowerCase(),
-        slug: c.slug,
-        updatedAt: c.updated_at
-      }));
+      const formatted = cats.map(c => {
+        if (!c.image_url) {
+          console.warn("[CATEGORY IMAGE MISSING]", { slug: c.slug, name: c.name, image_url: c.image_url, source: "ShopCategorySection" });
+        } else {
+          console.debug("[CATEGORY IMAGE]", { slug: c.slug, name: c.name, image_url: c.image_url });
+        }
+        return {
+          name: c.name,
+          img: c.image_url || "",
+          filter: c.name.toLowerCase(),
+          slug: c.slug,
+          updatedAt: c.updated_at
+        };
+      });
       setCategories(formatted);
     });
   }, []);
@@ -162,6 +169,9 @@ export function ShopCategorySection({
                         alt={cat.name}
                         loading="lazy"
                         className="w-full h-full object-cover transform transition-transform duration-[350ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05] pointer-events-none"
+                        onError={(event) => {
+                          console.error("[CATEGORY IMAGE FAILED]", { slug: cat.slug, name: cat.name, src: event.currentTarget.src });
+                        }}
                       />
                     </div>
 

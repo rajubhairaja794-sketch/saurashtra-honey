@@ -44,6 +44,17 @@ export function ShopPage({
   initialCategories?: ShopCategory[];
   initialProducts?: Product[];
 }) {
+  // Temporary development diagnostic
+  console.table(
+    initialCategories.map(c => ({
+      slug: c.slug,
+      name: c.name,
+      image_url: c.image_url,
+      image: (c as any).image,
+      updated_at: c.updated_at
+    }))
+  );
+
   const search = useSearch({ strict: false }) as Record<string, any>;
   const navigate = useNavigate();
 
@@ -298,7 +309,7 @@ export function ShopPage({
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
             {[
               categories.find((c) => c.slug === "all-products" || c.name.toLowerCase() === "all products") || 
-              { slug: "all-products", name: "All Products", image: heroProductsImg, hasCustomImage: false },
+              { slug: "all-products", name: "All Products", image_url: heroProductsImg, hasCustomImage: false },
               ...categories.filter((c) => c.slug !== "all-products" && c.name.toLowerCase() !== "all products")
             ].map((c) => c.slug === "all-products" || c.name.toLowerCase() === "all products" ? (
               <Link
@@ -307,10 +318,13 @@ export function ShopPage({
                 className="group relative flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 aspect-square"
               >
                 <img
-                  src={c.image}
+                  src={c.image_url || undefined}
                   alt={c.name}
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
                   loading="lazy"
+                  onError={(event) => {
+                    console.error("[CATEGORY IMAGE FAILED]", { slug: c.slug, name: c.name, src: event.currentTarget.src });
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 flex items-end justify-center">
@@ -327,10 +341,13 @@ export function ShopPage({
                 className="group relative flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 aspect-square"
               >
                 <img
-                  src={c.image}
+                  src={c.image_url || undefined}
                   alt={c.name}
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
                   loading="lazy"
+                  onError={(event) => {
+                    console.error("[CATEGORY IMAGE FAILED]", { slug: c.slug, name: c.name, src: event.currentTarget.src });
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 flex items-end justify-center">

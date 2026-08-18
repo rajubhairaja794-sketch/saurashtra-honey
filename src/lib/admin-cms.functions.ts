@@ -164,6 +164,15 @@ export async function publishCategoriesJSON(contextSupabase: any) {
     });
     
   if (uploadError) {
+    console.error("[CACHE PUBLISH ERROR]", {
+      bucket: "media",
+      path: "public_cache/categories.json",
+      operation: "upload",
+      error: uploadError,
+      message: uploadError.message,
+      name: uploadError.name,
+      statusCode: (uploadError as any).statusCode || (uploadError as any).status
+    });
     throw new Error(`Upload cache error: ${uploadError.message}`);
   }
   console.log("Successfully published public_cache/categories.json");
