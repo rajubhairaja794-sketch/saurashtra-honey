@@ -109,7 +109,6 @@ export async function seedDefaultCategoriesIfEmpty(supabase: SB) {
   } catch (e) {
     console.error("Failed to seed categories:", e);
   }
-  await publishCategoriesJSON(supabase);
 }
 
 export const listCategories = createServerFn({ method: "POST" })
@@ -139,44 +138,6 @@ export const listCategories = createServerFn({ method: "POST" })
       ),
     };
   });
-
-
-export async function publishCategoriesJSON(contextSupabase: any) {
-  const { data, error } = await contextSupabase
-    .from("categories")
-    .select("id, slug, name, image_url, parent_id, sort_order, active")
-    .eq("active", true)
-    .order("sort_order", { ascending: true })
-    .order("name", { ascending: true });
-  
-  if (error || !data) {
-    throw new Error(`Failed to query categories for cache: ${error?.message}`);
-  }
-  
-  const json = JSON.stringify(data);
-  
-  const { data: uploadData, error: uploadError } = await contextSupabase.storage
-    .from("media")
-    .upload("public_cache/categories.json", json, { 
-        contentType: "application/json", 
-        upsert: true,
-        cacheControl: "0"
-    });
-    
-  if (uploadError) {
-    console.error("[CACHE PUBLISH ERROR]", {
-      bucket: "media",
-      path: "public_cache/categories.json",
-      operation: "upload",
-      error: uploadError,
-      message: uploadError.message,
-      name: uploadError.name,
-      statusCode: (uploadError as any).statusCode || (uploadError as any).status
-    });
-    throw new Error(`Upload cache error: ${uploadError.message}`);
-  }
-  console.log("Successfully published public_cache/categories.json");
-}
 
 export const upsertCategory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -240,7 +201,6 @@ export const upsertCategory = createServerFn({ method: "POST" })
     await audit(context.supabase, context.userId, id ? "category.update" : "category.create", "category", id, {
       slug: cleanSlug,
     });
-    await publishCategoriesJSON(context.supabase);
     return { ok: true };
   });
 

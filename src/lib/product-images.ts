@@ -103,3 +103,40 @@ export function resolveImage(
   
   return resultUrl;
 }
+
+/**
+ * ONE CANONICAL HELPER for Category Images as requested.
+ * 1. Returns null if there is no image.
+ * 2. Returns category.image_url unchanged if it is already an absolute HTTPS URL.
+ * 3. Converts a Storage path to the correct public URL exactly once.
+ * 4. Never uses local fallback when a valid image_url exists.
+ */
+export function getCategoryImageUrl(category: { image_url?: string | null, slug?: string }): string | null {
+  if (!category || !category.image_url) {
+    return null;
+  }
+  
+  const cleanUrl = category.image_url.trim();
+  if (!cleanUrl) return null;
+
+  // If it's already a full HTTP/HTTPS URL, return it exactly as-is.
+  if (/^https?:\/\//i.test(cleanUrl)) {
+    return cleanUrl;
+  }
+
+  // It's a storage path, convert it exactly once using the "media" bucket.
+  let path = cleanUrl.replace(/^\/+/, '');
+  if (path.startsWith('media/')) {
+    path = path.substring(6);
+  }
+  
+  path = path.split('?')[0].split('#')[0]; // remove accidental query strings
+
+  const { data } = supabase.storage.from("media").getPublicUrl(path);
+  if (data && data.publicUrl) {
+    return data.publicUrl;
+  }
+
+  return null;
+}
+
