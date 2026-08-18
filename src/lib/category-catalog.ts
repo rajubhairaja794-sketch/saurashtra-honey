@@ -14,6 +14,7 @@ export type ShopCategory = {
   slug: string;
   name: string;
   image_url: string | null;
+  image?: string;
   parent_id: string | null;
   sort_order: number;
   active: boolean;
@@ -34,20 +35,41 @@ export const DEFAULT_SHOP_CATEGORIES: ShopCategory[] = [];
 export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler(async (): Promise<ShopCategory[]> => {
   // TIER 1: The Public Cache (Bypasses RLS perfectly and reflects Admin image saves instantly)
   const url = "https://lxdkcqdkfuuqjudsysrr.supabase.co/storage/v1/object/public/media/public_cache/categories.json?t=" + Date.now();
+  let cachedData: ShopCategory[] | null = null;
   try {
     const res = await fetch(url);
     if (res.ok) {
-      const data = await res.json();
-      return (data || []) as ShopCategory[];
+      cachedData = (await res.json()) || [];
     }
   } catch (e) {
     // Cache missing or failed, fall through to DB
   }
 
+  const mapCategory = (c: any): ShopCategory => {
+    let fallback = allProductsFallback;
+    if (c.slug === "honey") fallback = honeyFallback;
+    else if (c.slug === "beeswax") fallback = beeswaxFallback;
+    else if (c.slug === "bee-pollen") fallback = pollenFallback;
+    else if (c.slug === "beeswax-candles") fallback = candleFallback;
+    else if (c.slug === "premium-gift-pack" || c.slug === "gift-hampers") fallback = giftpackFallback;
+    else if (c.slug === "beauty-products") fallback = beautyFallback;
+
+    const resolvedImg = resolveImage(null, c.image_url, fallback, c.updated_at);
+    return {
+      ...c,
+      image_url: resolvedImg,
+      image: resolvedImg // Add image property for components relying on cat.image
+    } as ShopCategory;
+  };
+
+  if (cachedData) {
+    return cachedData.map(mapCategory);
+  }
+
   // TIER 2: Direct Database Query (Will likely fail due to 42501 until RLS is fixed)
   const { data, error } = await supabase
     .from("categories")
-    .select("id, slug, name, image_url, parent_id, sort_order, active")
+    .select("id, slug, name, image_url, parent_id, sort_order, active, updated_at")
     .eq("active", true)
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
@@ -73,7 +95,7 @@ export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler
         });
       });
 
-      return dynamicCats.sort((a, b) => a.sort_order - b.sort_order);
+      return dynamicCats.map(mapCategory).sort((a, b) => a.sort_order - b.sort_order);
     }
   }
 
@@ -81,7 +103,7 @@ export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler
     console.error("Failed to fetch categories from Supabase:", error);
   }
   
-  return (data || []) as ShopCategory[];
+  return (data || []).map(mapCategory) as ShopCategory[];
 });
 
 export async function fetchShopCategories(): Promise<ShopCategory[]> {

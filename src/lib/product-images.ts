@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import ajwain from "@/assets/prod-ajwain.jpg";
 import fennel from "@/assets/prod-fennel.jpg";
 import lychee from "@/assets/prod-lychee.jpg";
@@ -59,29 +60,40 @@ export function resolveImage(
   updatedAt?: string | null,
 ): string {
   let cleanUrl = url?.trim();
+  
+  // If url is empty but key looks like a path (e.g. products/123.jpg), treat it as the url
+  if (!cleanUrl && key?.trim() && key.includes('/')) {
+    cleanUrl = key.trim();
+  }
+
   let resultUrl = fallback;
   if (cleanUrl) {
-    if (cleanUrl.includes('lxdkcqdkfuuqjudsysrr.supabase.co')) {
-      resultUrl = cleanUrl;
-    } else if (cleanUrl.includes('/media/')) {
-       const parts = cleanUrl.split('/media/');
-       let path = parts[parts.length - 1];
-       path = path.split('?')[0].split('#')[0];
-       if (path.includes('supabase.co')) {
-           const pathParts = path.split('/');
-           path = "hero/" + pathParts[pathParts.length - 1];
-       }
-       resultUrl = `https://lxdkcqdkfuuqjudsysrr.supabase.co/storage/v1/object/public/media/${path}`;
-    } else if (/^https?:\/\//i.test(cleanUrl)) {
+    if (/^https?:\/\//i.test(cleanUrl)) {
       resultUrl = cleanUrl;
     } else {
-      resultUrl = `https://lxdkcqdkfuuqjudsysrr.supabase.co/storage/v1/object/public/media/${cleanUrl.replace(/^\//, '')}`;
+      let path = cleanUrl.replace(/^\/+/, '');
+      let bucket = "media";
+      
+      if (path.startsWith('media/')) {
+        path = path.substring(6);
+      } else if (path.startsWith('review-media/')) {
+        bucket = "review-media";
+        path = path.substring(13);
+      }
+      
+      // Remove query strings if they accidentally got stored
+      path = path.split('?')[0].split('#')[0];
+
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      if (data && data.publicUrl) {
+        resultUrl = data.publicUrl;
+      }
     }
   } else if (key && imageMap[key]) {
       resultUrl = imageMap[key];
   }
   
-  if (updatedAt && resultUrl.includes('lxdkcqdkfuuqjudsysrr.supabase.co')) {
+  if (updatedAt && resultUrl.includes('supabase.co')) {
       const ts = new Date(updatedAt).getTime();
       if (!isNaN(ts)) {
           const separator = resultUrl.includes('?') ? '&' : '?';

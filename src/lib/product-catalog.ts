@@ -79,7 +79,7 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     : [];
   const galleryImages =
     rawImages.length > 0
-      ? Array.from(new Set(rawImages)).slice(0, 9)
+      ? Array.from(new Set(rawImages)).slice(0, 9).map(img => resolveImage(img, null, fallbackImage(r.slug), r.updated_at))
       : staticMatch?.images;
   const primaryImg = resolveImage(
     r.image_key,
@@ -95,7 +95,7 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     : [];
   const additionalImages =
     rawAdditional.length > 0
-      ? Array.from(new Set(rawAdditional)).slice(0, 8)
+      ? Array.from(new Set(rawAdditional)).slice(0, 8).map(img => resolveImage(img, null, fallbackImage(r.slug), r.updated_at))
       : staticMatch?.additionalImages;
 
   return {

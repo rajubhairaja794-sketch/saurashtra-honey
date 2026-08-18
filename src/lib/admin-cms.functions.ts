@@ -142,33 +142,31 @@ export const listCategories = createServerFn({ method: "POST" })
 
 
 export async function publishCategoriesJSON(contextSupabase: any) {
-  try {
-    const { data, error } = await contextSupabase
-      .from("categories")
-      .select("id, slug, name, image_url, parent_id, sort_order, active")
-      .eq("active", true)
-      .order("sort_order", { ascending: true })
-      .order("name", { ascending: true });
-    
-    if (error || !data) {
-      console.error("Failed to query categories for cache:", error);
-      return;
-    }
-    
-    const json = JSON.stringify(data);
-    
-    const { data: uploadData, error: uploadError } = await contextSupabase.storage
-      .from("media")
-      .upload("public_cache/categories.json", json, { contentType: "application/json", upsert: true });
-      
-    if (uploadError) {
-      console.error("Upload cache error:", uploadError);
-    } else {
-      console.log("Successfully published public_cache/categories.json");
-    }
-  } catch (e) {
-    console.error("Exception in publishCategoriesJSON", e);
+  const { data, error } = await contextSupabase
+    .from("categories")
+    .select("id, slug, name, image_url, parent_id, sort_order, active")
+    .eq("active", true)
+    .order("sort_order", { ascending: true })
+    .order("name", { ascending: true });
+  
+  if (error || !data) {
+    throw new Error(`Failed to query categories for cache: ${error?.message}`);
   }
+  
+  const json = JSON.stringify(data);
+  
+  const { data: uploadData, error: uploadError } = await contextSupabase.storage
+    .from("media")
+    .upload("public_cache/categories.json", json, { 
+        contentType: "application/json", 
+        upsert: true,
+        cacheControl: "0"
+    });
+    
+  if (uploadError) {
+    throw new Error(`Upload cache error: ${uploadError.message}`);
+  }
+  console.log("Successfully published public_cache/categories.json");
 }
 
 export const upsertCategory = createServerFn({ method: "POST" })
