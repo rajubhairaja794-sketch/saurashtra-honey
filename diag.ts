@@ -16,7 +16,7 @@ process.env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL;
 process.env.VITE_SUPABASE_PUBLISHABLE_KEY = env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 // Patch global fetch for Supabase
-function isNewSupabaseApiKey(value) {
+function isNewSupabaseApiKey(value: string) {
   return value.startsWith('sb_publishable_') || value.startsWith('sb_secret_');
 }
 

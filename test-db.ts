@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 
-function isNewSupabaseApiKey(value) {
+function isNewSupabaseApiKey(value: string) {
   return value.startsWith('sb_publishable_') || value.startsWith('sb_secret_');
 }
 
-function createSupabaseFetch(supabaseKey) {
-  return (input, init) => {
+function createSupabaseFetch(supabaseKey: string) {
+  return (input: RequestInfo | URL, init?: RequestInit) => {
     const headers = new Headers(
       typeof Request !== 'undefined' && input instanceof Request ? input.headers : undefined,
     );
