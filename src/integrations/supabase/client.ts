@@ -20,7 +20,14 @@ function createSupabaseClient() {
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
-      storage: typeof window !== 'undefined' ? localStorage : undefined,
+      storage: (function() {
+        if (typeof window === 'undefined') return undefined;
+        try {
+          return window.localStorage;
+        } catch {
+          return undefined; // Fallback to memory storage if localStorage is blocked (e.g. Safari Private Mode)
+        }
+      })(),
       persistSession: true,
       autoRefreshToken: true,
     }
