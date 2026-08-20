@@ -93,7 +93,7 @@ export function resolveImage(
       resultUrl = imageMap[key];
   }
   
-  if (updatedAt && resultUrl.includes('supabase.co')) {
+  if (updatedAt && resultUrl && typeof resultUrl === 'string' && resultUrl.includes('supabase.co')) {
       const ts = new Date(updatedAt).getTime();
       if (!isNaN(ts)) {
           const separator = resultUrl.includes('?') ? '&' : '?';

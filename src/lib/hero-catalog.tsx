@@ -13,43 +13,28 @@ import beeFlowerImg from "@/assets/bee-flower.jpg";
 import beeFarmImg from "@/assets/bee-farm.jpg";
 import familyHoneyImg from "@/assets/family-honey.jpg";
 
-export const fetchPublicHeroRows = createServerFn({ method: "POST" })
-  .inputValidator((d: { page: string }) => z.object({ page: z.string() }).parse(d))
-  .handler(async ({ data: { page } }) => {
-    try {
-      // 1. Try public client first (will fail with 42501 if RLS is broken)
-      const { data, error } = await supabase
-        .from("hero_slides")
-        .select("*")
-        .eq("page", page)
-        .eq("active", true)
-        .order("sort_order", { ascending: true });
+export async function getPublicHeroSlides(page: string = "home"): Promise<{ slides: HeroSlide[], error: string | null }> {
+  try {
+    const { data, error } = await supabase
+      .from("hero_slides")
+      .select("*")
+      .eq("page", page)
+      .eq("active", true)
+      .order("sort_order", { ascending: true });
 
-      if (data && data.length > 0) {
-        return { rows: data as unknown as HeroRow[] };
-      }
-
-      // 2. If RLS blocks it (42501), fallback to secure Server Admin client
-      if (error && error.code === '42501') {
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data: adminData, error: adminError } = await supabaseAdmin
-          .from("hero_slides")
-          .select("*")
-          .eq("page", page)
-          .eq("active", true)
-          .order("sort_order", { ascending: true });
-          
-        if (adminData && adminData.length > 0) {
-          return { rows: adminData as unknown as HeroRow[] };
-        }
-      }
-
-      return { rows: [] as HeroRow[] };
-    } catch (err) {
-      console.error("fetchPublicHeroRows error:", err);
-      return { rows: [] as HeroRow[] };
+    if (error) {
+      return { slides: [], error: `Supabase Error: ${error.message} (Code: ${error.code})` };
     }
-  });
+
+    if (!data || data.length === 0) {
+      return { slides: [], error: null };
+    }
+
+    return { slides: (data as unknown as HeroRow[]).map(r => heroRowToSlide(r)), error: null };
+  } catch (err: any) {
+    return { slides: [], error: `Network/Client Error: ${err.message || 'Unknown error'}` };
+  }
+}
 
 export type HeroRow = {
   id: string;
@@ -76,25 +61,4 @@ export function heroRowToSlide(r: HeroRow): HeroSlide {
   };
 }
 
-export function getDefaultHeroSlides(p: string = "home"): HeroSlide[] {
-  return []; // Return empty array for unknown pages or errors to avoid leaking old data
-}
-
-export async function fetchHeroSlides(page: string): Promise<HeroSlide[]> {
-  try {
-    const { data, error } = await supabase
-      .from("hero_slides")
-      .select("*")
-      .eq("page", page)
-      .eq("active", true)
-      .order("sort_order", { ascending: true });
-    if (error || !data || data.length === 0) {
-      return getDefaultHeroSlides(page);
-    }
-    return (data as unknown as HeroRow[]).map((r) => heroRowToSlide(r));
-  } catch {
-    return getDefaultHeroSlides(page);
-  }
-}
-
-
+// Fallbacks have been strictly removed per user request

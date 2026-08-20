@@ -17,10 +17,10 @@ import Autoplay from "embla-carousel-autoplay";
 import { PremiumMobileCarousel } from "@/components/site/PremiumMobileCarousel";
 import { ProductCard } from "@/components/site/ProductCard";
 import { HeroSlider, type HeroSlide } from "@/components/site/HeroSlider";
-import { fetchPublicHeroRows, heroRowToSlide } from "@/lib/hero-catalog";
+import { getPublicHeroSlides, heroRowToSlide } from "@/lib/hero-catalog";
 import { useServerFn } from "@tanstack/react-start";
 import { type Product } from "@/lib/products";
-import { type ShopCategory, fetchShopCategories } from "@/lib/category-catalog";
+import { type ShopCategory, fetchShopCategories, listPublicCategoriesFn } from "@/lib/category-catalog";
 import { type BlogPost } from "@/lib/blog";
 import * as Icons from "lucide-react";
 import {
@@ -51,15 +51,26 @@ import prodLiquidImg from "@/assets/prod-liquid.jpg";
    ========================================================================= */
 export function HomeHero() {
   const [slides, setSlides] = React.useState<HeroSlide[]>([]);
-  const getRows = useServerFn(fetchPublicHeroRows);
+  const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    void getRows({ data: { page: "home" } }).then((res: any) => {
-      if (res && res.rows && res.rows.length > 0) {
-        setSlides(res.rows.map((r: any) => heroRowToSlide(r)));
+    void getPublicHeroSlides("home").then((res) => {
+      if (res.error) {
+        setErrorMsg(res.error);
+      } else if (res.slides && res.slides.length > 0) {
+        setSlides(res.slides);
       }
     });
-  }, [getRows]);
+  }, []);
+
+  if (errorMsg) {
+    return (
+      <div className="p-8 m-8 bg-red-100 text-red-900 border border-red-300 rounded font-mono text-sm max-w-4xl mx-auto">
+        <h3 className="font-bold mb-2">🚨 Database Request Failed (Hero Slider)</h3>
+        <p>{errorMsg}</p>
+      </div>
+    );
+  }
 
   if (!slides || slides.length === 0) return null;
   return <HeroSlider slides={slides} size="home" interval={5000} />;
@@ -171,6 +182,9 @@ export function HomeShopByCategory({
 }) {
   const [displayCats, setDisplayCats] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
+  
+  const getCategories = useServerFn(listPublicCategoriesFn);
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, dragFree: true, align: "start" },
@@ -185,20 +199,11 @@ export function HomeShopByCategory({
     if (emblaApi) emblaApi.scrollNext();
   }, [emblaApi]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const processCategories = (allCats: any[]) => {
-      const FALLBACK_IMAGE_BY_SLUG: Record<string, string> = {
-        honey: heroHoneyImg,
-        beeswax: prodHoneycombImg,
-        "bee-pollen": beeFarmImg,
-        "beeswax-candle": honeycombBeesImg,
-        "beeswax-products": prodGiftpackImg,
-        "beauty-products": prodLycheeImg,
-        "all-products": heroProductsImg,
-      };
       const baseCats = allCats.map(cat => ({
         name: cat.name,
-        img: cat.image_url || FALLBACK_IMAGE_BY_SLUG[cat.slug] || heroHoneyImg,
+        img: cat.image_url,
         filter: cat.name,
         slug: cat.slug,
         updatedAt: cat.updatedAt
@@ -210,16 +215,33 @@ export function HomeShopByCategory({
     if (initialCategories && initialCategories.length > 0) {
       processCategories(initialCategories);
     } else {
-      fetchShopCategories()
-        .then(processCategories)
+      getCategories()
+        .then((res) => {
+          if (res.error) {
+            setErrorMsg(res.error);
+            setLoading(false);
+          } else {
+            processCategories(res.categories || []);
+          }
+        })
         .catch((err) => {
           console.error("Failed to load categories on homepage:", err);
+          setErrorMsg(err.message || "Unknown error fetching categories");
           setLoading(false);
         });
     }
-  }, [initialCategories]);
+  }, [initialCategories, getCategories]);
 
   if (loading) return null;
+  
+  if (errorMsg) {
+    return (
+      <div className="p-8 m-8 bg-red-100 text-red-900 border border-red-300 rounded font-mono text-sm max-w-4xl mx-auto">
+        <h3 className="font-bold mb-2">🚨 Database Request Failed (Categories)</h3>
+        <p>{errorMsg}</p>
+      </div>
+    );
+  }
 
   const s_eyebrow = settings?.eyebrow ?? "DISCOVER";
   const s_heading = settings?.heading ?? "Explore Our World";

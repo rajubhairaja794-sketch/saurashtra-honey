@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { HeroSlider, type HeroSlide } from "@/components/site/HeroSlider";
-import { fetchHeroSlides, getDefaultHeroSlides } from "@/lib/hero-catalog";
+import { getPublicHeroSlides } from "@/lib/hero-catalog";
 
 export function PageHeroSlider({
   page,
@@ -9,12 +9,14 @@ export function PageHeroSlider({
   page: "home" | "shop" | "our-story" | "bee-farming" | "blog" | "bulk-orders" | "contact" | string;
   interval?: number;
 }) {
-  const [slides, setSlides] = useState<HeroSlide[]>(() =>
-    getDefaultHeroSlides(page)
-  );
+  const [slides, setSlides] = useState<HeroSlide[]>([]);
 
   useEffect(() => {
-    void fetchHeroSlides(page).then(setSlides);
+    void getPublicHeroSlides(page).then((res) => {
+      if (!res.error && res.slides.length > 0) {
+        setSlides(res.slides);
+      }
+    });
   }, [page]);
 
   const isHome = page.toLowerCase() === "home";

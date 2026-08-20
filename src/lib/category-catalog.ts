@@ -31,111 +31,37 @@ type Row = {
 
 export const DEFAULT_SHOP_CATEGORIES: ShopCategory[] = [];
 
-export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler(async (): Promise<ShopCategory[]> => {
-  // TIER 1: The Public Cache (Bypasses RLS perfectly and reflects Admin image saves instantly)
-  const url = "https://lxdkcqdkfuuqjudsysrr.supabase.co/storage/v1/object/public/media/public_cache/categories.json?t=" + Date.now();
-  let cachedData: ShopCategory[] | null = null;
+export const listPublicCategoriesFn = createServerFn({ method: "POST" }).handler(async (): Promise<{ categories: ShopCategory[], error: string | null }> => {
   try {
-    const res = await fetch(url);
-    if (res.ok) {
-      cachedData = (await res.json()) || [];
+    const { data, error } = await supabase
+      .from("categories")
+      .select("id, slug, name, image_url, parent_id, sort_order, active, updated_at")
+      .eq("active", true)
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true });
+
+    if (error) {
+      return { categories: [], error: `Supabase Error: ${error.message} (Code: ${error.code})` };
     }
-  } catch (e) {
-    // Cache missing or failed, fall through to DB
-  }
-
-  const mapCategory = (c: any): ShopCategory => {
-    let fallback = allProductsFallback;
-    if (c.slug === "honey") fallback = honeyFallback;
-    else if (c.slug === "beeswax") fallback = beeswaxFallback;
-    else if (c.slug === "bee-pollen") fallback = pollenFallback;
-    else if (c.slug === "beeswax-candles") fallback = candleFallback;
-    else if (c.slug === "premium-gift-pack" || c.slug === "gift-hampers") fallback = giftpackFallback;
-    else if (c.slug === "beauty-products") fallback = beautyFallback;
-
-    if (!c.image_url) {
-      console.warn("CATEGORY IMAGE MISSING", { slug: c.slug, name: c.name, image_url: c.image_url, source: "database/cache" });
-    }
-
-    const resolvedImg = resolveImage(null, c.image_url, fallback, c.updated_at);
     
-    console.log("[CATEGORY FINAL IMAGE]", {
-      slug: c.slug,
-      name: c.name,
-      image_url: resolvedImg
-    });
+    if (!data) return { categories: [], error: null };
 
-    return {
+    const categories = data.map(c => ({
       ...c,
-      image_url: resolvedImg
-    } as ShopCategory;
-  };
+      image_url: c.image_url ? resolveImage(null, c.image_url, undefined, c.updated_at) : null
+    })) as ShopCategory[];
 
-  if (cachedData) {
-    console.log("[CATEGORY PIPELINE]", {
-      source: "PUBLIC_CACHE",
-      categories: cachedData
-    });
-    return cachedData.map(mapCategory);
+    return { categories, error: null };
+  } catch (err: any) {
+    return { categories: [], error: `Network/Client Error: ${err.message}` };
   }
-
-  // TIER 2: Direct Database Query (Will likely fail due to 42501 until RLS is fixed)
-  const { data, error } = await supabase
-    .from("categories")
-    .select("id, slug, name, image_url, parent_id, sort_order, active, updated_at")
-    .eq("active", true)
-    .order("sort_order", { ascending: true })
-    .order("name", { ascending: true });
-
-  if (error && error.code === '42501') {
-    // TIER 3: The Native Fallback (Extract unique categories from active products so the UI never crashes)
-    const { data: prodData } = await supabase.from("products").select("category");
-    if (prodData) {
-      const uniqueCats = [...new Set(prodData.map(p => p.category).filter(Boolean))];
-      const sortOrder = ["All Products", "Honey", "Beeswax", "Bee Pollen", "Beeswax Candles", "Beauty Products"];
-      
-      const dynamicCats: ShopCategory[] = [
-        { id: "all-products", slug: "all-products", name: "All Products", image_url: null, parent_id: null, sort_order: 0, active: true }
-      ];
-
-      uniqueCats.forEach(name => {
-        const strName = name as string;
-        const slug = strName.toLowerCase().replace(/\s+/g, '-');
-        dynamicCats.push({
-          id: slug, slug, name: strName, image_url: null, parent_id: null,
-          sort_order: sortOrder.indexOf(strName) !== -1 ? sortOrder.indexOf(strName) + 1 : 99,
-          active: true
-        });
-      });
-
-      const finalCats = dynamicCats.map(mapCategory).sort((a, b) => a.sort_order - b.sort_order);
-      console.log("[CATEGORY PIPELINE]", {
-        source: "PRODUCTS_FALLBACK (42501)",
-        categories: finalCats
-      });
-      return finalCats;
-    }
-  }
-
-  if (error && error.code !== '42501') {
-    console.error("Failed to fetch categories from Supabase:", error);
-  }
-  
-  const finalCats = (data || []).map(mapCategory);
-  console.log("[CATEGORY PIPELINE]", {
-    source: "SUPABASE_DB",
-    categories: finalCats
-  });
-  return finalCats;
 });
 
 export async function fetchShopCategories(): Promise<ShopCategory[]> {
   try {
-    const rows = await listPublicCategoriesFn();
-    return rows;
-  } catch (err) {
-    console.error("fetchShopCategories caught an error.", err);
-    // Returning empty array so UI doesn't crash but shows error state if needed
+    const res = await listPublicCategoriesFn();
+    return res.categories || [];
+  } catch {
     return [];
   }
 }

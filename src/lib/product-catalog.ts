@@ -40,9 +40,7 @@ type VariantRow = {
   weight_g: number | null;
 };
 
-function fallbackImage(slug: string): string {
-  return staticProducts.find((p) => p.slug === slug)?.image ?? "";
-}
+// Fallback removed to enforce strict Admin -> Supabase -> Frontend flow
 
 function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
   const dbVariants = r.id && varMap ? varMap.get(r.id) : undefined;
@@ -73,18 +71,19 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
       ? mappedVariants.find((v) => v.isDefault) || mappedVariants[0]
       : undefined;
 
-  const staticMatch = staticProducts.find((p) => p.slug === r.slug);
   const rawImages = Array.isArray(r.images)
     ? (r.images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0)
     : [];
-  const galleryImages =
-    rawImages.length > 0
-      ? Array.from(new Set(rawImages)).slice(0, 9).map(img => resolveImage(img, null, fallbackImage(r.slug), r.updated_at))
-      : staticMatch?.images;
+    
+  const galleryImages = rawImages.length > 0
+    ? Array.from(new Set(rawImages)).slice(0, 9).map(img => resolveImage(null, img, "/images/placeholder-image.png", r.updated_at))
+    : [];
+
+  const directImgUrl = r.image_url || (rawImages.length > 0 ? rawImages[0] : null);
   const primaryImg = resolveImage(
-    r.image_key,
-    r.image_url,
-    galleryImages && galleryImages.length > 0 ? galleryImages[0] : fallbackImage(r.slug),
+    null,
+    directImgUrl,
+    "/images/placeholder-image.png",
     r.updated_at
   );
 
@@ -93,10 +92,10 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     : r.attributes && typeof r.attributes === "object" && Array.isArray((r.attributes as Record<string, unknown>).additional_images)
     ? ((r.attributes as Record<string, unknown>).additional_images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0)
     : [];
-  const additionalImages =
-    rawAdditional.length > 0
-      ? Array.from(new Set(rawAdditional)).slice(0, 8).map(img => resolveImage(img, null, fallbackImage(r.slug), r.updated_at))
-      : staticMatch?.additionalImages;
+    
+  const additionalImages = rawAdditional.length > 0
+    ? Array.from(new Set(rawAdditional)).slice(0, 8).map(img => resolveImage(null, img, "/images/placeholder-image.png", r.updated_at))
+    : [];
 
   return {
     slug: r.slug,
