@@ -556,7 +556,8 @@ function ProductForm({
           if (typeof replaceIdx === "number") {
             cur[replaceIdx] = res.url;
           } else if (cur.length < 9) {
-            cur.push(res.url);
+            // Prepend new image so it immediately becomes the primary image
+            cur.unshift(res.url);
           }
           setF((prev) => ({
             ...prev,
