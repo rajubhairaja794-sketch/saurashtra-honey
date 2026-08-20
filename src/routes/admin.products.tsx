@@ -6,6 +6,7 @@ import {
   listAdminProducts,
   upsertProduct,
   deleteProduct,
+  deleteAllProducts,
   listProductVariants,
   saveProductVariants,
   type VariantItem,
@@ -37,6 +38,8 @@ import {
   Pencil,
   Plus,
   RefreshCcw,
+  Save,
+  Search,
   Star,
   Trash2,
   Upload,
@@ -128,6 +131,7 @@ function ProductsPage() {
   const list = useServerFn(listAdminProducts);
   const save = useServerFn(upsertProduct);
   const del = useServerFn(deleteProduct);
+  const nuke = useServerFn(deleteAllProducts);
   const getCats = useServerFn(listCategories);
   const [rows, setRows] = useState<P[]>([]);
   const [cats, setCats] = useState<any[]>([]);
@@ -308,6 +312,21 @@ function ProductsPage() {
 
   const cols = ["name", "slug", "sku", "category", "price", "stock_quantity", "status"];
 
+  const handleNukeAll = async () => {
+    if (!window.confirm("WARNING: This will permanently delete ALL product records in the catalog. Are you absolutely sure?")) return;
+    if (!window.confirm("FINAL WARNING: This is destructive. Type OK to continue.") ) return;
+    
+    setLoading(true);
+    try {
+      await nuke({});
+      toast.success("All products deleted successfully");
+      await load();
+    } catch (e: any) {
+      toast.error("Failed to delete all products: " + e.message);
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       <PageHeader
@@ -332,6 +351,9 @@ function ProductsPage() {
             <BtnPrimary onClick={() => setEdit(EMPTY)}>
               <Plus className="size-3.5" /> NEW PRODUCT
             </BtnPrimary>
+            <BtnGhost onClick={handleNukeAll} className="text-red-500 hover:text-red-600 border-red-200 hover:bg-red-50">
+              <Trash2 className="size-3.5" /> NUKE ALL
+            </BtnGhost>
           </>
         }
       />
