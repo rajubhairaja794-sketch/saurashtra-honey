@@ -418,10 +418,10 @@ export function getCategoryMetadata(
     const dbCat = dbCategories?.find(
       (c) => getCategorySlug(c.slug) === normalized || getCategorySlug(c.name) === normalized
     );
-    if (dbCat && dbCat.hasCustomImage && dbCat.image) {
+    if (dbCat && dbCat.image_url) {
       return {
         ...found,
-        heroImage: dbCat.image,
+        heroImage: dbCat.image_url,
       };
     }
     return found;
@@ -435,7 +435,7 @@ export function getCategoryMetadata(
   );
 
   const displayName = dbCat ? dbCat.name.toUpperCase() : slug.replace(/-/g, " ").toUpperCase();
-  const heroImg = dbCat?.image || heroHoneyImg;
+  const heroImg = dbCat?.image_url || heroHoneyImg;
 
   return {
     slug: normalized,

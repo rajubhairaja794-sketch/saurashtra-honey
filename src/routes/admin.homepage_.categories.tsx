@@ -180,8 +180,8 @@ function AdminHomepageCategories() {
             return (
               <Card key={sel.id} className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  {cat?.image ? (
-                    <img src={cat.image} alt={cat.name} className="w-12 h-12 object-cover rounded bg-cream" />
+                  {cat?.image_url ? (
+                    <img src={cat.image_url} alt={cat.name} className="w-12 h-12 object-cover rounded bg-cream" />
                   ) : (
                     <div className="w-12 h-12 rounded bg-cream border border-border" />
                   )}
