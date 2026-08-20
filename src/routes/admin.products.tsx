@@ -498,7 +498,15 @@ function ProductForm({
   onCancel: () => void;
   onSave: (p: Partial<P>, variants?: VariantItem[]) => Promise<void>;
 }) {
-  const [f, setF] = useState<Partial<P>>({ ...initial });
+  const sanitizedInitial = { ...initial };
+  if (sanitizedInitial.images && Array.isArray(sanitizedInitial.images)) {
+    sanitizedInitial.images = sanitizedInitial.images.filter(img => typeof img === 'string' && img.startsWith('http'));
+    sanitizedInitial.image_url = sanitizedInitial.images[0] || null;
+  }
+  if (sanitizedInitial.additional_images && Array.isArray(sanitizedInitial.additional_images)) {
+    sanitizedInitial.additional_images = sanitizedInitial.additional_images.filter(img => typeof img === 'string' && img.startsWith('http'));
+  }
+  const [f, setF] = useState<Partial<P>>(sanitizedInitial);
   const [pendingVariants, setPendingVariants] = useState<VariantItem[]>([]);
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"general" | "pricing" | "media" | "seo" | "details">("general");
