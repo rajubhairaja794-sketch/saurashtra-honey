@@ -85,12 +85,17 @@ export const upsertProduct = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { id, ...rest } = data;
-    if (rest.images && Array.isArray(rest.images) && rest.images.length > 0) {
-      rest.image_url = rest.images[0];
+    if (rest.images && Array.isArray(rest.images)) {
+      rest.images = rest.images.filter((img) => typeof img === "string" && img.trim().length > 0);
+      if (rest.images.length > 0) {
+        rest.image_url = rest.images[0].startsWith("http") ? rest.images[0] : null;
+      } else {
+        rest.image_url = null;
+      }
     }
     const attrs = { ...(rest.attributes || {}) } as Record<string, unknown>;
-    if (rest.additional_images) {
-      attrs.additional_images = rest.additional_images;
+    if (rest.additional_images && Array.isArray(rest.additional_images)) {
+      attrs.additional_images = rest.additional_images.filter((img) => typeof img === "string" && img.trim().length > 0);
     }
     rest.attributes = attrs as never;
     delete (rest as Record<string, unknown>).additional_images;

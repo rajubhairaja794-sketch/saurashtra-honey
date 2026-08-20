@@ -157,65 +157,71 @@ function ProductsPage() {
   }, []);
 
   async function onSave(p: Partial<P>, variants?: VariantItem[]) {
-    const res = await save({
-      data: {
-        id: p.id,
-        slug: p.slug!,
-        name: p.name!,
-        tagline: p.tagline ?? null,
-        description: p.description ?? null,
-        category: p.category ?? null,
-        flora: p.flora || null,
-        badge: p.badge || null,
-        price: Number(p.price ?? 0),
-        price_max: p.price_max ?? null,
-        mrp: p.mrp ?? null,
-        rating: Number(p.rating ?? 0),
-        reviews_count: Number(p.reviews_count ?? 0),
-        sizes: p.sizes ?? [],
-        benefits: p.benefits ?? [],
-        image_key: p.image_key || null,
-        image_url: p.image_url || null,
-        images: p.images ?? [],
-        additional_images: p.additional_images ?? [],
-        stock_quantity: Number(p.stock_quantity ?? 100),
-        in_stock: !!p.in_stock,
-        published: !!p.published,
-        sort_order: Number(p.sort_order ?? 0),
-        sku: p.sku || null,
-        barcode: p.barcode || null,
-        brand: p.brand || null,
-        ingredients: p.ingredients || null,
-        usage_instructions: p.usage_instructions || null,
-        warnings: p.warnings || null,
-        cost_price_paise: p.cost_price_paise ?? null,
-        gst_percent: p.gst_percent ?? null,
-        hsn_code: p.hsn_code || null,
-        weight_g: p.weight_g ?? null,
-        low_stock_limit: Number(p.low_stock_limit ?? 5),
-        status: p.status ?? "published",
-        is_featured: !!p.is_featured,
-        is_bestseller: !!p.is_bestseller,
-        is_new_arrival: !!p.is_new_arrival,
-        show_on_homepage: !!p.show_on_homepage,
-        video_url: p.video_url || null,
-        meta_title: p.meta_title || null,
-        meta_description: p.meta_description || null,
-        meta_keywords: p.meta_keywords || null,
-        canonical_url: p.canonical_url || null,
-      } as never,
-    });
-    const savedId = res.id || p.id;
-    if (savedId && variants && variants.length > 0) {
-      try {
-        await saveV({ data: { product_id: savedId, variants } });
-      } catch (err) {
-        console.error("Failed to save variants during product save:", err);
+    try {
+      const res = await save({
+        data: {
+          id: p.id,
+          slug: p.slug!,
+          name: p.name!,
+          tagline: p.tagline ?? null,
+          description: p.description ?? null,
+          category: p.category ?? null,
+          flora: p.flora || null,
+          badge: p.badge || null,
+          price: Number(p.price ?? 0),
+          price_max: p.price_max ?? null,
+          mrp: p.mrp ?? null,
+          rating: Number(p.rating ?? 0),
+          reviews_count: Number(p.reviews_count ?? 0),
+          sizes: p.sizes ?? [],
+          benefits: p.benefits ?? [],
+          image_key: p.image_key || null,
+          image_url: p.image_url || null,
+          images: p.images ?? [],
+          additional_images: p.additional_images ?? [],
+          stock_quantity: Number(p.stock_quantity ?? 100),
+          in_stock: !!p.in_stock,
+          published: !!p.published,
+          sort_order: Number(p.sort_order ?? 0),
+          sku: p.sku || null,
+          barcode: p.barcode || null,
+          brand: p.brand || null,
+          ingredients: p.ingredients || null,
+          usage_instructions: p.usage_instructions || null,
+          warnings: p.warnings || null,
+          cost_price_paise: p.cost_price_paise ?? null,
+          gst_percent: p.gst_percent ?? null,
+          hsn_code: p.hsn_code || null,
+          weight_g: p.weight_g ?? null,
+          low_stock_limit: Number(p.low_stock_limit ?? 5),
+          status: p.status ?? "published",
+          is_featured: !!p.is_featured,
+          is_bestseller: !!p.is_bestseller,
+          is_new_arrival: !!p.is_new_arrival,
+          show_on_homepage: !!p.show_on_homepage,
+          video_url: p.video_url || null,
+          meta_title: p.meta_title || null,
+          meta_description: p.meta_description || null,
+          meta_keywords: p.meta_keywords || null,
+          canonical_url: p.canonical_url || null,
+        } as never,
+      });
+      const savedId = res.id || p.id;
+      if (savedId && variants && variants.length > 0) {
+        try {
+          await saveV({ data: { product_id: savedId, variants } });
+        } catch (err) {
+          console.error("Failed to save variants during product save:", err);
+        }
       }
+      toast.success("Saved");
+      setEdit(null);
+      await load();
+    } catch (e: any) {
+      console.error("Save error:", e);
+      toast.error(e.message || "Failed to save product");
+      throw e;
     }
-    toast.success("Saved");
-    setEdit(null);
-    await load();
   }
 
   async function bulkDelete() {
@@ -500,11 +506,11 @@ function ProductForm({
 }) {
   const sanitizedInitial = { ...initial };
   if (sanitizedInitial.images && Array.isArray(sanitizedInitial.images)) {
-    sanitizedInitial.images = sanitizedInitial.images.filter(img => typeof img === 'string' && img.startsWith('http'));
-    sanitizedInitial.image_url = sanitizedInitial.images[0] || null;
+    sanitizedInitial.images = sanitizedInitial.images.filter(img => typeof img === 'string' && img.trim().length > 0);
+    sanitizedInitial.image_url = sanitizedInitial.images[0]?.startsWith("http") ? sanitizedInitial.images[0] : null;
   }
   if (sanitizedInitial.additional_images && Array.isArray(sanitizedInitial.additional_images)) {
-    sanitizedInitial.additional_images = sanitizedInitial.additional_images.filter(img => typeof img === 'string' && img.startsWith('http'));
+    sanitizedInitial.additional_images = sanitizedInitial.additional_images.filter(img => typeof img === 'string' && img.trim().length > 0);
   }
   const [f, setF] = useState<Partial<P>>(sanitizedInitial);
   const [pendingVariants, setPendingVariants] = useState<VariantItem[]>([]);
@@ -952,7 +958,7 @@ function ProductForm({
                       }`}
                     >
                       <div className="relative aspect-square rounded-xl overflow-hidden bg-cream-deep/30 mb-2">
-                        <img src={u} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                        <img src={resolveImage(u, u)} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
                         {i === 0 && (
                           <span className="absolute top-2 left-2 bg-burnt-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
                             PRIMARY (MAIN)
@@ -1090,7 +1096,7 @@ function ProductForm({
 
                       <div className="aspect-square rounded-xl overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center relative">
                         {url ? (
-                          <img src={url} alt={`Additional ${idx + 1}`} className="w-full h-full object-cover" />
+                          <img src={resolveImage(url, url)} alt={`Additional ${idx + 1}`} className="w-full h-full object-cover" />
                         ) : (
                           <div className="text-center text-muted-foreground/60 p-4">
                             <ImageOff className="size-6 mx-auto mb-1 opacity-40" />
