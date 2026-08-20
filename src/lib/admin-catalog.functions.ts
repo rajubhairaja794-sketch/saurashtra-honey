@@ -94,13 +94,12 @@ export const upsertProduct = createServerFn({ method: "POST" })
     }
     rest.attributes = attrs as never;
     delete (rest as Record<string, unknown>).additional_images;
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (id) {
-      const { data: updated, error } = await supabaseAdmin.from("products").update(rest as never).eq("id", id).select("id").single();
+      const { data: updated, error } = await context.supabase.from("products").update(rest as never).eq("id", id).select("id").single();
       if (error) throw new Error(error.message);
       return { ok: true, id: updated?.id || id };
     }
-    const { data: inserted, error } = await supabaseAdmin.from("products").insert(rest as never).select("id").single();
+    const { data: inserted, error } = await context.supabase.from("products").insert(rest as never).select("id").single();
     if (error) throw new Error(error.message);
     return { ok: true, id: inserted?.id };
   });
@@ -110,8 +109,7 @@ export const deleteProduct = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("products").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("products").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
