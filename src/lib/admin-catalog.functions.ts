@@ -87,10 +87,8 @@ export const upsertProduct = createServerFn({ method: "POST" })
     const { id, ...rest } = data;
     if (rest.images && Array.isArray(rest.images)) {
       rest.images = rest.images.filter((img) => typeof img === "string" && img.trim().length > 0);
-      if (rest.images.length > 0) {
-        rest.image_url = rest.images[0].startsWith("http") ? rest.images[0] : null;
-      } else {
-        rest.image_url = null;
+      if (!rest.image_url && rest.images.length > 0 && rest.images[0].startsWith("http")) {
+        rest.image_url = rest.images[0];
       }
     }
     const attrs = { ...(rest.attributes || {}) } as Record<string, unknown>;

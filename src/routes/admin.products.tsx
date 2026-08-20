@@ -507,8 +507,20 @@ function ProductForm({
   const sanitizedInitial = { ...initial };
   if (sanitizedInitial.images && Array.isArray(sanitizedInitial.images)) {
     sanitizedInitial.images = sanitizedInitial.images.filter(img => typeof img === 'string' && img.trim().length > 0);
-    sanitizedInitial.image_url = sanitizedInitial.images[0]?.startsWith("http") ? sanitizedInitial.images[0] : null;
+  } else {
+    sanitizedInitial.images = [];
   }
+  
+  // Rule #3: If image_url exists, the UI should treat image_url as the primary display image
+  if (sanitizedInitial.image_url) {
+    if (sanitizedInitial.images.length === 0) {
+      sanitizedInitial.images = [sanitizedInitial.image_url];
+    } else if (sanitizedInitial.images[0] !== sanitizedInitial.image_url) {
+      // Ensure image_url is the primary image if it's not already
+      sanitizedInitial.images = [sanitizedInitial.image_url, ...sanitizedInitial.images.filter(img => img !== sanitizedInitial.image_url)];
+    }
+  }
+
   if (sanitizedInitial.additional_images && Array.isArray(sanitizedInitial.additional_images)) {
     sanitizedInitial.additional_images = sanitizedInitial.additional_images.filter(img => typeof img === 'string' && img.trim().length > 0);
   }
@@ -968,8 +980,9 @@ function ProductForm({
                           type="button"
                           onClick={() => {
                             const cur = [...(f.images ?? [])];
-                            cur.splice(i, 1);
-                            setF({ ...f, images: cur, image_url: cur[0] ?? null });
+                            const removed = cur.splice(i, 1)[0];
+                            const newImageUrl = (removed === f.image_url) ? (cur[0] ?? null) : f.image_url;
+                            setF({ ...f, images: cur, image_url: newImageUrl });
                           }}
                           className="absolute top-2 right-2 bg-destructive text-white rounded-full size-6 flex items-center justify-center text-xs shadow hover:scale-105 transition-transform"
                         >
@@ -985,7 +998,7 @@ function ProductForm({
                               const cur = [...(f.images ?? [])];
                               const [moved] = cur.splice(i, 1);
                               cur.unshift(moved);
-                              setF({ ...f, images: cur, image_url: cur[0] ?? null });
+                              setF({ ...f, images: cur, image_url: moved });
                             }}
                             className="px-2 py-1 rounded bg-cream text-espresso font-semibold hover:bg-burnt-orange/20 hover:text-burnt-orange transition-colors"
                           >
@@ -1004,7 +1017,7 @@ function ProductForm({
                                 const tmp = cur[i - 1];
                                 cur[i - 1] = cur[i];
                                 cur[i] = tmp;
-                                setF({ ...f, images: cur, image_url: cur[0] ?? null });
+                                setF({ ...f, images: cur, image_url: f.image_url ?? cur[0] });
                               }}
                               className="size-6 rounded bg-cream hover:bg-cream-deep flex items-center justify-center text-espresso"
                               title="Move left/up"
@@ -1020,7 +1033,7 @@ function ProductForm({
                                 const tmp = cur[i + 1];
                                 cur[i + 1] = cur[i];
                                 cur[i] = tmp;
-                                setF({ ...f, images: cur, image_url: cur[0] ?? null });
+                                setF({ ...f, images: cur, image_url: f.image_url ?? cur[0] });
                               }}
                               className="size-6 rounded bg-cream hover:bg-cream-deep flex items-center justify-center text-espresso"
                               title="Move right/down"
@@ -1050,7 +1063,12 @@ function ProductForm({
                       .map((s) => s.trim())
                       .filter(Boolean)
                       .slice(0, 9);
-                    setF({ ...f, images: lines, image_url: lines[0] ?? null });
+                    
+                    const newImageUrl = lines.includes(f.image_url || "") 
+                      ? f.image_url 
+                      : (f.image_url ?? lines[0] ?? null);
+                      
+                    setF({ ...f, images: lines, image_url: newImageUrl });
                   }}
                   className={`${inp} font-mono text-xs`}
                   placeholder="Paste up to 9 image URLs, one per line"
