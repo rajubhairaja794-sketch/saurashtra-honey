@@ -146,7 +146,8 @@ function ProductsPage() {
   async function load() {
     setLoading(true);
     try {
-      const [r, c] = await Promise.all([list({}), getCats({})]);
+      const r = await list({});
+      const c = await getCats({});
       setRows(r.rows as unknown as P[]);
       setCats(c.rows || []);
       setSelected(new Set());
