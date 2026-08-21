@@ -61,12 +61,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } catch {/* ignore */}
     setHydrated(true);
   }, []);
-  useEffect(() => { if (hydrated) localStorage.setItem(KEY, JSON.stringify(items)); }, [items, hydrated]);
-  useEffect(() => { if (hydrated) localStorage.setItem(SAVED_KEY, JSON.stringify(saved)); }, [saved, hydrated]);
+  useEffect(() => { if (hydrated) { try { localStorage.setItem(KEY, JSON.stringify(items)); } catch {} } }, [items, hydrated]);
+  useEffect(() => { if (hydrated) { try { localStorage.setItem(SAVED_KEY, JSON.stringify(saved)); } catch {} } }, [saved, hydrated]);
   useEffect(() => {
     if (!hydrated) return;
-    if (coupon) localStorage.setItem(COUPON_KEY, JSON.stringify(coupon));
-    else localStorage.removeItem(COUPON_KEY);
+    try {
+      if (coupon) localStorage.setItem(COUPON_KEY, JSON.stringify(coupon));
+      else localStorage.removeItem(COUPON_KEY);
+    } catch {}
   }, [coupon, hydrated]);
 
   const applyCoupon = useCallback((c: AppliedCoupon | null) => setCoupon(c), []);

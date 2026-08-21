@@ -12,9 +12,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState("en");
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const l = window.localStorage.getItem(KEY);
-    if (l) setLocale(l);
-    document.documentElement.lang = l ?? "en";
+    try {
+      const l = window.localStorage.getItem(KEY);
+      if (l) setLocale(l);
+      document.documentElement.lang = l ?? "en";
+    } catch {
+      document.documentElement.lang = "en";
+    }
   }, []);
   function set(l: string) {
     setLocale(l);

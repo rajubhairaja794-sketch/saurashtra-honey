@@ -23,9 +23,17 @@ function createSupabaseClient() {
       storage: (function() {
         if (typeof window === 'undefined') return undefined;
         try {
+          const testKey = '__test__';
+          window.localStorage.setItem(testKey, testKey);
+          window.localStorage.removeItem(testKey);
           return window.localStorage;
         } catch {
-          return undefined; // Fallback to memory storage if localStorage is blocked (e.g. Safari Private Mode)
+          // Fallback to memory storage if localStorage is blocked (e.g. Safari Private Mode)
+          return {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {}
+          };
         }
       })(),
       persistSession: true,
