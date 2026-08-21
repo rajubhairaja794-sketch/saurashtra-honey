@@ -9,6 +9,7 @@ import {
   deleteAllProducts,
   listProductVariants,
   saveProductVariants,
+  verifyProductImage,
   type VariantItem,
 } from "@/lib/admin-catalog.functions";
 import { listCategories, upsertCategory, uploadProductImage } from "@/lib/admin-cms.functions";
@@ -129,6 +130,7 @@ const EMPTY: Partial<P> = {
 
 function ProductsPage() {
   const list = useServerFn(listAdminProducts);
+  const verifyImg = useServerFn(verifyProductImage);
   const save = useServerFn(upsertProduct);
   const del = useServerFn(deleteProduct);
   const nuke = useServerFn(deleteAllProducts);
@@ -212,6 +214,21 @@ function ProductsPage() {
         } as never,
       });
       const savedId = res.id || p.id;
+      
+      // MANDATORY POST-SAVE VERIFICATION
+      if (savedId) {
+        try {
+          const verified = await verifyImg({ data: { id: savedId } });
+          if (!verified) throw new Error("Could not read back from DB");
+          if (p.image_url && verified.image_url !== p.image_url) {
+            throw new Error(`Expected image_url ${p.image_url} but got ${verified.image_url}`);
+          }
+        } catch (vErr: any) {
+          console.error("MANDATORY POST-SAVE VERIFICATION FAILED:", vErr);
+          throw new Error("MANDATORY POST-SAVE VERIFICATION FAILED: " + vErr.message);
+        }
+      }
+
       if (savedId && variants && variants.length > 0) {
         try {
           await saveV({ data: { product_id: savedId, variants } });
@@ -604,6 +621,7 @@ function ProductForm({
             ...prev,
             images: cur,
             image_url: cur[0] ?? prev.image_url,
+            image_key: null,
           }));
         } else {
           const cur = [...(f.additional_images ?? [])];

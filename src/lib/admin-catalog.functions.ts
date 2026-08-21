@@ -117,6 +117,17 @@ export const deleteProduct = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const verifyProductImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: product, error } = await context.supabase.from("products").select("image_url, images, image_key").eq("id", data.id).single();
+    if (error) throw new Error(error.message);
+    return product;
+  });
+
+
 export const deleteAllProducts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
