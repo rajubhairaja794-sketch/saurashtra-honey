@@ -68,7 +68,9 @@ export function resolveImage(
 
   let resultUrl = fallback;
   if (cleanUrl) {
-    if (/^https?:\/\//i.test(cleanUrl)) {
+    if (imageMap[cleanUrl]) {
+      resultUrl = imageMap[cleanUrl];
+    } else if (/^https?:\/\//i.test(cleanUrl)) {
       resultUrl = cleanUrl;
     } else {
       let path = cleanUrl.replace(/^\/+/, '');
