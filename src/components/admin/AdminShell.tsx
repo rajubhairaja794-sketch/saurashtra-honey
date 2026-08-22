@@ -34,7 +34,7 @@ import {
   Layers,
   Instagram,
 } from "lucide-react";
-import { AutoSeeder } from "./AutoSeeder";
+
 
 type NavItem = {
   label: string;
