@@ -79,7 +79,7 @@ const NAV: NavItem[] = [
   { label: "Audit Logs", to: "/admin/audit", icon: ClipboardList, perm: "audit.read" },
 ];
 
-export function AdminShell() {
+export function AdminLayout() {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const claim = useServerFn(claimAdmin);
