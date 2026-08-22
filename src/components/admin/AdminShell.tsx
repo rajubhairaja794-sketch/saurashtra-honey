@@ -236,7 +236,7 @@ export function AdminShell() {
       )}
 
       {/* Main */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 relative">
         <header className="h-14 bg-white border-b border-border sticky top-0 z-20 flex items-center gap-3 px-4 lg:px-6">
           <button className="lg:hidden" onClick={() => setOpen((o) => !o)} aria-label="Menu">
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -259,6 +259,11 @@ export function AdminShell() {
         <main className="p-4 lg:p-6">
           <Outlet />
         </main>
+        
+        {/* DEBUG CACHE INDICATOR */}
+        <div className="fixed bottom-2 right-2 text-[10px] font-mono text-muted-foreground bg-white/80 p-1 border border-border rounded pointer-events-none z-50">
+          BUILD: V-NO-SYNC (1877109)
+        </div>
       </div>
     </div>
   );
