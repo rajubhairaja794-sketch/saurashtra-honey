@@ -81,6 +81,11 @@ export function resolveImage(
       } else if (path.startsWith('review-media/')) {
         bucket = "review-media";
         path = path.substring(13);
+      } else if (path.startsWith('legacy/')) {
+        bucket = "product_images";
+      } else if (path.startsWith('product_images/')) {
+        bucket = "product_images";
+        path = path.substring(15);
       }
       
       // Remove query strings if they accidentally got stored
@@ -126,15 +131,22 @@ export function getCategoryImageUrl(category: { image_url?: string | null, slug?
     return cleanUrl;
   }
 
-  // It's a storage path, convert it exactly once using the "media" bucket.
+  // It's a storage path, convert it exactly once using the "media" bucket by default.
   let path = cleanUrl.replace(/^\/+/, '');
+  let bucket = "media";
+  
   if (path.startsWith('media/')) {
     path = path.substring(6);
+  } else if (path.startsWith('legacy/')) {
+    bucket = "product_images";
+  } else if (path.startsWith('product_images/')) {
+    bucket = "product_images";
+    path = path.substring(15);
   }
   
   path = path.split('?')[0].split('#')[0]; // remove accidental query strings
 
-  const { data } = supabase.storage.from("media").getPublicUrl(path);
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
   if (data && data.publicUrl) {
     return data.publicUrl;
   }
