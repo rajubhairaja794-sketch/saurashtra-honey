@@ -45,7 +45,6 @@ import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminMediaRouteImport } from './routes/admin.media'
-import { Route as AdminMigrateCatalogRouteImport } from './routes/admin.migrate-catalog'
 import { Route as AdminNewsletterRouteImport } from './routes/admin.newsletter'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
@@ -253,11 +252,6 @@ const AdminMediaRoute = AdminMediaRouteImport.update({
   path: '/media',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminMigrateCatalogRoute = AdminMigrateCatalogRouteImport.update({
-  id: '/migrate-catalog',
-  path: '/migrate-catalog',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminNewsletterRoute = AdminNewsletterRouteImport.update({
   id: '/newsletter',
   path: '/newsletter',
@@ -427,7 +421,6 @@ export interface FileRoutesByFullPath {
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
-  '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
@@ -490,7 +483,6 @@ export interface FileRoutesByTo {
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
-  '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
@@ -556,7 +548,6 @@ export interface FileRoutesById {
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/media': typeof AdminMediaRoute
-  '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
@@ -623,7 +614,6 @@ export interface FileRouteTypes {
     | '/admin/loyalty'
     | '/admin/marketing'
     | '/admin/media'
-    | '/admin/migrate-catalog'
     | '/admin/newsletter'
     | '/admin/orders'
     | '/admin/products'
@@ -686,7 +676,6 @@ export interface FileRouteTypes {
     | '/admin/loyalty'
     | '/admin/marketing'
     | '/admin/media'
-    | '/admin/migrate-catalog'
     | '/admin/newsletter'
     | '/admin/orders'
     | '/admin/products'
@@ -751,7 +740,6 @@ export interface FileRouteTypes {
     | '/admin/loyalty'
     | '/admin/marketing'
     | '/admin/media'
-    | '/admin/migrate-catalog'
     | '/admin/newsletter'
     | '/admin/orders'
     | '/admin/products'
@@ -1070,13 +1058,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMediaRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/migrate-catalog': {
-      id: '/admin/migrate-catalog'
-      path: '/migrate-catalog'
-      fullPath: '/admin/migrate-catalog'
-      preLoaderRoute: typeof AdminMigrateCatalogRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/newsletter': {
       id: '/admin/newsletter'
       path: '/newsletter'
@@ -1275,7 +1256,6 @@ interface AdminRouteChildren {
   AdminLoyaltyRoute: typeof AdminLoyaltyRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminMediaRoute: typeof AdminMediaRoute
-  AdminMigrateCatalogRoute: typeof AdminMigrateCatalogRoute
   AdminNewsletterRoute: typeof AdminNewsletterRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminProductsRoute: typeof AdminProductsRoute
@@ -1306,7 +1286,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminLoyaltyRoute: AdminLoyaltyRoute,
   AdminMarketingRoute: AdminMarketingRoute,
   AdminMediaRoute: AdminMediaRoute,
-  AdminMigrateCatalogRoute: AdminMigrateCatalogRoute,
   AdminNewsletterRoute: AdminNewsletterRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminProductsRoute: AdminProductsRoute,
