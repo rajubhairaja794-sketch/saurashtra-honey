@@ -42,7 +42,7 @@ export const imageMap: Record<string, string> = {
   "bee-flower": beeFlower,
   "prod-liquid": liquid,
   "team-beekeepers": team,
-  // Add new product images mapped from products.json
+  // Add new product images
   "prod-beeswax-pellets": beeswaxPellets,
   "prod-bee-pollen": beePollen,
   "prod-beeswax-candles": beeswaxCandles,
