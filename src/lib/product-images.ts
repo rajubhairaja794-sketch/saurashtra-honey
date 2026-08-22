@@ -67,12 +67,7 @@ export function resolveProductImage(
     return FALLBACK_IMAGE;
   }
 
-  // 1.5. If the exact key exists in the local imageMap, return the local asset immediately
-  if (imageMap[cleanInput]) {
-    return imageMap[cleanInput];
-  }
-
-  // 2. If it's already an absolute URL to product_images, return as-is
+  // 1. Absolute http/https URL → return unchanged.
   if (/^https?:\/\//i.test(cleanInput)) {
     // We optionally add the cache-busting timestamp
     if (updatedAt && cleanInput.includes('supabase.co')) {
@@ -85,33 +80,40 @@ export function resolveProductImage(
     return cleanInput;
   }
 
-  // 3. Clean up the path
+  // Clean up the path
   let path = cleanInput.replace(/^\/+/, '').split('?')[0].split('#')[0];
 
-  // 4. Normalize to the correct bucket and path
   let bucket = "product_images";
 
-  if (path.startsWith('media/')) {
-    bucket = "media";
-    path = path.substring(6);
-  } else if (path.startsWith('review-media/')) {
-    bucket = "review-media";
-    path = path.substring(13);
-  } else if (path.startsWith('product_images/')) {
+  // 2. Explicit product_images/... path → convert to canonical public URL.
+  if (path.startsWith('product_images/')) {
     bucket = "product_images";
     path = path.substring(15);
-  } else if (path.startsWith('legacy/')) {
+  } 
+  // 3. legacy/... path → product_images/legacy/...
+  else if (path.startsWith('legacy/')) {
     bucket = "product_images";
     // Keep the legacy/ prefix for the path
-  } else if (!path.includes('/')) {
-    // Otherwise, assume it's a migrated file that should be in legacy/
+  } 
+  else if (path.startsWith('media/')) {
+    bucket = "media";
+    path = path.substring(6);
+  } 
+  else if (path.startsWith('review-media/')) {
+    bucket = "review-media";
+    path = path.substring(13);
+  } 
+  // 4. Raw filename/key without slash → product_images/legacy/<key>.
+  else if (!path.includes('/')) {
     bucket = "product_images";
     path = `legacy/${path}`;
   }
 
   // Generate public URL
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  let resultUrl = data?.publicUrl || FALLBACK_IMAGE;
+  
+  // 5. Only if no usable Storage reference exists, use local imageMap fallback.
+  let resultUrl = data?.publicUrl || imageMap[cleanInput] || FALLBACK_IMAGE;
 
   // Append timestamp if applicable
   if (updatedAt && resultUrl !== FALLBACK_IMAGE && resultUrl.includes('supabase.co')) {

@@ -124,9 +124,11 @@ export const upsertProduct = createServerFn({ method: "POST" })
       }
     }
     const attrs = { ...(rest.attributes || {}) } as Record<string, unknown>;
-    if (rest.additional_images && Array.isArray(rest.additional_images)) {
+    
+    if (Array.isArray(rest.additional_images)) {
       attrs.additional_images = rest.additional_images.filter((img) => typeof img === "string" && img.trim().length > 0);
     }
+    
     rest.attributes = attrs as never;
     delete (rest as Record<string, unknown>).additional_images;
     if (id) {
@@ -154,7 +156,7 @@ export const verifyProductImage = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { data: product, error } = await context.supabase.from("products").select("image_url, images, image_key").eq("id", data.id).single();
+    const { data: product, error } = await context.supabase.from("products").select("image_url, images, image_key, attributes").eq("id", data.id).single();
     if (error) throw new Error(error.message);
     return product;
   });

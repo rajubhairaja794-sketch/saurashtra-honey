@@ -210,6 +210,7 @@ function ProductsPage() {
           meta_description: p.meta_description || null,
           meta_keywords: p.meta_keywords || null,
           canonical_url: p.canonical_url || null,
+          attributes: p.attributes ?? {},
         } as never,
       });
       const savedId = res.id || p.id;
@@ -219,8 +220,32 @@ function ProductsPage() {
         try {
           const verified = await verifyImg({ data: { id: savedId } });
           if (!verified) throw new Error("Could not read back from DB");
+          
           if (p.image_url && verified.image_url !== p.image_url) {
             throw new Error(`Expected image_url ${p.image_url} but got ${verified.image_url}`);
+          }
+
+          const submittedImages = p.images || [];
+          const verifiedImages = verified.images || [];
+          if (submittedImages.length !== verifiedImages.length) {
+            throw new Error(`Expected ${submittedImages.length} gallery images but got ${verifiedImages.length}`);
+          }
+          for (let i = 0; i < submittedImages.length; i++) {
+            if (submittedImages[i] !== verifiedImages[i]) {
+              throw new Error(`Gallery image mismatch at index ${i}: expected ${submittedImages[i]} but got ${verifiedImages[i]}`);
+            }
+          }
+
+          const submittedAdditional = p.additional_images || [];
+          const verifiedAttrs = verified.attributes || {};
+          const verifiedAdditional = Array.isArray(verifiedAttrs.additional_images) ? verifiedAttrs.additional_images : [];
+          if (submittedAdditional.length !== verifiedAdditional.length) {
+            throw new Error(`Expected ${submittedAdditional.length} additional images but got ${verifiedAdditional.length}`);
+          }
+          for (let i = 0; i < submittedAdditional.length; i++) {
+            if (submittedAdditional[i] !== verifiedAdditional[i]) {
+              throw new Error(`Additional image mismatch at index ${i}: expected ${submittedAdditional[i]} but got ${verifiedAdditional[i]}`);
+            }
           }
         } catch (vErr: any) {
           console.error("MANDATORY POST-SAVE VERIFICATION FAILED:", vErr);
