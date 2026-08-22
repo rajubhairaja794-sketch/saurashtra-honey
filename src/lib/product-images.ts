@@ -53,62 +53,86 @@ export const imageMap: Record<string, string> = {
 export const IMAGE_KEYS = Object.keys(imageMap);
 export const FALLBACK_IMAGE = hero;
 
+export function resolveProductImage(
+  url: string | null | undefined,
+  key: string | null | undefined,
+  firstImage: string | null | undefined,
+  productName: string = "product",
+  updatedAt?: string | null
+): string {
+  // 1. Determine the best available input string
+  let cleanInput = (url || key || firstImage || "").trim();
+
+  if (!cleanInput) {
+    return FALLBACK_IMAGE;
+  }
+
+  // 2. If it's already an absolute URL to product_images, return as-is
+  if (/^https?:\/\//i.test(cleanInput)) {
+    // We optionally add the cache-busting timestamp
+    if (updatedAt && cleanInput.includes('supabase.co')) {
+      const ts = new Date(updatedAt).getTime();
+      if (!isNaN(ts)) {
+        const separator = cleanInput.includes('?') ? '&' : '?';
+        return `${cleanInput}${separator}v=${ts}`;
+      }
+    }
+    return cleanInput;
+  }
+
+  // 3. Clean up the path
+  let path = cleanInput.replace(/^\/+/, '').split('?')[0].split('#')[0];
+
+  // 4. Normalize to the correct bucket and path
+  let bucket = "product_images";
+
+  if (path.startsWith('media/')) {
+    bucket = "media";
+    path = path.substring(6);
+  } else if (path.startsWith('review-media/')) {
+    bucket = "review-media";
+    path = path.substring(13);
+  } else if (path.startsWith('product_images/')) {
+    bucket = "product_images";
+    path = path.substring(15);
+  } else if (path.startsWith('legacy/')) {
+    bucket = "product_images";
+    // Keep the legacy/ prefix for the path
+  } else if (!path.includes('/')) {
+    // If it's just a raw string like "prod-ajwain.jpg" or "prod-ajwain"
+    if (imageMap[path]) {
+      // It's a local bundled asset key
+      return imageMap[path];
+    }
+    // Otherwise, assume it's a migrated file that should be in legacy/
+    bucket = "product_images";
+    path = `legacy/${path}`;
+  }
+
+  // Generate public URL
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  let resultUrl = data?.publicUrl || FALLBACK_IMAGE;
+
+  // Append timestamp if applicable
+  if (updatedAt && resultUrl !== FALLBACK_IMAGE && resultUrl.includes('supabase.co')) {
+    const ts = new Date(updatedAt).getTime();
+    if (!isNaN(ts)) {
+      const separator = resultUrl.includes('?') ? '&' : '?';
+      resultUrl += `${separator}v=${ts}`;
+    }
+  }
+
+  return resultUrl;
+}
+
+// Keep resolveImage for non-product cases (like categories) but point it to resolveProductImage if applicable
 export function resolveImage(
   key: string | null | undefined,
   url: string | null | undefined,
   fallback: string = FALLBACK_IMAGE,
   updatedAt?: string | null,
 ): string {
-  let cleanUrl = url?.trim();
-  
-  // If url is empty but key looks like a path (e.g. products/123.jpg), treat it as the url
-  if (!cleanUrl && key?.trim() && key.includes('/')) {
-    cleanUrl = key.trim();
-  }
-
-  let resultUrl = fallback;
-  if (cleanUrl) {
-    if (imageMap[cleanUrl]) {
-      resultUrl = imageMap[cleanUrl];
-    } else if (/^https?:\/\//i.test(cleanUrl)) {
-      resultUrl = cleanUrl;
-    } else {
-      let path = cleanUrl.replace(/^\/+/, '');
-      let bucket = "media";
-      
-      if (path.startsWith('media/')) {
-        path = path.substring(6);
-      } else if (path.startsWith('review-media/')) {
-        bucket = "review-media";
-        path = path.substring(13);
-      } else if (path.startsWith('legacy/')) {
-        bucket = "product_images";
-      } else if (path.startsWith('product_images/')) {
-        bucket = "product_images";
-        path = path.substring(15);
-      }
-      
-      // Remove query strings if they accidentally got stored
-      path = path.split('?')[0].split('#')[0];
-
-      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-      if (data && data.publicUrl) {
-        resultUrl = data.publicUrl;
-      }
-    }
-  } else if (key && imageMap[key]) {
-      resultUrl = imageMap[key];
-  }
-  
-  if (updatedAt && resultUrl && typeof resultUrl === 'string' && resultUrl.includes('supabase.co')) {
-      const ts = new Date(updatedAt).getTime();
-      if (!isNaN(ts)) {
-          const separator = resultUrl.includes('?') ? '&' : '?';
-          resultUrl += `${separator}v=${ts}`;
-      }
-  }
-  
-  return resultUrl;
+  return resolveProductImage(url, key, null, "image", updatedAt);
 }
 
 /**

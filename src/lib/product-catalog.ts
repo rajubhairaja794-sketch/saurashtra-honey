@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { products as staticProducts, type Product, type ProductVariant } from "@/lib/products";
-import { resolveImage } from "@/lib/product-images";
+import { resolveImage, resolveProductImage } from "@/lib/product-images";
 
 type Row = {
   id: string;
@@ -76,14 +76,15 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     : [];
     
   const galleryImages = rawImages.length > 0
-    ? Array.from(new Set(rawImages)).slice(0, 9).map(img => resolveImage(null, img, "/images/placeholder-image.png", r.updated_at))
+    ? Array.from(new Set(rawImages)).slice(0, 9).map(img => resolveProductImage(null, img, null, r.name, r.updated_at))
     : [];
 
   const directImgUrl = r.image_url || (rawImages.length > 0 ? rawImages[0] : null);
-  const primaryImg = resolveImage(
-    null,
-    directImgUrl,
-    "/images/placeholder-image.png",
+  const primaryImg = resolveProductImage(
+    r.image_url,
+    r.image_key,
+    rawImages.length > 0 ? rawImages[0] : null,
+    r.name,
     r.updated_at
   );
 
@@ -94,8 +95,19 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     : [];
     
   const additionalImages = rawAdditional.length > 0
-    ? Array.from(new Set(rawAdditional)).slice(0, 8).map(img => resolveImage(null, img, "/images/placeholder-image.png", r.updated_at))
+    ? Array.from(new Set(rawAdditional)).slice(0, 8).map(img => resolveProductImage(null, img, null, r.name, r.updated_at))
     : [];
+
+  // Temporary development debugging
+  if (process.env.NODE_ENV === "development" && r.name === "Ajwain Honey") {
+    console.log("=== IMAGE FIX DEBUG ===");
+    console.log("Product:", r.name);
+    console.log("Raw image_url:", r.image_url);
+    console.log("Raw image_key:", r.image_key);
+    console.log("Raw images[0]:", rawImages[0] || null);
+    console.log("Resolved URL:", primaryImg);
+    console.log("=======================");
+  }
 
   return {
     slug: r.slug,

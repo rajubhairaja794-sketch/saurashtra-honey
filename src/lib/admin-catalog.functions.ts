@@ -22,8 +22,40 @@ export const listAdminProducts = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const rows = (data ?? []).map((row: any) => {
       const attrs = row.attributes || {};
+      
+      // Normalize product image resolution on the server
+      let finalImgUrl = row.image_url;
+      let cleanInput = (row.image_url || row.image_key || (row.images && row.images[0]) || "").trim();
+      
+      if (cleanInput && !cleanInput.startsWith("http")) {
+        // Fallback resolution just like the client to ensure consistency
+        let path = cleanInput.replace(/^\/+/, '').split('?')[0].split('#')[0];
+        let bucket = "product_images";
+        if (path.startsWith('media/')) {
+          bucket = "media";
+          path = path.substring(6);
+        } else if (path.startsWith('review-media/')) {
+          bucket = "review-media";
+          path = path.substring(13);
+        } else if (path.startsWith('product_images/')) {
+          bucket = "product_images";
+          path = path.substring(15);
+        } else if (path.startsWith('legacy/')) {
+          bucket = "product_images";
+        } else if (!path.includes('/')) {
+          bucket = "product_images";
+          path = `legacy/${path}`;
+        }
+        
+        const { data: storageData } = context.supabase.storage.from(bucket).getPublicUrl(path);
+        if (storageData && storageData.publicUrl) {
+          finalImgUrl = storageData.publicUrl;
+        }
+      }
+
       return {
         ...row,
+        image_url: finalImgUrl,
         additional_images: Array.isArray(attrs.additional_images) ? attrs.additional_images : [],
       };
     });

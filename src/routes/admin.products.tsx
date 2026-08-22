@@ -13,7 +13,7 @@ import {
   type VariantItem,
 } from "@/lib/admin-catalog.functions";
 import { listCategories, upsertCategory, uploadProductImage } from "@/lib/admin-cms.functions";
-import { resolveImage, IMAGE_KEYS, FALLBACK_IMAGE } from "@/lib/product-images";
+import { resolveImage, resolveProductImage, IMAGE_KEYS, FALLBACK_IMAGE } from "@/lib/product-images";
 import {
   BtnGhost,
   BtnPrimary,
@@ -467,15 +467,23 @@ function ProductsPage() {
                 </Td>
                 <Td>
                   <div className="flex items-center gap-3">
-                    {resolveImage(r.image_key, r.image_url) && resolveImage(r.image_key, r.image_url) !== FALLBACK_IMAGE ? (
-                      <div className="size-10 rounded-lg overflow-hidden border border-border/50 shrink-0 bg-cream">
-                        <img src={resolveImage(r.image_key, r.image_url)} alt={r.name} className="w-full h-full object-cover" loading="lazy" />
-                      </div>
-                    ) : (
-                      <div className="size-10 rounded-lg border border-border/50 shrink-0 bg-cream flex items-center justify-center text-muted-foreground">
-                        <ImageOff className="size-4" />
-                      </div>
-                    )}
+                    {(() => {
+                      const productImage = resolveProductImage(
+                        r.image_url,
+                        r.image_key,
+                        r.images?.[0],
+                        r.name
+                      );
+                      return productImage && productImage !== FALLBACK_IMAGE ? (
+                        <div className="size-10 rounded-lg overflow-hidden border border-border/50 shrink-0 bg-cream">
+                          <img src={productImage} alt={r.name} className="w-full h-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE; console.error("Failed to load image:", productImage); }} />
+                        </div>
+                      ) : (
+                        <div className="size-10 rounded-lg border border-border/50 shrink-0 bg-cream flex items-center justify-center text-muted-foreground">
+                          <ImageOff className="size-4" />
+                        </div>
+                      );
+                    })()}
                     <div>
                       <div className="font-bold text-forest-dark text-[15px]">{r.name}</div>
                       <div className="text-xs text-muted-foreground font-mono mt-0.5">

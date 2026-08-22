@@ -293,18 +293,18 @@ export const uploadProductImage = createServerFn({ method: "POST" })
     const buf = Buffer.from(data.base64, "base64");
     if (buf.byteLength > 10 * 1024 * 1024) throw new Error("File too large (max 10MB)");
     const up = await context.supabase.storage
-      .from("media")
+      .from("product_images")
       .upload(path, buf, { contentType: data.contentType, upsert: false });
     if (up.error) throw new Error(up.error.message);
     await context.supabase.from("media_library").insert({
-      bucket: "media",
+      bucket: "product_images",
       path,
       filename: data.filename,
       mime_type: data.contentType,
       size_bytes: buf.byteLength,
       uploaded_by: context.userId,
     } as never);
-    const { data: pub } = context.supabase.storage.from("media").getPublicUrl(path);
+    const { data: pub } = context.supabase.storage.from("product_images").getPublicUrl(path);
     await audit(context.supabase, context.userId, "product.image_upload", "product", undefined, {
       filename: data.filename,
     });
