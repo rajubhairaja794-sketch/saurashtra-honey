@@ -67,6 +67,11 @@ export function resolveProductImage(
     return FALLBACK_IMAGE;
   }
 
+  // 1.5. If the exact key exists in the local imageMap, return the local asset immediately
+  if (imageMap[cleanInput]) {
+    return imageMap[cleanInput];
+  }
+
   // 2. If it's already an absolute URL to product_images, return as-is
   if (/^https?:\/\//i.test(cleanInput)) {
     // We optionally add the cache-busting timestamp
@@ -99,11 +104,6 @@ export function resolveProductImage(
     bucket = "product_images";
     // Keep the legacy/ prefix for the path
   } else if (!path.includes('/')) {
-    // If it's just a raw string like "prod-ajwain.jpg" or "prod-ajwain"
-    if (imageMap[path]) {
-      // It's a local bundled asset key
-      return imageMap[path];
-    }
     // Otherwise, assume it's a migrated file that should be in legacy/
     bucket = "product_images";
     path = `legacy/${path}`;

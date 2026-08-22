@@ -1010,7 +1010,18 @@ function ProductForm({
 
               {(f.images ?? []).length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {(f.images ?? []).map((u, i) => (
+                  {(f.images ?? []).map((u, i) => {
+                    const resolvedGalleryImg = resolveProductImage(u, null, null, f.name);
+                    
+                    // Temporary development debugging as requested
+                    if (process.env.NODE_ENV === "development" && f.name === "Ajwain Honey") {
+                      console.log("[PRODUCT_GALLERY_DEBUG]", {
+                        raw: u,
+                        resolved: resolvedGalleryImg
+                      });
+                    }
+
+                    return (
                     <div
                       key={i}
                       className={`relative group rounded-2xl border p-2 bg-white flex flex-col justify-between ${
@@ -1018,7 +1029,7 @@ function ProductForm({
                       }`}
                     >
                       <div className="relative aspect-square rounded-xl overflow-hidden bg-cream-deep/30 mb-2">
-                        <img src={resolveImage(u, u)} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                        <img src={resolvedGalleryImg} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
                         {i === 0 && (
                           <span className="absolute top-2 left-2 bg-burnt-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
                             PRIMARY (MAIN)
@@ -1092,7 +1103,7 @@ function ProductForm({
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               ) : (
                 <div className="py-8 px-4 rounded-xl border-2 border-dashed border-border/80 text-center text-muted-foreground">
@@ -1162,7 +1173,7 @@ function ProductForm({
 
                       <div className="aspect-square rounded-xl overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center relative">
                         {url ? (
-                          <img src={resolveImage(url, url)} alt={`Additional ${idx + 1}`} className="w-full h-full object-cover" />
+                          <img src={resolveProductImage(url, null, null, f.name)} alt={`Additional ${idx + 1}`} className="w-full h-full object-cover" />
                         ) : (
                           <div className="text-center text-muted-foreground/60 p-4">
                             <ImageOff className="size-6 mx-auto mb-1 opacity-40" />
